@@ -1,0 +1,149 @@
+# Eval harness: promptfoo sends test questions to the live API and grades answers (deterministic checks + LLM-as-judge)
+description: >
+  Stage 6 retrieval evaluation for Customer Compass v2 (apps/api-py). Tests
+  the live /api/v1/chat/rag and /api/v1/chat/crm endpoints against the
+  sample-data/documents corpus: does retrieval find the right source(s),
+  does the LLM ground its answer in them (with correct company-scoping
+  isolation), and does it correctly decline to answer when nothing relevant
+  is in the corpus? Run against a running `docker compose up -d db qdrant
+  ollama api-py` stack (see README.md in this directory for usage).
+
+providers:
+  # Providers here are our own live API endpoints (RAG and CRM modes), not model vendors
+  - id: http://localhost:8001/api/v1/chat/rag
+    label: rag
+    config:
+      method: POST
+      headers:
+        Content-Type: application/json
+      body:
+        messages:
+          - role: user
+            content: "{{prompt}}"
+      transformResponse: |
+        (json) => JSON.stringify({
+          message: json.message,
+          citationCompanies: (json.citations || []).map(c => c.companyName),
+          citationCount: (json.citations || []).length,
+        })
+
+  - id: http://localhost:8001/api/v1/chat/crm
+    label: crm
+    config:
+      method: POST
+      headers:
+        Content-Type: application/json
+      body:
+        messages:
+          - role: user
+            content: "{{prompt}}"
+      transformResponse: |
+        (json) => JSON.stringify({
+          message: json.message,
+          scopedCompany: json.scopedCompany,
+          openDeals: (json.facts && json.facts.openDeals) || [],
+        })
+
+defaultTest:
+  options:
+    # Judge model: this local Ollama model grades answers for the llm-rubric assertions
+    # Use a free Ollama model as judge too, so the whole eval suite runs
+    # with zero cloud cost/API keys required — same local model the app
+    # itself defaults to.
+    provider: ollama:chat:qwen2.5:7b
+
+tests:
+  # Assertion types: icontains/icontains-any/javascript are deterministic checks; llm-rubric asks the judge model
+  # --- RAG: grounded, answerable questions (one per company + one product-only doc) ---
+  - description: "RAG finds Acme's discount/site-count request"
+    providers: ["rag"]
+    vars:
+      prompt: "What discount did Ravi Patel ask for at Acme Fabrication?"
+    assert:
+      - type: icontains
+        value: "discount"
+      - type: javascript
+        value: "JSON.parse(output).citationCount > 0"
+      - type: llm-rubric
+        value: >
+          The output is a JSON object; judge only its "message" field. The
+          message should mention a volume/quantity discount request related
+          to adding more factory sites or site licenses.
+
+  - description: "RAG finds Harbor & Pine's point-of-sale sync resolution"
+    providers: ["rag"]
+    vars:
+      prompt: "What did Elena Torres say about the point-of-sale sync issue?"
+    assert:
+      - type: icontains-any
+        value: ["point-of-sale", "point of sale", "pos sync", "sync issue"]
+      - type: llm-rubric
+        value: >
+          The output is a JSON object; judge only its "message" field. The
+          message should state that the point-of-sale sync issue was
+          resolved quickly (within a few hours) during a busy period.
+
+  - description: "RAG finds Northstar's per-customer delay alerting answer, scoped correctly"
+    providers: ["rag"]
+    vars:
+      prompt: "Can delay alerts be configured per fleet customer for Northstar?"
+    assert:
+      - type: icontains
+        value: "alert"
+      - type: javascript
+        # Company-scoping isolation: a Northstar-specific question must never
+        # cite another customer's material. Wrapped in an IIFE with an
+        # explicit return since promptfoo's inline JS assertions only
+        # support a single expression, not multi-statement bodies.
+        value: >
+          const data = JSON.parse(output); const leaked = data.citationCompanies.filter((c) => c && c !== "Northstar Logistics"); leaked.length === 0
+      - type: llm-rubric
+        value: >
+          The output is a JSON object; judge only its "message" field. The
+          message should confirm that delay alerts can be configured per
+          fleet customer, not only globally.
+
+  # --- RAG: out-of-corpus questions (tests MIN_SIMILARITY tuning + the LLM's refusal behavior) ---
+  - description: "RAG correctly declines a plausible-but-uncovered question (refund policy)"
+    providers: ["rag"]
+    vars:
+      prompt: "What is our refund policy?"
+    assert:
+      - type: llm-rubric
+        value: >
+          The output is a JSON object; judge only its "message" field. Pass
+          if the message communicates, in any wording, that the sources do
+          not contain refund-policy information (e.g. "the sources don't
+          cover this" or "no refund policy is mentioned in the provided
+          documents"). Fail only if it states or implies an actual refund
+          policy (invents an answer).
+
+  - description: "RAG retrieves nothing for a clearly unrelated question"
+    providers: ["rag"]
+    vars:
+      prompt: "What is the capital of France?"
+    assert:
+      - type: javascript
+        value: "JSON.parse(output).citationCount === 0"
+      - type: llm-rubric
+        value: >
+          The output is a JSON object; judge only its "message" field. Pass
+          if the message says it has no relevant information in the
+          provided sources. Fail only if it actually answers the geography
+          question (e.g. states "Paris") from general knowledge.
+
+  # --- CRM: structured facts + company scoping ---
+  - description: "CRM returns the correct open deal and scoped company for Acme"
+    providers: ["crm"]
+    vars:
+      prompt: "What is the status of the Acme renewal deal?"
+    assert:
+      - type: javascript
+        value: "JSON.parse(output).scopedCompany === 'Acme Fabrication'"
+      - type: javascript
+        value: "JSON.parse(output).openDeals.length > 0"
+      - type: llm-rubric
+        value: >
+          The output is a JSON object; judge only its "message" field. The
+          message should mention the Premium Operations Plan renewal deal
+          and that it is open.
