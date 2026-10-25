@@ -1,0 +1,6 @@
+.agent-run { white-space: normal; }
+.agent-run details { margin: 8px 0; font-size: .85rem; }
+.agent-run summary { cursor: pointer; color: #4a4368; font-weight: 600; }
+.agent-review.ok { font-size: .8rem; color: #1f6b3a; background: #e7f6ee; border-radius: 4px; padding: 2px 6px; display: inline-block; }
+.agent-gate { border-top: 1px solid #d9d3f5; margin-top: 10px; padding-top: 10px; }
+.agent-gate .agent-decline { background: #fff; color: #684bd4; border: 1px solid #684bd4; }

@@ -1,0 +1,103 @@
+services:
+  # Postgres: relational CRM data (companies, deals, tasks, audit log); pgvector image, vector column unused
+  db:
+    image: pgvector/pgvector:pg17
+    container_name: customer-compass-v3-db
+    environment:
+      POSTGRES_DB: customer_compass
+      POSTGRES_USER: customer_compass
+      POSTGRES_PASSWORD: customer_compass_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/001-init.sql:ro
+      - ./db/002-rag.sql:/docker-entrypoint-initdb.d/002-rag.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U customer_compass -d customer_compass"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Model cache: if you already ran the original `customer-compass` repo on
+  # this machine, run `./scripts/setup-ollama-cache.sh` once before `up` —
+  # it detects that repo's existing Ollama volume (already holding
+  # qwen2.5:3b / mxbai-embed-large) and reuses it here, skipping a fresh
+  # multi-GB download. If no prior cache is found, a new volume is created
+  # and models are pulled fresh on first use. See README for details.
+  ollama:
+    image: ollama/ollama:latest
+    container_name: customer-compass-v3-ollama
+    ports:
+      - "11435:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+
+  # Vector DB for v2 (replacing pgvector from v1 — see docs/tech-stack.md
+  # and the v2 migration plan). Standing this up here in PR 1; ingestion/
+  # retrieval code is migrated to use it in later PRs. Postgres (above)
+  # stays for structured/relational data (companies, CRM facts) only.
+  # Qdrant: vector DB that stores chunk embeddings and does nearest-neighbour search
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: customer-compass-v3-qdrant
+    ports:
+      - "6333:6333"   # REST API
+      - "6334:6334"   # gRPC API
+    volumes:
+      - qdrant-data:/qdrant/storage
+
+  # FastAPI service for the v2 stack (PR 5 of N: company routes added, and
+  # the frontend cut over to this service under /api/v1 — the old Express
+  # API, apps/api, has been removed). sample-data is mounted read-only since
+  # the Docker image only contains apps/api-py, not the whole repo.
+  # OLLAMA_URL points at the ollama service's internal Docker DNS name/port
+  # (http://ollama:11434), since api-py reaches it over the compose network
+  # rather than from the host (which used the host-mapped 11435 port).
+  # api-py: FastAPI backend tying together Postgres, Qdrant, Ollama, OpenRouter and Google embeddings
+  api-py:
+    build:
+      context: ./apps/api-py
+    container_name: customer-compass-v3-api-py
+    environment:
+      DATABASE_URL: postgresql://customer_compass:customer_compass_dev@db:5432/customer_compass
+      QDRANT_URL: http://qdrant:6333
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}  # Google embedding API key (gemini-embedding-001)
+      SAMPLE_DATA_DIR: /sample-data/documents
+      LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
+      OLLAMA_URL: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:3b}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}  # key for hosted cloud models via OpenRouter
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-liquid/lfm-2.5-2.6b:free}
+      GUARD_MODE: ${GUARD_MODE:-rules}  # Stage 8.d: rules | llm | both
+      GUARD_PROVIDER: ${GUARD_PROVIDER:-ollama}
+      GUARD_MODEL: ${GUARD_MODEL:-}
+      SECURITY_AUDIT_RETENTION_DAYS: ${SECURITY_AUDIT_RETENTION_DAYS:-90}
+      QDRANT_COLLECTION: ${QDRANT_COLLECTION:-document_chunks}  # Stage 3.a: set to document_chunks_demo to try fake data
+      VECTOR_INDEX_MIN_POINTS: ${VECTOR_INDEX_MIN_POINTS:-10000}
+      VECTOR_HNSW_EF: ${VECTOR_HNSW_EF:-64}
+      AGENT_MAX_STEPS: ${AGENT_MAX_STEPS:-8}  # Stage 10: step limit per agent run
+      AGENT_TIMEOUT_SECONDS: ${AGENT_TIMEOUT_SECONDS:-180}
+      AGENT_MAX_REVISIONS: ${AGENT_MAX_REVISIONS:-1}
+    volumes:
+      - ./sample-data:/sample-data:ro
+    ports:
+      - "8001:8001"
+    depends_on:
+      db:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+      ollama:
+        condition: service_started
+
+volumes:
+  postgres-data:
+  # Explicit, overridable name so this volume can point at an existing
+  # Ollama model cache (e.g. from the original customer-compass repo)
+  # instead of always creating a brand-new one. Set via .env — see
+  # scripts/setup-ollama-cache.sh.
+  ollama-data:
+    name: ${OLLAMA_VOLUME_NAME:-customer-compass-v3_ollama-data}
+  qdrant-data:
+

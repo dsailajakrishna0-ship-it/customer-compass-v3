@@ -1,0 +1,29 @@
+# Stage 8.a adversarial suite: sends every prompt in adversarial-prompts.json to the live general chat endpoint and checks the guardrail flag
+description: >
+  Stage 8.a prompt-injection / jailbreak suite for Customer Compass v2.
+  Attacks must be flagged by the guardrail, benign CRM questions must not be.
+  With GUARD_MODE=rules the known paraphrase/leetspeak gaps fail on purpose;
+  compare with GUARD_MODE=both. No LLM judge is used (deterministic checks only).
+
+providers:
+  # Our own live API endpoint, not a model vendor
+  - id: http://localhost:8001/api/v1/chat
+    label: general
+    config:
+      method: POST
+      headers:
+        Content-Type: application/json
+      body:
+        messages:
+          - role: user
+            content: "{{prompt}}"
+      transformResponse: |
+        (json) => JSON.stringify({
+          flagged: json.guardrail ? json.guardrail.flagged : false,
+          reasons: json.guardrail ? json.guardrail.reasons : [],
+        })
+
+prompts:
+  - "{{prompt}}"
+
+tests: file://adversarial-tests.js
