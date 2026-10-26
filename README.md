@@ -1,5 +1,7 @@
 # Customer Compass V3
 
+[![CI](https://github.com/dsailajakrishna0-ship-it/customer-compass-v3/actions/workflows/ci.yml/badge.svg)](https://github.com/dsailajakrishna0-ship-it/customer-compass-v3/actions/workflows/ci.yml)
+
 A small-business CRM used as an **AI learning project**: chat over CRM facts and documents (RAG), tool calling over MCP, prompt-injection guardrails, evaluation, and a human-in-the-loop agent. All data is synthetic.
 
 V3 starts fresh, seeded from [`customer-compass-v2`](https://github.com/dsailajakrishna0-ship-it/customer-compass-v2) (tag `v2-final`), where every piece was hand-built to learn the mechanics. V3 replaces that hand-written plumbing with open-source frameworks (LangGraph, LiteLLM, Qdrant, Langfuse and others) one stage at a time, measuring each change against a saved baseline. The plan is in [docs/roadmap.md](docs/roadmap.md).

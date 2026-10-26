@@ -83,6 +83,13 @@ services:
       - ./sample-data:/sample-data:ro
     ports:
       - "8001:8001"
+    healthcheck:
+      # the slim image has no curl, so probe /health with Python's standard library
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health', timeout=3)"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 5s
     depends_on:
       db:
         condition: service_healthy

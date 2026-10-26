@@ -16,5 +16,9 @@ COPY app ./app
 
 RUN uv sync --locked --no-dev
 
+# Run as an unprivileged user (Trivy DS-0002); .venv and app code are only read at runtime
+RUN useradd --system --no-create-home --uid 10001 appuser
+USER appuser
+
 EXPOSE 8001
-CMD ["uv", "run", "--no-sync", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001"]
+CMD ["/app/.venv/bin/uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001"]
