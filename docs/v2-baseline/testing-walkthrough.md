@@ -6,7 +6,7 @@ A learner-oriented path through every V2 stage. Each step uses the same pattern:
 - **Observe** — what you should see.
 - **Learn** — the concept it shows.
 
-For every URL, port and command, see [testing-guide.md](testing-guide.md). Exact
+For every URL, port and command, see [testing-guide.md](../testing-guide.md). Exact
 expected outputs and edge cases are in each stage doc (linked per stage). The
 API base is `http://localhost:8001/api/v1`, the UI is `http://localhost:5173`.
 
@@ -62,12 +62,12 @@ API base is `http://localhost:8001/api/v1`, the UI is `http://localhost:5173`.
 Follow the eight steps in the stage doc. In short:
 1. **Ask:** "Analyze Acme Fabrication account and recommend a next action". **Observe:** recommendation, Reviewer verdict, evidence, trace, Confirm/Decline. **Learn:** three agents (Analyst, Reviewer, Task Drafter) with one job each; code orders them.
 2. **Set:** Decline, then Confirm on a rerun. **Observe:** only Confirm creates a task. **Learn:** the recommend call never writes.
-3. **Ask:** "What is Acme industry?" **Observe:** a direct answer, no agent. **Learn:** do not use agents when a simpler pattern works ([agent-boundaries.md](agent-boundaries.md)).
+3. **Ask:** "What is Acme industry?" **Observe:** a direct answer, no agent. **Learn:** do not use agents when a simpler pattern works ([agent-boundaries.md](../agent-boundaries.md)).
 4. **Set:** `AGENT_TIMEOUT_SECONDS=20`. **Observe:** `timed_out`. **Learn:** agents need hard limits.
 
 ---
 
 ## What this walkthrough does not cover
 - Memory across sessions (only the last 12 messages are sent; a page refresh clears them).
-- Agents choosing their own tools, parallel agents and multi-agent frameworks (V3, see [v3-roadmap-draft.md](v3-roadmap-draft.md)).
+- Agents choosing their own tools, parallel agents and multi-agent frameworks (V3, see [roadmap.md](../roadmap.md)).
 - Output quality beyond spot checks: the local 3B model is small, so judge answers against the evidence rather than trusting them.

@@ -3,7 +3,7 @@
 This document replaces the old Stage-2-only version
 (`docs/part-1-foundations/02-request-flow.md`), which described a single
 `POST /api/chat` call straight out of a monolithic `main.tsx`. Since the
-[frontend refactor](./fe-architecture-overview.md) and later backend stages,
+[frontend refactor](fe-architecture-overview.md) and later backend stages,
 the flow goes through dedicated hooks/context/api layers on the frontend and
 four chat endpoints on the FastAPI backend (the Python API server) (`/api/v1/chat`, `/rag`, `/crm`,
 `/tools`). It now lives in `docs/fe/` because most
@@ -227,7 +227,7 @@ which re-renders `MessageList` → `MessageBubble`, conditionally showing
 
 The original `02-request-flow.md` was accurate for Stage 2 only — it quoted
 `useState` and `askQuestion` living directly inside `main.tsx`, which no
-longer exists after the [frontend layering refactor](./fe-architecture-overview.md).
+longer exists after the [frontend layering refactor](fe-architecture-overview.md).
 Keeping a stage-numbered doc that described stale frontend code was more
 confusing than useful, so this rewritten version lives alongside the other
 frontend docs in `docs/fe/` instead.

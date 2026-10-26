@@ -3,12 +3,6 @@
 **Part:** II — Grounded Intelligence
 **Status:** Implemented
 
-> **v2 stack note:** file paths below (`apps/api/src/*.ts`) and URLs
-> (`localhost:3001/api/...`) are from the original Express API. Current
-> equivalents: `apps/api-py/app/llm/{provider,cloud,ollama}.py`,
-> `apps/api-py/app/routes/llm.py`, `http://localhost:8001/api/v1/...`.
-> Since Stage 7, `provider.py` also retries once on the other provider.
-
 ## Goal
 
 Add one free-tier cloud LLM provider as a swappable alternative to local Ollama (the runner of the local generating model),
@@ -103,7 +97,7 @@ between them.
 ## How to run the app
 
 ```bash
-cd /home/devarapallim/Murali/git-personal/customer-compass
+cd customer-compass-v3
 docker compose up -d db ollama
 cd apps/api
 cp .env.example .env

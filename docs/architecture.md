@@ -1,6 +1,8 @@
 # Architecture overview
 
-This is the "how all the pieces fit together" map for customer-compass-v2.
+> **Status:** describes the seed state (V2 @ `v2-final`). Each V3 stage updates this file in the same PR that changes the architecture (see [roadmap.md](roadmap.md)). Technology choices live in [tech-stack.md](tech-stack.md).
+
+This is the "how all the pieces fit together" map for Customer Compass.
 For the per-stage build history, see [tech-stack.md](tech-stack.md) and the
 `part-*/` stage documents. For the frontend's internal layering, see
 [fe/fe-architecture-overview.md](fe/fe-architecture-overview.md).
@@ -71,7 +73,7 @@ stage: [tech-stack.md](tech-stack.md).
 | **7 — Production Concerns** | **Cross-provider auto-fallback** (retry once on the other provider), **per-request `usage` telemetry** | A failing provider no longer surfaces a hard error — it silently retries on the other provider and *tells you it did* (fallback flag + cost/latency footer in UI) | Stage 4 dual providers |
 | **8 — Prompt-Injection Guardrails** | **Rule-based input/document guard** (the prompt guard, a text scan for injection phrases), `<untrusted_context>` delimiting, `guardrail` field on every response | Injection attempts (direct or planted in a document) are neutralized in place and surfaced visibly, instead of silently succeeding or blocking the whole request | Stage 3 document ingestion, Stage 5 CRM chat, Stage 7 visibility pattern |
 | **9 — Tool Calling (MCP)** | **MCP server/client** (`app/mcp/`; MCP is a protocol that exposes tools to the model), fenced-text tool-call protocol, `/api/v1/chat/tools`, **`tasks`**/**`tool_audit_log`** (records every tool call) tables | Model can call live tools **mid-conversation** (read CRM/docs, propose+confirm a mutating action) instead of everything being stuffed into the prompt upfront | Stage 1 DB, Stage 3 retrieval, Stage 5 CRM queries, Stage 8 guardrail (applied to tool results too) |
-| **10 — Agentic Assistant** | **`app/agent/`** (3 agents: Analyst, Reviewer, Task Drafter; orchestration is plain code), `POST /api/v1/agent/recommend` and `/agent/confirm`, an inspectable trace, the "Account follow-up agent" chat mode — see [part-4-autonomy-protocols/10-agentic-assistant.md](part-4-autonomy-protocols/10-agentic-assistant.md) | A bounded multi-step review (max 8 steps, 180 s) that ends in a confirmation gate; only `/agent/confirm` can create a task. Which pattern to use when: [agent-boundaries.md](agent-boundaries.md) | Stage 9 tools, Stage 8 guardrails, Stage 5 CRM queries |
+| **10 — Agentic Assistant** | **`app/agent/`** (3 agents: Analyst, Reviewer, Task Drafter; orchestration is plain code), `POST /api/v1/agent/recommend` and `/agent/confirm`, an inspectable trace, the "Account follow-up agent" chat mode — see [part-4-autonomy-protocols/10-agentic-assistant.md](v2-baseline/part-4-autonomy-protocols/10-agentic-assistant.md) | A bounded multi-step review (max 8 steps, 180 s) that ends in a confirmation gate; only `/agent/confirm` can create a task. Which pattern to use when: [agent-boundaries.md](agent-boundaries.md) | Stage 9 tools, Stage 8 guardrails, Stage 5 CRM queries |
 
 ## Why two databases
 
@@ -102,7 +104,7 @@ Postgres and Qdrant have different jobs and neither replaces the other here:
 Both are always wired up side by side (`app/llm/provider.py`); a request
 can choose either via `provider`, and since Stage 7, a failure in the
 requested provider triggers one automatic retry with the other before the
-request fails outright (full design: [part-3-trust-safety/07-production-concerns.md](part-3-trust-safety/07-production-concerns.md)).
+request fails outright (full design: [part-3-trust-safety/07-production-concerns.md](v2-baseline/part-3-trust-safety/07-production-concerns.md)).
 
 Embeddings are separate from chat inference: they always come from Google's
 `gemini-embedding-001` (768-dim, needs `GOOGLE_API_KEY`), not from Ollama.
@@ -161,4 +163,4 @@ the network) and `DATABASE_URL` (`db:5432` from inside the network).
 | Frontend component/hook layering | [fe/fe-architecture-overview.md](fe/fe-architecture-overview.md) |
 | Frontend chat request lifecycle | [fe/fe-chat-request-flow.md](fe/fe-chat-request-flow.md) |
 | Retrieval evaluation (promptfoo) suite | [../evals/README.md](../evals/README.md) |
-| Local startup troubleshooting | [v2-startup-troubleshooting.md](v2-startup-troubleshooting.md) |
+| Local startup troubleshooting | [troubleshooting.md](troubleshooting.md) |

@@ -6,10 +6,10 @@ of `customer-compass-v2`). V2 stays the closed, hand-built baseline. V3's learni
 open-source frameworks and standard tools replace hand-written plumbing, and what else the product can do.
 
 Sources of this plan: V2's
-[`v3-roadmap-draft.md`](https://github.com/dsailajakrishna0-ship-it/customer-compass-v2/blob/v2-final/docs/v3-roadmap-draft.md) (decisions)
-and [`v3-roadmap-draft-recommendations-2.md`](https://github.com/dsailajakrishna0-ship-it/customer-compass-v2/blob/v2-final/docs/v3-roadmap-draft-recommendations-2.md)
+[`v3-roadmap-draft.md`](https://github.com/dsailajakrishna0-ship-it/customer-compass-v2/blob/v2-final/docs/v3-roadmap-draft.md) (decisions, superseded by this file)
+and [`recommendations-2.md`](recommendations-2.md)
 (feedback, tooling table, diagrams, risks). Recommendations-2 is the reference for implementation; its tool IDs (T1–T18),
-repo findings (R1–R12) and doc findings (D1–D9) are cited below.
+repo findings (R1–R12) and doc findings (D1–D9) are cited below. Decisions are recorded in [`adr/`](adr/README.md).
 
 ## Decisions carried over
 
@@ -32,7 +32,7 @@ repo findings (R1–R12) and doc findings (D1–D9) are cited below.
 
 | Stage | Name | Status |
 | --- | --- | --- |
-| 0 | Foundation | In progress |
+| 0 | Foundation | In progress (0.1 done, 0.2 in review) |
 | 1 | Model layer (cloud-only) | Planned |
 | 2 | Tools and MCP | Planned |
 | 3 | LangGraph port | Planned |

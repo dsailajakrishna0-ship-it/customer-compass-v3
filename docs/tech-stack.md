@@ -1,5 +1,7 @@
 # Tech stack and alternatives
 
+> **Status:** this file is the **single source of truth** for what technology is active and what it replaced; other docs link here instead of restating it. It currently describes the seed state (V2 @ `v2-final`). Each V3 stage updates it in the same PR that changes the stack (see [roadmap.md](roadmap.md)).
+
 This is a living, cross-cutting reference of the technology used in Customer
 Compass. It's organized two ways:
 
@@ -166,7 +168,7 @@ information, organized the other way (by technology, not by stage).
   with plain-code orchestration, a step/time budget (8 steps, 180 s), an
   inspectable trace and a confirmation gate (`/api/v1/agent/recommend`,
   `/api/v1/agent/confirm`). See
-  [10-agentic-assistant.md](part-4-autonomy-protocols/10-agentic-assistant.md).
+  [10-agentic-assistant.md](v2-baseline/part-4-autonomy-protocols/10-agentic-assistant.md).
 
 
 ## LLM inference (chat/completion)
@@ -220,8 +222,8 @@ Postgres still runs from the `pgvector/pgvector:pg17` image and
 `db/002-rag.sql` still defines a `vector(1024)` column, but both are unused
 legacy in v2 — all vector search goes through Qdrant.
 
-`pgvector` is genuinely production-viable at this project's scale (see
-discussion in `docs/conversation-progress.md`) — this is not a "toy vs. real"
+`pgvector` is genuinely production-viable at this project's scale (the V2
+discussion is in the `customer-compass-v2` repo, tag `v2-final`) — this is not a "toy vs. real"
 comparison, but a "one database vs. a purpose-built vector database"
 trade-off worth learning hands-on.
 
@@ -283,5 +285,5 @@ No alternative planned — this holds the core CRM data and is not swapped.
 - Add a new row/section here the same time a new stage introduces a
   swappable technology choice.
 - Keep the "Active" column accurate — if a stage promotes an alternative to
-  the new default, update this file and note the change in
-  `docs/conversation-progress.md`.
+  the new default, update this file and record the decision in
+  `docs/adr/` (one short file per decision).

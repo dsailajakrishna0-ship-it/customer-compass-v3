@@ -216,7 +216,7 @@ the other three chat routes.
 confirmation — `false` means the task was only proposed (see
 `GET /api/v1/tool-audit-log` below), `true` means it was actually written
 to `tasks`. See
-[part-4-autonomy-protocols/09-tool-calling-mcp.md](part-4-autonomy-protocols/09-tool-calling-mcp.md)
+[part-4-autonomy-protocols/09-tool-calling-mcp.md](v2-baseline/part-4-autonomy-protocols/09-tool-calling-mcp.md)
 for the full design and manual test steps.
 
 ## `POST /api/v1/agent/recommend`
@@ -246,7 +246,7 @@ with the local model.
 
 ## `POST /api/v1/agent/confirm`
 
-Stage 10: the only agent write path. **Request:** `{ "companyName": "Acme Fabrication", "note": "...", "confirm": true }`. `confirm: false` records a decline and creates nothing. `confirm: true` creates the task through the Stage 9 tool (audited in `tool_audit_log`); `404` if the company is not found. See [part-4-autonomy-protocols/10-agentic-assistant.md](part-4-autonomy-protocols/10-agentic-assistant.md).
+Stage 10: the only agent write path. **Request:** `{ "companyName": "Acme Fabrication", "note": "...", "confirm": true }`. `confirm: false` records a decline and creates nothing. `confirm: true` creates the task through the Stage 9 tool (audited in `tool_audit_log`); `404` if the company is not found. See [part-4-autonomy-protocols/10-agentic-assistant.md](v2-baseline/part-4-autonomy-protocols/10-agentic-assistant.md).
 
 ### `GET /api/v1/security-audit-log` (Stage 8.c)
 
@@ -401,7 +401,7 @@ Flagged text is **neutralized, not blocked** — the matched phrase is
 redacted before reaching the LLM, but the request still proceeds and still
 returns an answer. Citations in the response still show the **original,
 un-redacted** document content, so you can see exactly what was retrieved.
-See [part-3-trust-safety/08-prompt-injection-guardrails.md](part-3-trust-safety/08-prompt-injection-guardrails.md)
+See [part-3-trust-safety/08-prompt-injection-guardrails.md](v2-baseline/part-3-trust-safety/08-prompt-injection-guardrails.md)
 for the full design and manual test steps.
 
 ---

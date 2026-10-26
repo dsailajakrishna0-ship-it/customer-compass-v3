@@ -3,15 +3,6 @@
 **Part:** I — Foundations
 **Status:** Completed
 
-> **v2 stack note:** this record describes the original v1 implementation
-> (Express API on port 3001, Ollama `mxbai-embed-large` embeddings, pgvector).
-> In v2 the API is FastAPI (`apps/api-py`, port 8001, `/api/v1/...`,
-> files `app/rag/*.py`), embeddings are Google `gemini-embedding-001`
-> (768-dim; an embedding model that turns text into vectors, not a chat model)
-> and vectors live in Qdrant (a vector database). See
-> [../architecture.md](../architecture.md) and [../tech-stack.md](../tech-stack.md).
-> Paths, ports, models and curl examples below are kept as originally recorded.
-
 ## Goal
 
 Build a transparent Retrieval-Augmented Generation pipeline using synthetic CRM
@@ -373,7 +364,7 @@ the product overview and the matching support conversation.
 ## How to run the app
 
 ```bash
-cd /home/devarapallim/Murali/git-personal/customer-compass
+cd customer-compass-v3
 docker compose up -d db ollama
 ```
 

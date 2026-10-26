@@ -3,14 +3,6 @@
 **Part:** I — Foundations
 **Status:** Complete
 
-> **v2 stack note:** this record was written against the original Express API
-> (`apps/api`, port 3001, `/api/...`, `npm run dev` starting the API). In the
-> current repo the API is FastAPI (`apps/api-py`, port 8001, `/api/v1/...`);
-> start it with `docker compose up -d db qdrant ollama api-py` (Postgres for CRM data, Qdrant vector DB, Ollama local model runner, the FastAPI backend) and the web app
-> with `cd apps/web && npm run dev`. See [../testing-guide.md](../testing-guide.md)
-> for current run/test steps. Paths, ports and curl examples below are kept as
-> originally recorded.
-
 ## Goal
 
 Establish a small, locally runnable CRM baseline before introducing AI. The
@@ -54,7 +46,7 @@ Invalid company IDs return `400`; unknown IDs return `404`.
 ## How to run the app
 
 ```bash
-cd /home/devarapallim/Murali/git-personal/customer-compass
+cd customer-compass-v3
 docker compose up -d db
 npm install
 npm run dev

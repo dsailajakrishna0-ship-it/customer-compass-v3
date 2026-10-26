@@ -6,8 +6,8 @@
 The delivered suite is a **promptfoo** evaluation (an eval harness that sends test questions to the live API and grades the answers) of the live `/api/v1/chat/rag`
 and `/api/v1/chat/crm` endpoints (deterministic checks plus an LLM-as-judge
 rubric, i.e. a second model that grades the answers). Full documentation, including how to run it and its known gaps, lives
-in [../../evals/README.md](../../evals/README.md); the config is
-[`evals/promptfooconfig.yaml`](../../evals/promptfooconfig.yaml).
+in [../../evals/README.md](../../../evals/README.md); the config is
+[`evals/promptfooconfig.yaml`](../../../evals/promptfooconfig.yaml).
 
 ## Goal
 
@@ -34,9 +34,9 @@ rather than relying on a few successful chat examples.
 ## How to run the app
 
 ```bash
-cd /home/devarapallim/Murali/git-personal/customer-compass-v2
+cd customer-compass-v3
 docker compose up -d db qdrant ollama api-py
-docker exec customer-compass-v2-ollama ollama pull qwen2.5:7b   # judge model, once
+docker exec customer-compass-v3-ollama ollama pull qwen2.5:7b   # judge model, once
 curl -X POST http://localhost:8001/api/v1/documents/ingest      # once
 ```
 

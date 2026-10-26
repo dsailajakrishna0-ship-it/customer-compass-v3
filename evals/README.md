@@ -63,7 +63,7 @@ The judge model (`ollama:chat:qwen2.5:7b` in `defaultTest.options.provider`)
 needs to be pulled once:
 
 ```bash
-docker exec customer-compass-v2-ollama ollama pull qwen2.5:7b
+docker exec customer-compass-v3-ollama ollama pull qwen2.5:7b
 ```
 
 View results in an interactive browser UI:
