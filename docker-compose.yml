@@ -39,7 +39,7 @@ services:
   # stays for structured/relational data (companies, CRM facts) only.
   # Qdrant: vector DB that stores chunk embeddings and does nearest-neighbour search
   qdrant:
-    image: qdrant/qdrant:v1.19.2
+    image: qdrant/qdrant:v1.20.0
     container_name: customer-compass-v3-qdrant
     ports:
       - "6333:6333"   # REST API
