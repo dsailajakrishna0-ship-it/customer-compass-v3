@@ -2,10 +2,14 @@
   "name": "customer-compass",
   "private": true,
   "version": "0.1.0",
-  "workspaces": ["apps/*"],
+  "workspaces": [
+    "apps/*"
+  ],
   "scripts": {
     "dev": "npm run dev -w @customer-compass/web",
-    "build": "npm run build -w @customer-compass/web"
+    "build": "npm run build -w @customer-compass/web",
+    "lint": "npm run lint -w @customer-compass/web",
+    "typecheck": "npm run typecheck -w @customer-compass/web",
+    "test": "npm run test -w @customer-compass/web"
   }
 }
-

@@ -52,7 +52,11 @@ async def guard_input(text: str, mode: str | None = None) -> GuardFinding:
     """Runs the configured guard(s) on user text. The rules result (with
     neutralized text) is always the base; the classifier only adds a finding."""
     mode = mode or GUARD_MODE
-    finding = scan_and_neutralize(text) if mode in ("rules", "both") else GuardFinding(neutralized_text=text)
+    finding = (
+        scan_and_neutralize(text)
+        if mode in ("rules", "both")
+        else GuardFinding(neutralized_text=text)
+    )
     if mode in ("llm", "both"):
         try:
             if await classify_prompt(text):

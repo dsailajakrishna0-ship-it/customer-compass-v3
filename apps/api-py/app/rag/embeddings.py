@@ -31,7 +31,9 @@ async def embed_texts(texts: list[str]) -> list[list[float]]:
     if len(texts) == 0:
         return []
     if not GOOGLE_API_KEY:
-        raise RuntimeError("GOOGLE_API_KEY is not set. Add it to apps/api-py/.env to use embeddings.")
+        raise RuntimeError(
+            "GOOGLE_API_KEY is not set. Add it to apps/api-py/.env to use embeddings."
+        )
 
     async with httpx.AsyncClient(timeout=30.0) as client:
         embeddings: list[list[float]] = []
@@ -46,11 +48,15 @@ async def embed_texts(texts: list[str]) -> list[list[float]]:
                 },
             )
             if response.status_code != 200:
-                raise RuntimeError(f"Google embeddings request failed: {response.status_code} {response.text}")
+                raise RuntimeError(
+                    f"Google embeddings request failed: {response.status_code} {response.text}"
+                )
             payload = response.json()
             values = payload.get("embedding", {}).get("values")
             if not isinstance(values, list):
-                raise RuntimeError("Google did not return an embedding vector for one of the inputs.")
+                raise RuntimeError(
+                    "Google did not return an embedding vector for one of the inputs."
+                )
             embeddings.append(values)
     return embeddings
 

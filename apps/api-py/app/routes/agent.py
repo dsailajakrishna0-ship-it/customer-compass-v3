@@ -57,7 +57,9 @@ async def confirm(body: ConfirmRequest):
     if not body.confirm:
         return {"status": "declined", "message": "No task was created."}
 
-    result = await create_followup_task_tool(body.company_name, finding.neutralized_text, confirm=True)
+    result = await create_followup_task_tool(
+        body.company_name, finding.neutralized_text, confirm=True
+    )
     if result.get("status") == "not_found":
         raise HTTPException(status_code=404, detail=result["message"])
     return result

@@ -5,7 +5,15 @@ from app.llm.types import GenerationResult
 
 
 def _result(text: str) -> GenerationResult:
-    return GenerationResult(content=text, provider="ollama", model="fake", tokens_in=1, tokens_out=1, latency_ms=1, estimated_cost=None)
+    return GenerationResult(
+        content=text,
+        provider="ollama",
+        model="fake",
+        tokens_in=1,
+        tokens_out=1,
+        latency_ms=1,
+        estimated_cost=None,
+    )
 
 
 def _fake_llm(reply: str):
@@ -58,5 +66,7 @@ async def test_drafter_falls_back_to_action_and_caps_length():
     rec = agents.Recommendation(action="Send pricing", rationale="r")
     note, _ = await agents.run_task_drafter(_fake_llm("not json"), rec)
     assert note == "Send pricing"
-    long_note, _ = await agents.run_task_drafter(_fake_llm('{"task_note": "' + "a" * 900 + '"}'), rec)
+    long_note, _ = await agents.run_task_drafter(
+        _fake_llm('{"task_note": "' + "a" * 900 + '"}'), rec
+    )
     assert len(long_note) == agents.TASK_NOTE_MAX_CHARS

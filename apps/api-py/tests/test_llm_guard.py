@@ -7,7 +7,14 @@ from app.guardrails import llm_guard
 
 @pytest.mark.parametrize(
     ("reply", "unsafe"),
-    [("UNSAFE", True), ("unsafe.", True), ("  Unsafe: injection", True), ("SAFE", False), ("", False), ("maybe", False)],
+    [
+        ("UNSAFE", True),
+        ("unsafe.", True),
+        ("  Unsafe: injection", True),
+        ("SAFE", False),
+        ("", False),
+        ("maybe", False),
+    ],
 )
 def test_parse_verdict(reply: str, unsafe: bool) -> None:
     assert llm_guard.parse_verdict(reply) is unsafe

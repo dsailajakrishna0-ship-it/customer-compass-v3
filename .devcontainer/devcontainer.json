@@ -1,0 +1,21 @@
+{
+  "name": "customer-compass-v3",
+  "image": "mcr.microsoft.com/devcontainers/python:1-3.12-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": { "version": "22" },
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+  },
+  "postCreateCommand": "pip install uv && uv tool install rust-just && uv tool install pre-commit && npm ci && (cd apps/api-py && uv sync) && pre-commit install",
+  "forwardPorts": [5173, 8001, 6333, 5432],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "charliermarsh.ruff",
+        "ms-python.mypy-type-checker",
+        "dbaeumer.vscode-eslint",
+        "vitest.explorer",
+        "EditorConfig.EditorConfig"
+      ]
+    }
+  }
+}

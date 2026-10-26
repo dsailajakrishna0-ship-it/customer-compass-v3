@@ -66,7 +66,9 @@ def _load_documents() -> list[ParsedDocument]:
         title = post.get("title")
         doc_type = post.get("type")
         if not isinstance(title, str) or doc_type not in DOCUMENT_TYPES:
-            raise ValueError(f"Document {file_path.name} is missing required frontmatter (title, type).")
+            raise ValueError(
+                f"Document {file_path.name} is missing required frontmatter (title, type)."
+            )
 
         company_name = post.get("company")
         documents.append(

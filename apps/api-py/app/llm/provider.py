@@ -54,16 +54,21 @@ async def generate(
     except Exception as primary_exc:  # noqa: BLE001 - deliberately broad: any provider failure triggers fallback
         fallback_provider: LlmProvider = "ollama" if resolved == "cloud" else "cloud"
         logger.warning(
-            "LLM provider %r failed (%s); falling back to %r", resolved, primary_exc, fallback_provider
+            "LLM provider %r failed (%s); falling back to %r",
+            resolved,
+            primary_exc,
+            fallback_provider,
         )
         try:
             # model only makes sense for "cloud"; dropped automatically when
             # falling back to "ollama" since generate_with_ollama ignores it.
             fallback_model = model if fallback_provider == "cloud" else None
-            result = await _generate_once(fallback_provider, system_prompt, messages, fallback_model)
+            result = await _generate_once(
+                fallback_provider, system_prompt, messages, fallback_model
+            )
         except Exception as fallback_exc:  # noqa: BLE001
             logger.warning("Fallback provider %r also failed (%s)", fallback_provider, fallback_exc)
-            raise primary_exc
+            raise primary_exc from fallback_exc
         result.fallback_used = True
         result.fallback_from = resolved
         return result

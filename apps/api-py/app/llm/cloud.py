@@ -47,7 +47,9 @@ async def generate_with_cloud(
     hardcoded default above."""
     api_key = os.environ.get("OPENROUTER_API_KEY")
     if not api_key:
-        raise RuntimeError("OPENROUTER_API_KEY is not set. Add it to apps/api-py/.env to use LLM_PROVIDER=cloud.")
+        raise RuntimeError(
+            "OPENROUTER_API_KEY is not set. Add it to apps/api-py/.env to use LLM_PROVIDER=cloud."
+        )
 
     resolved_model = model or DEFAULT_OPENROUTER_MODEL
 
@@ -80,7 +82,9 @@ async def generate_with_cloud(
 
     content = (payload.get("choices") or [{}])[0].get("message", {}).get("content")
     if not content:
-        raise RuntimeError("The cloud model returned an empty response. Try again or pick a different model.")
+        raise RuntimeError(
+            "The cloud model returned an empty response. Try again or pick a different model."
+        )
 
     usage = payload.get("usage") or {}
     tokens_in = usage.get("prompt_tokens")

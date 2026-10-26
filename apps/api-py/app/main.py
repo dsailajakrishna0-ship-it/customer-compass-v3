@@ -51,7 +51,10 @@ async def http_exception_handler(_request: Request, exc: HTTPException) -> JSONR
     the UI, because `body.error` was always undefined. Returning both keys
     keeps FastAPI's default shape available while restoring the field the
     frontend actually reads."""
-    return JSONResponse(status_code=exc.status_code, content={"error": exc.detail, "detail": exc.detail})
+    return JSONResponse(
+        status_code=exc.status_code, content={"error": exc.detail, "detail": exc.detail}
+    )
+
 
 # CORS: lets the Vite dev UI (localhost:5173) call this API from the browser
 app.add_middleware(
