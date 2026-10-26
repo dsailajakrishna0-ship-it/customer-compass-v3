@@ -115,7 +115,6 @@ class ChatRequest(BaseModel):
         return [{"role": m.role, "content": m.content} for m in self.messages]
 
 
-
 def _citation(i: int, chunk) -> dict:
     return {
         "number": i + 1,
@@ -233,7 +232,9 @@ async def rag_chat(body: ChatRequest):
         # embedding quality) -- only what reaches the LLM gets neutralized.
         chunks = await retrieve_relevant_chunks(question)
         if not chunks:
-            _, guardrail = await _finalize("chat/rag", build_report((question_finding, "user_input")), "")
+            _, guardrail = await _finalize(
+                "chat/rag", build_report((question_finding, "user_input")), ""
+            )
             return {
                 "message": "I could not find any ingested documents relevant to that question.",
                 "citations": [],
@@ -243,22 +244,28 @@ async def rag_chat(body: ChatRequest):
 
         chunk_findings = [scan_and_neutralize(chunk.content) for chunk in chunks]
         neutralized_chunks = [
-            replace(chunk, content=finding.neutralized_text) for chunk, finding in zip(chunks, chunk_findings)
+            replace(chunk, content=finding.neutralized_text)
+            for chunk, finding in zip(chunks, chunk_findings, strict=True)
         ]
         context = wrap_untrusted_context(build_context(neutralized_chunks))
         augmented_messages: list[ChatMessage] = [
             *body.message_dicts[:-1],
-            {"role": "user", "content": f"Context:\n{context}\n\nQuestion: {question_finding.neutralized_text}"},
+            {
+                "role": "user",
+                "content": f"Context:\n{context}\n\nQuestion: {question_finding.neutralized_text}",
+            },
         ]
         report = build_report(
             (question_finding, "user_input"),
             *[
                 (finding, f"document: {chunk.document_title}")
-                for finding, chunk in zip(chunk_findings, chunks)
+                for finding, chunk in zip(chunk_findings, chunks, strict=True)
             ],
         )
 
-        result = await generate(GROUNDED_SYSTEM_PROMPT, augmented_messages, resolved_provider, body.model)
+        result = await generate(
+            GROUNDED_SYSTEM_PROMPT, augmented_messages, resolved_provider, body.model
+        )
         # Citations/snippets still show the ORIGINAL chunk content, so the
         # user can see exactly what was retrieved, including the flagged text.
         citations = [_citation(i, chunk) for i, chunk in enumerate(chunks)]
@@ -271,7 +278,9 @@ async def rag_chat(body: ChatRequest):
             "guardrail": guardrail,
         }
     except Exception as exc:  # noqa: BLE001
-        raise HTTPException(status_code=503, detail=str(exc) or "Could not answer with retrieval.") from exc
+        raise HTTPException(
+            status_code=503, detail=str(exc) or "Could not answer with retrieval."
+        ) from exc
 
 
 # Mode 3 - CRM copilot: combines Postgres facts (SQL) and/or RAG chunks, chosen by the query router
@@ -287,11 +296,21 @@ async def crm_chat(body: ChatRequest):
     try:
         route = await classify_query(question)
 
-        facts = await get_company_summary(route.company.id) if route.wants_structured and route.company else None
-        chunks = await retrieve_relevant_chunks(question, route.company.id if route.company else None) if route.wants_rag else []
+        facts = (
+            await get_company_summary(route.company.id)
+            if route.wants_structured and route.company
+            else None
+        )
+        chunks = (
+            await retrieve_relevant_chunks(question, route.company.id if route.company else None)
+            if route.wants_rag
+            else []
+        )
 
         if not facts and not chunks:
-            _, guardrail = await _finalize("chat/crm", build_report((question_finding, "user_input")), "")
+            _, guardrail = await _finalize(
+                "chat/crm", build_report((question_finding, "user_input")), ""
+            )
             return {
                 "message": (
                     "I could not find a matching company or deal data for that question."
@@ -328,24 +347,32 @@ async def crm_chat(body: ChatRequest):
         if chunks:
             chunk_findings = [scan_and_neutralize(chunk.content) for chunk in chunks]
             neutralized_chunks = [
-                replace(chunk, content=finding.neutralized_text) for chunk, finding in zip(chunks, chunk_findings)
+                replace(chunk, content=finding.neutralized_text)
+                for chunk, finding in zip(chunks, chunk_findings, strict=True)
             ]
-            doc_block = f"Source documents:\n{wrap_untrusted_context(build_context(neutralized_chunks))}"
+            doc_block = (
+                f"Source documents:\n{wrap_untrusted_context(build_context(neutralized_chunks))}"
+            )
 
         context_parts = [part for part in (facts_block, doc_block) if part is not None]
         augmented_messages: list[ChatMessage] = [
             *body.message_dicts[:-1],
-            {"role": "user", "content": f"{chr(10).join(context_parts)}\n\nQuestion: {question_finding.neutralized_text}"},
+            {
+                "role": "user",
+                "content": f"{chr(10).join(context_parts)}\n\nQuestion: {question_finding.neutralized_text}",
+            },
         ]
         report = build_report(
             (question_finding, "user_input"),
             *[
                 (finding, f"document: {chunk.document_title}")
-                for finding, chunk in zip(chunk_findings, chunks)
+                for finding, chunk in zip(chunk_findings, chunks, strict=True)
             ],
         )
 
-        result = await generate(CRM_SYSTEM_PROMPT, augmented_messages, resolved_provider, body.model)
+        result = await generate(
+            CRM_SYSTEM_PROMPT, augmented_messages, resolved_provider, body.model
+        )
         # Citations/snippets still show the ORIGINAL chunk content.
         citations = [_citation(i, chunk) for i, chunk in enumerate(chunks)]
 
@@ -361,7 +388,9 @@ async def crm_chat(body: ChatRequest):
             "guardrail": guardrail,
         }
     except Exception as exc:  # noqa: BLE001
-        raise HTTPException(status_code=503, detail=str(exc) or "Could not answer the CRM question.") from exc
+        raise HTTPException(
+            status_code=503, detail=str(exc) or "Could not answer the CRM question."
+        ) from exc
 
 
 def _format_tool_descriptions(specs) -> str:
@@ -422,7 +451,7 @@ async def tools_chat(body: ChatRequest):
                         {
                             "role": "user",
                             "content": (
-                                "That tool_call block was invalid (bad JSON or missing \"tool\"). "
+                                'That tool_call block was invalid (bad JSON or missing "tool"). '
                                 "Retry with a valid tool_call block, or answer in plain text."
                             ),
                         }
@@ -442,10 +471,13 @@ async def tools_chat(body: ChatRequest):
                 tools_used.append({"tool": tool_name, "arguments": arguments})
 
                 wrapped = wrap_untrusted_context(tool_finding.neutralized_text)
-                conversation.append({"role": "user", "content": f"Tool result for {tool_name}:\n{wrapped}"})
+                conversation.append(
+                    {"role": "user", "content": f"Tool result for {tool_name}:\n{wrapped}"}
+                )
             else:
                 # Hit MAX_TOOL_ITERATIONS with a tool call still pending --
                 # force one last plain-text answer from what's known so far.
+                assert result is not None  # the loop ran at least once
                 conversation.append({"role": "assistant", "content": result.content})
                 conversation.append(
                     {
@@ -469,5 +501,6 @@ async def tools_chat(body: ChatRequest):
                 "guardrail": guardrail,
             }
     except Exception as exc:  # noqa: BLE001
-        raise HTTPException(status_code=503, detail=str(exc) or "Could not answer using tools.") from exc
-
+        raise HTTPException(
+            status_code=503, detail=str(exc) or "Could not answer using tools."
+        ) from exc

@@ -50,11 +50,17 @@ async def get_company_summary_tool(company_name: str) -> dict:
     block, via the same app.crm.queries.get_company_summary function."""
     company = await _resolve_company(company_name)
     if company is None:
-        result = {"status": "not_found", "message": f'No company matching "{company_name}" was found.'}
-        await _log_tool_call("get_company_summary", {"company_name": company_name}, "error", result["message"], None)
+        result: dict = {
+            "status": "not_found",
+            "message": f'No company matching "{company_name}" was found.',
+        }
+        await _log_tool_call(
+            "get_company_summary", {"company_name": company_name}, "error", result["message"], None
+        )
         return result
 
     summary = await get_company_summary(company.id)
+    assert summary is not None  # the company was just resolved
     result = {
         "status": "executed",
         "company": {
@@ -63,7 +69,12 @@ async def get_company_summary_tool(company_name: str) -> dict:
             "industry": summary.industry,
             "relationshipStatus": summary.relationship_status,
             "openDeals": [
-                {"name": d.name, "amount": d.amount, "status": d.status, "expectedCloseDate": d.expected_close_date}
+                {
+                    "name": d.name,
+                    "amount": d.amount,
+                    "status": d.status,
+                    "expectedCloseDate": d.expected_close_date,
+                }
                 for d in summary.open_deals
             ],
             "wonDealsCount": summary.won_deals_count,
@@ -85,16 +96,27 @@ async def get_open_deals_tool(company_name: str) -> dict:
     summary), via app.crm.queries.get_company_summary."""
     company = await _resolve_company(company_name)
     if company is None:
-        result = {"status": "not_found", "message": f'No company matching "{company_name}" was found.'}
-        await _log_tool_call("get_open_deals", {"company_name": company_name}, "error", result["message"], None)
+        result: dict = {
+            "status": "not_found",
+            "message": f'No company matching "{company_name}" was found.',
+        }
+        await _log_tool_call(
+            "get_open_deals", {"company_name": company_name}, "error", result["message"], None
+        )
         return result
 
     summary = await get_company_summary(company.id)
+    assert summary is not None  # the company was just resolved
     result = {
         "status": "executed",
         "companyName": summary.name,
         "openDeals": [
-            {"name": d.name, "amount": d.amount, "status": d.status, "expectedCloseDate": d.expected_close_date}
+            {
+                "name": d.name,
+                "amount": d.amount,
+                "status": d.status,
+                "expectedCloseDate": d.expected_close_date,
+            }
             for d in summary.open_deals
         ],
     }
@@ -116,7 +138,7 @@ async def search_documents_tool(query: str, company_name: str | None = None) -> 
     model, exactly like Stage 8's document handling."""
     company = await _resolve_company(company_name) if company_name else None
     chunks = await retrieve_relevant_chunks(query, company.id if company else None)
-    result = {
+    result: dict = {
         "status": "executed",
         "results": [
             {
@@ -139,7 +161,16 @@ async def search_documents_tool(query: str, company_name: str | None = None) -> 
     return result
 
 
-_CONFIRMATION_WORDS = {"yes", "confirm", "confirmed", "approve", "approved", "go ahead", "do it", "proceed"}
+_CONFIRMATION_WORDS = {
+    "yes",
+    "confirm",
+    "confirmed",
+    "approve",
+    "approved",
+    "go ahead",
+    "do it",
+    "proceed",
+}
 
 
 def looks_like_confirmation(text: str) -> bool:
@@ -158,8 +189,17 @@ async def create_followup_task_tool(company_name: str, note: str, confirm: bool 
     the model itself deciding on its own to skip confirmation)."""
     company = await _resolve_company(company_name)
     if company is None:
-        result = {"status": "not_found", "message": f'No company matching "{company_name}" was found.'}
-        await _log_tool_call("create_followup_task", {"company_name": company_name, "note": note}, "error", result["message"], None)
+        result: dict = {
+            "status": "not_found",
+            "message": f'No company matching "{company_name}" was found.',
+        }
+        await _log_tool_call(
+            "create_followup_task",
+            {"company_name": company_name, "note": note},
+            "error",
+            result["message"],
+            None,
+        )
         return result
 
     if not confirm:
@@ -185,7 +225,13 @@ async def create_followup_task_tool(company_name: str, note: str, confirm: bool 
     )
     result = {
         "status": "confirmed",
-        "task": {"id": row["id"], "companyName": company.name, "note": note, "status": row["status"], "createdAt": row["created_at"]},
+        "task": {
+            "id": row["id"],
+            "companyName": company.name,
+            "note": note,
+            "status": row["status"],
+            "createdAt": row["created_at"],
+        },
     }
     await _log_tool_call(
         "create_followup_task",

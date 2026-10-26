@@ -9,6 +9,7 @@ One short file per decision, so the reason for a choice is not buried in a long 
 | ADR | Title | Status |
 | --- | --- | --- |
 | [0001](0001-v3-goals-and-tooling-rule.md) | V3 goals and tooling rule | Accepted |
+| [0002](0002-developer-tooling.md) | Developer tooling | Accepted |
 
 ## Template
 

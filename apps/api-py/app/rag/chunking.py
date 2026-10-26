@@ -21,7 +21,9 @@ class Chunk:
     char_end: int
 
 
-def chunk_text(text: str, chunk_size: int = CHUNK_SIZE, overlap: int = CHUNK_OVERLAP) -> list[Chunk]:
+def chunk_text(
+    text: str, chunk_size: int = CHUNK_SIZE, overlap: int = CHUNK_OVERLAP
+) -> list[Chunk]:
     if chunk_size <= 0:
         raise ValueError("chunk_size must be greater than 0.")
     if overlap < 0 or overlap >= chunk_size:

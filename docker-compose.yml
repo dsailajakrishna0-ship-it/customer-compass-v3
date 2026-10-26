@@ -1,7 +1,7 @@
 services:
   # Postgres: relational CRM data (companies, deals, tasks, audit log); pgvector image, vector column unused
   db:
-    image: pgvector/pgvector:pg17
+    image: pgvector/pgvector:0.8.6-pg17
     container_name: customer-compass-v3-db
     environment:
       POSTGRES_DB: customer_compass
@@ -26,7 +26,7 @@ services:
   # multi-GB download. If no prior cache is found, a new volume is created
   # and models are pulled fresh on first use. See README for details.
   ollama:
-    image: ollama/ollama:latest
+    image: ollama/ollama:0.13.5
     container_name: customer-compass-v3-ollama
     ports:
       - "11435:11434"
@@ -39,7 +39,7 @@ services:
   # stays for structured/relational data (companies, CRM facts) only.
   # Qdrant: vector DB that stores chunk embeddings and does nearest-neighbour search
   qdrant:
-    image: qdrant/qdrant:latest
+    image: qdrant/qdrant:v1.19.2
     container_name: customer-compass-v3-qdrant
     ports:
       - "6333:6333"   # REST API
@@ -100,4 +100,3 @@ volumes:
   ollama-data:
     name: ${OLLAMA_VOLUME_NAME:-customer-compass-v3_ollama-data}
   qdrant-data:
-

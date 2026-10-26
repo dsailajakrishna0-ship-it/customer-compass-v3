@@ -280,6 +280,16 @@ the real MCP client) bridges that gap instead of branching per provider.
 
 No alternative planned — this holds the core CRM data and is not swapped.
 
+## Developer tooling
+
+| Area | Tool |
+| --- | --- |
+| Python lint, format, types, tests | ruff, mypy, pytest + pytest-cov |
+| Web lint and tests | ESLint (typescript-eslint), Vitest + Testing Library |
+| Hooks and commands | pre-commit, just (`justfile`), Dev Container |
+
+Versions and reasons: [ADR 0002](adr/0002-developer-tooling.md).
+
 ## Maintenance
 
 - Add a new row/section here the same time a new stage introduces a

@@ -14,7 +14,14 @@ vectors + their citable payload.
 import os
 
 from qdrant_client import AsyncQdrantClient
-from qdrant_client.models import Distance, FieldCondition, Filter, MatchValue, PointStruct, VectorParams
+from qdrant_client.models import (
+    Distance,
+    FieldCondition,
+    Filter,
+    MatchValue,
+    PointStruct,
+    VectorParams,
+)
 
 from app.rag.embeddings import EMBEDDING_DIMENSIONS
 
@@ -64,6 +71,10 @@ async def count_chunks(document_id: int | None = None) -> int:
     client = get_client()
     query_filter: Filter | None = None
     if document_id is not None:
-        query_filter = Filter(must=[FieldCondition(key="document_id", match=MatchValue(value=document_id))])
-    result = await client.count(collection_name=COLLECTION_NAME, count_filter=query_filter, exact=True)
+        query_filter = Filter(
+            must=[FieldCondition(key="document_id", match=MatchValue(value=document_id))]
+        )
+    result = await client.count(
+        collection_name=COLLECTION_NAME, count_filter=query_filter, exact=True
+    )
     return result.count

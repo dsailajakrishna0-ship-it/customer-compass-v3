@@ -13,8 +13,9 @@ fallback instead of raising.
 
 import json
 import re
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
-from typing import Awaitable, Callable, Literal
+from typing import Literal
 
 from app.llm.types import ChatMessage, GenerationResult
 
@@ -115,8 +116,9 @@ async def run_analyst(
 ) -> tuple[Recommendation, GenerationResult]:
     prompt = f"Evidence:\n{evidence_text}"
     if reviewer_feedback:
-        prompt += "\n\nThe Reviewer sent your last recommendation back. Fix these issues:\n- " + "\n- ".join(
-            reviewer_feedback
+        prompt += (
+            "\n\nThe Reviewer sent your last recommendation back. Fix these issues:\n- "
+            + "\n- ".join(reviewer_feedback)
         )
     result = await llm(ANALYST_SYSTEM_PROMPT, [{"role": "user", "content": prompt}])
     return parse_recommendation(result.content), result
@@ -134,7 +136,9 @@ async def run_reviewer(
     return parse_review(result.content), result
 
 
-async def run_task_drafter(llm: LlmCall, recommendation: Recommendation) -> tuple[str, GenerationResult]:
+async def run_task_drafter(
+    llm: LlmCall, recommendation: Recommendation
+) -> tuple[str, GenerationResult]:
     prompt = f"Approved recommendation:\naction: {recommendation.action}\nrationale: {recommendation.rationale}"
     result = await llm(DRAFTER_SYSTEM_PROMPT, [{"role": "user", "content": prompt}])
     data = parse_json_object(result.content)

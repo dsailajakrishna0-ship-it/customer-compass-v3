@@ -36,7 +36,9 @@ async def ingest():
     try:
         summary = await ingest_documents()
     except Exception as exc:  # noqa: BLE001 - mirrors the Express route's catch-all 500
-        raise HTTPException(status_code=500, detail="Ingestion failed. Check the API logs.") from exc
+        raise HTTPException(
+            status_code=500, detail="Ingestion failed. Check the API logs."
+        ) from exc
 
     status_code = 200 if summary.status == "completed" else 502
     body = {

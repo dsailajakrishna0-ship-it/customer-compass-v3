@@ -39,11 +39,19 @@ npm run dev                       # web app at http://localhost:5173
 
 Then open the app and click **Ingest documents** once. API docs are at <http://localhost:8001/docs>. Full run and test guide, with every chat mode and sample questions: [docs/testing-guide.md](docs/testing-guide.md). Problems starting up: [docs/troubleshooting.md](docs/troubleshooting.md).
 
-Run the API tests (they need the `db` container running):
+## Developer commands
+
+Install [just](https://just.systems/) once (`uv tool install rust-just`), then:
 
 ```bash
-cd apps/api-py && uv run pytest -q
+just            # list all commands
+just lint       # ruff, mypy, ESLint, tsc
+just test       # API tests (starts Postgres) and web tests
+just fmt        # auto-fix and format Python
+just up         # start the stack      just down   # stop it
 ```
+
+Optional: `uv tool install pre-commit && pre-commit install` to run the checks on every commit. A Dev Container with everything installed is in `.devcontainer/`. Tool choices: [ADR 0002](docs/adr/0002-developer-tooling.md).
 
 ## Repository layout
 

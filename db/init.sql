@@ -124,4 +124,3 @@ INSERT INTO interactions (company_id, interaction_type, subject, occurred_at, su
   (7, 'call', 'Renewal discussion', '2026-09-18T10:00:00Z', 'Dr. Kim confirmed renewal and asked about expanding to a second clinic location.'),
   (7, 'support', 'Data handling and compliance question', '2026-09-22T15:30:00Z', 'James asked how patient-adjacent operational data is stored and whether it meets their compliance requirements.'),
   (7, 'email', 'Positive feedback on uptime', '2026-09-25T12:00:00Z', 'Dr. Kim praised the service uptime over the past quarter and asked about the expansion timeline.');
-

@@ -60,7 +60,9 @@ def _add_item(bundle: EvidenceBundle, source: str, text: str, location: str, sca
     bundle.text += f"{label} [{source}] {text}\n"
 
 
-async def _gather_evidence(company_name: str, company_id: int, budget: RunBudget, trace: Trace) -> EvidenceBundle:
+async def _gather_evidence(
+    company_name: str, company_id: int, budget: RunBudget, trace: Trace
+) -> EvidenceBundle:
     bundle = EvidenceBundle(text="")
 
     budget.spend()
@@ -83,7 +85,13 @@ async def _gather_evidence(company_name: str, company_id: int, budget: RunBudget
             "tool: get_company_summary",
             scan=False,
         )
-    trace.record("tool", "get_company_summary", company_name, f"{len(bundle.items)} evidence item(s)", started)
+    trace.record(
+        "tool",
+        "get_company_summary",
+        company_name,
+        f"{len(bundle.items)} evidence item(s)",
+        started,
+    )
 
     budget.spend()
     started = time.monotonic()
@@ -97,15 +105,33 @@ async def _gather_evidence(company_name: str, company_id: int, budget: RunBudget
             f"interaction: {item.subject}",
             scan=True,
         )
-    trace.record("code", "get_recent_interactions", company_name, f"{len(bundle.items) - before} interaction(s)", started)
+    trace.record(
+        "code",
+        "get_recent_interactions",
+        company_name,
+        f"{len(bundle.items) - before} interaction(s)",
+        started,
+    )
 
     budget.spend()
     started = time.monotonic()
     docs = await search_documents_tool("recent history, requests and open issues", company_name)
     before = len(bundle.items)
     for doc in docs.get("results", [])[:MAX_DOCS]:
-        _add_item(bundle, f"document: {doc['title']}", doc["content"], f"document: {doc['title']}", scan=True)
-    trace.record("tool", "search_documents", company_name, f"{len(bundle.items) - before} document chunk(s)", started)
+        _add_item(
+            bundle,
+            f"document: {doc['title']}",
+            doc["content"],
+            f"document: {doc['title']}",
+            scan=True,
+        )
+    trace.record(
+        "tool",
+        "search_documents",
+        company_name,
+        f"{len(bundle.items) - before} document chunk(s)",
+        started,
+    )
     return bundle
 
 
@@ -117,14 +143,18 @@ def _response(status: str, trace: Trace, **extra) -> dict:
     return {"route": "agent", "status": status, "trace": trace.to_list(), **extra}
 
 
-async def run_account_review(message: str, llm: agents.LlmCall, limits: AgentLimits | None = None) -> dict:
+async def run_account_review(
+    message: str, llm: agents.LlmCall, limits: AgentLimits | None = None
+) -> dict:
     limits = limits or AgentLimits.from_env()
     trace = Trace()
     try:
         async with asyncio.timeout(limits.timeout_seconds):
             return await _run(message, llm, limits, trace)
     except TimeoutError:
-        return _response("timed_out", trace, message=f"Stopped after {limits.timeout_seconds:.0f}s.")
+        return _response(
+            "timed_out", trace, message=f"Stopped after {limits.timeout_seconds:.0f}s."
+        )
     except BudgetExceeded as exc:
         return _response("budget_exceeded", trace, message=str(exc))
 
@@ -144,7 +174,9 @@ async def _run(message: str, llm: agents.LlmCall, limits: AgentLimits, trace: Tr
         status="ok" if company else "error",
     )
     if company is None:
-        return _response("company_not_found", trace, message="Name a company from the CRM to analyze.")
+        return _response(
+            "company_not_found", trace, message="Name a company from the CRM to analyze."
+        )
 
     bundle = await _gather_evidence(company.name, company.id, budget, trace)
     evidence_text = _evidence_for_agents(bundle)
@@ -183,10 +215,19 @@ async def _run(message: str, llm: agents.LlmCall, limits: AgentLimits, trace: Tr
         note_call("reviewer", result)
         unknown = agents.unknown_citations(recommendation, labels)
         if unknown:
-            review = agents.Review("revise", [*review.reasons, f"Cited evidence that does not exist: {', '.join(unknown)}"])
+            review = agents.Review(
+                "revise",
+                [*review.reasons, f"Cited evidence that does not exist: {', '.join(unknown)}"],
+            )
         elif not recommendation.evidence:
             review = agents.Review("revise", [*review.reasons, "No evidence was cited."])
-        trace.record("agent", "Reviewer agent", recommendation.action, f"{review.verdict}: {'; '.join(review.reasons)}", started)
+        trace.record(
+            "agent",
+            "Reviewer agent",
+            recommendation.action,
+            f"{review.verdict}: {'; '.join(review.reasons)}",
+            started,
+        )
 
         if review.verdict == "approve":
             break
@@ -221,7 +262,13 @@ async def _run(message: str, llm: agents.LlmCall, limits: AgentLimits, trace: Tr
         logger.warning("prompt_guard_flagged agent %s", report.reasons)
         await record_events("agent", report.events)
 
-    trace.record("gate", "awaiting_user_confirmation", "task not created", f"proposed: {note_finding.neutralized_text}", time.monotonic())
+    trace.record(
+        "gate",
+        "awaiting_user_confirmation",
+        "task not created",
+        f"proposed: {note_finding.neutralized_text}",
+        time.monotonic(),
+    )
     return _response(
         "completed",
         trace,
@@ -232,7 +279,12 @@ async def _run(message: str, llm: agents.LlmCall, limits: AgentLimits, trace: Tr
             "rationale": rationale_finding.neutralized_text,
             "evidence": recommendation.evidence,
         },
-        review={"approved": approved, "verdict": review.verdict, "reasons": review.reasons, "revisions": revisions},
+        review={
+            "approved": approved,
+            "verdict": review.verdict,
+            "reasons": review.reasons,
+            "revisions": revisions,
+        },
         proposedTask={"companyName": company.name, "note": note_finding.neutralized_text},
         guardrail={"flagged": report.flagged, "reasons": report.reasons},
         llmCalls=llm_calls,

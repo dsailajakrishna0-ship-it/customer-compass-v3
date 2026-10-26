@@ -21,7 +21,9 @@ def test_rules_match_expected_detection(case: dict) -> None:
 
 
 def test_no_benign_prompt_is_flagged() -> None:
-    assert not [c["id"] for c in CASES if not c["is_attack"] and scan_and_neutralize(c["prompt"]).flagged]
+    assert not [
+        c["id"] for c in CASES if not c["is_attack"] and scan_and_neutralize(c["prompt"]).flagged
+    ]
 
 
 def test_rules_never_claim_to_catch_a_benign_prompt() -> None:

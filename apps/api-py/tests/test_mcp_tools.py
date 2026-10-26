@@ -21,11 +21,7 @@ def test_looks_like_confirmation_rejects_unrelated_text() -> None:
 
 
 def test_tool_call_pattern_extracts_valid_json_block() -> None:
-    text = (
-        "```tool_call\n"
-        '{"tool": "get_open_deals", "arguments": {"company_name": "Acme"}}\n'
-        "```"
-    )
+    text = '```tool_call\n{"tool": "get_open_deals", "arguments": {"company_name": "Acme"}}\n```'
     match = _TOOL_CALL_PATTERN.search(text)
     assert match is not None
     parsed = json.loads(match.group(1))

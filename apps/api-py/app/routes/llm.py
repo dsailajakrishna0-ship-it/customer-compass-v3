@@ -41,9 +41,13 @@ async def list_models():
             ({"id": m["id"], "name": m["name"]} for m in models if m["id"].endswith(":free")),
             key=lambda m: m["name"],
         )
-        paid = [{"id": m["id"], "name": m["name"]} for m in models if m["id"] in PAID_EXAMPLE_MODEL_IDS]
+        paid = [
+            {"id": m["id"], "name": m["name"]} for m in models if m["id"] in PAID_EXAMPLE_MODEL_IDS
+        ]
 
         _cache = {"fetched_at": time.monotonic(), "free": free, "paid": paid}
         return {"free": free, "paid": paid}
     except Exception as exc:  # noqa: BLE001 - mirrors the Express route's catch-all 503
-        raise HTTPException(status_code=503, detail="Could not reach OpenRouter to list available models.") from exc
+        raise HTTPException(
+            status_code=503, detail="Could not reach OpenRouter to list available models."
+        ) from exc

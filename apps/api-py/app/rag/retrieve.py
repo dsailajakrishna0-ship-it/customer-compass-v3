@@ -7,12 +7,20 @@ Postgres/pgvector — each chunk's payload is already fully self-contained
 offsets), so no join back to Postgres is needed here.
 """
 
-from dataclasses import dataclass
 import logging
 import os
 import time
+from dataclasses import dataclass
+from typing import cast
 
-from qdrant_client.models import FieldCondition, Filter, IsNullCondition, MatchValue, PayloadField, SearchParams
+from qdrant_client.models import (
+    FieldCondition,
+    Filter,
+    IsNullCondition,
+    MatchValue,
+    PayloadField,
+    SearchParams,
+)
 
 from app.rag.embeddings import embed_text
 from app.rag.qdrant_store import COLLECTION_NAME, get_client
@@ -121,21 +129,25 @@ async def retrieve_relevant_chunks(
         with_payload=True,
     )
 
-    return [
-        RetrievedChunk(
-            chunk_id=point.id,
-            document_id=point.payload["document_id"],
-            document_title=point.payload["document_title"],
-            source_path=point.payload["source_path"],
-            doc_type=point.payload["doc_type"],
-            company_name=point.payload.get("company_name"),
-            chunk_index=point.payload["chunk_index"],
-            content=point.payload["content"],
-            similarity=point.score,
+    chunks = []
+    for point in results.points:
+        if point.score < MIN_SIMILARITY:
+            continue
+        payload = point.payload or {}
+        chunks.append(
+            RetrievedChunk(
+                chunk_id=cast(int | str, point.id),
+                document_id=payload["document_id"],
+                document_title=payload["document_title"],
+                source_path=payload["source_path"],
+                doc_type=payload["doc_type"],
+                company_name=payload.get("company_name"),
+                chunk_index=payload["chunk_index"],
+                content=payload["content"],
+                similarity=point.score,
+            )
         )
-        for point in results.points
-        if point.score >= MIN_SIMILARITY
-    ]
+    return chunks
 
 
 def build_context(chunks: list[RetrievedChunk]) -> str:

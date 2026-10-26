@@ -28,13 +28,18 @@ def test_limits_come_from_env(monkeypatch):
 
 @pytest.mark.parametrize(
     "message",
-    ["Analyze Acme Fabrication's account and recommend a next action", "What should we do about Northstar?"],
+    [
+        "Analyze Acme Fabrication's account and recommend a next action",
+        "What should we do about Northstar?",
+    ],
 )
 def test_analysis_requests_use_agent(message):
     assert needs_agent(message)
 
 
-@pytest.mark.parametrize("message", ["What is Acme's industry?", "List the open deals for Harbor & Pine"])
+@pytest.mark.parametrize(
+    "message", ["What is Acme's industry?", "List the open deals for Harbor & Pine"]
+)
 def test_simple_questions_bypass_agent(message):
     assert not needs_agent(message)
 

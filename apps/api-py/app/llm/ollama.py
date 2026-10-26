@@ -30,7 +30,9 @@ async def generate_with_ollama(system_prompt: str, messages: list[ChatMessage]) 
         )
     latency_ms = round((time.perf_counter() - started_at) * 1000)
     if response.status_code != 200:
-        raise RuntimeError("The local model is not ready. Start Ollama and pull the configured model.")
+        raise RuntimeError(
+            "The local model is not ready. Start Ollama and pull the configured model."
+        )
     payload = response.json()
     content = payload.get("message", {}).get("content") or "I could not generate a response."
     # Ollama's /api/chat reports token counts as prompt_eval_count (input) and
