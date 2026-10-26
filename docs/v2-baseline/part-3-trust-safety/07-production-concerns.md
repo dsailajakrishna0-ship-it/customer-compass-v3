@@ -34,7 +34,7 @@ production auth system.
    *other* provider before giving up. The response is flagged
    (`usage.fallbackUsed` / `usage.fallbackFrom`) so this is visible, not
    silent. If both providers fail, the original error is raised (still
-   surfaced as an HTTP 503, see [api-reference.md](../api-reference.md)).
+   surfaced as an HTTP 503, see [api-reference.md](../../api-reference.md)).
 
 2. **Per-request telemetry** (`app/llm/types.py::GenerationResult`). Every
    provider call now returns the actual provider/model used, input/output
@@ -59,15 +59,15 @@ production auth system.
    UI. Fixed with a global exception handler in `app/main.py` that returns
    both keys.
 
-See the [API reference's Usage object section](../api-reference.md#usage-object-stage-7)
+See the [API reference's Usage object section](../../api-reference.md#usage-object-stage-7)
 for the exact response shape, and
-[architecture.md](../architecture.md#request-flow-one-chat-question-start-to-finish-rag-mode-example)
+[architecture.md](../../architecture.md#request-flow-one-chat-question-start-to-finish-rag-mode-example)
 for how this fits into the overall request flow.
 
 ## How to run the app
 
 ```bash
-cd /home/devarapallim/Murali/git-personal/customer-compass-v2
+cd customer-compass-v3
 docker compose up -d db qdrant ollama api-py
 cd apps/web && npm run dev
 ```

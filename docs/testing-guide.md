@@ -10,13 +10,13 @@ clicking around and testing.
 ## 1. Commands to start everything
 
 ```bash
-cd /home/devarapallim/Murali/git-personal/customer-compass-v2
+cd customer-compass-v3
 
 # Backend stack: Postgres (CRM data), Qdrant (vector DB), Ollama (runs the local generating model), the FastAPI service (backend)
 docker compose up -d db qdrant ollama api-py
 
 # First time only (or after a DB/Ollama volume reset): pull the local model
-docker exec customer-compass-v2-ollama ollama pull qwen2.5:3b
+docker exec customer-compass-v3-ollama ollama pull qwen2.5:3b
 
 # Frontend dev server
 cd apps/web && npm run dev
@@ -67,7 +67,7 @@ commands are in section 1; stage-specific steps are in the linked docs.
 | `http://localhost:6333/collections/document_chunks` | Same collection info as JSON (points count, indexed vectors, segments, config). | `qdrant` container |
 | `http://localhost:6333/metrics` | Qdrant Prometheus metrics (chartable in Grafana). | `qdrant` container |
 | `http://localhost:11435/api/tags` | Ollama (local generating model): lists pulled models, confirms it is up. Host port 11435 maps to 11434 in the container. | `ollama` container |
-| `localhost:5432` (not a browser URL) | Postgres. Use `docker exec -it customer-compass-v2-db psql -U customer_compass -d customer_compass`, or a DB client (see the Stage 3 doc). | `db` container |
+| `localhost:5432` (not a browser URL) | Postgres. Use `docker exec -it customer-compass-v3-db psql -U customer_compass -d customer_compass`, or a DB client (see the Stage 3 doc). | `db` container |
 | `docker compose logs -f api-py` | Backend request/error logs, including the `llm_usage` line (Stage 7) and `prompt_guard_flagged` warnings (Stage 8). | any time |
 | `docker ps --format "{{.Names}}\t{{.Status}}"` | Confirms all 4 containers (`db`, `qdrant`, `ollama`, `api-py`) are `Up`, not stuck in `Created`. | any time |
 
@@ -276,7 +276,7 @@ Expect `guardrail.flagged: true` in the first response and a row with
 `event_type: "input"`, `endpoint: "chat"`, `pattern: "override_instructions"`
 in the second. A normal question (e.g. "What is Acme's deal status?" on
 `/api/v1/chat/crm`) must add no row. To check the table exists on an old
-volume: `docker exec customer-compass-v2-db psql -U customer_compass -d customer_compass -c '\d security_audit_log'`
+volume: `docker exec customer-compass-v3-db psql -U customer_compass -d customer_compass -c '\d security_audit_log'`
 (adjust user/db if your `.env` differs).
 
 **Step 4 — 8.b output guard.** Hard to trigger on demand because it needs
@@ -527,9 +527,9 @@ also logs `vector_search strategy=...` in the API logs.
 | [architecture.md](architecture.md) | System diagram, why two databases/providers, full request-flow walkthrough. |
 | [api-reference.md](api-reference.md) | Every endpoint's exact request/response shape. |
 | [tech-stack.md](tech-stack.md) | Per-stage build history and the active technology per capability. |
-| [v2-startup-troubleshooting.md](v2-startup-troubleshooting.md) | Known local-startup quirks (container-name clashes, shared ports, env-file setup) and their fixes. |
-| [part-2-grounded-intelligence/06-retrieval-evaluation.md](part-2-grounded-intelligence/06-retrieval-evaluation.md) + [../evals/README.md](../evals/README.md) | The automated promptfoo eval suite (a harness that sends test questions to the live API and grades the answers), if you want to run these same kinds of checks without manual clicking. |
-| [part-3-trust-safety/07-production-concerns.md](part-3-trust-safety/07-production-concerns.md) | Stage 7 fallback/telemetry design + its own manual test steps. |
-| [part-3-trust-safety/08-prompt-injection-guardrails.md](part-3-trust-safety/08-prompt-injection-guardrails.md) | Stage 8 guardrail design (threat model, neutralize-and-warn behavior) + indirect-injection manual test steps. |
-| [part-4-autonomy-protocols/10-agentic-assistant.md](part-4-autonomy-protocols/10-agentic-assistant.md) | Stage 10 agent design, limits, test steps and evidence. See also [agent-boundaries.md](agent-boundaries.md). |
-| [part-4-autonomy-protocols/09-tool-calling-mcp.md](part-4-autonomy-protocols/09-tool-calling-mcp.md) | Stage 9 MCP tool-calling design (server/client, confirmation gate, hand-rolled tool-call protocol) + the real bug caught during manual testing. |
+| [troubleshooting.md](troubleshooting.md) | Known local-startup quirks (container-name clashes, shared ports, env-file setup) and their fixes. |
+| [part-2-grounded-intelligence/06-retrieval-evaluation.md](v2-baseline/part-2-grounded-intelligence/06-retrieval-evaluation.md) + [../evals/README.md](../evals/README.md) | The automated promptfoo eval suite (a harness that sends test questions to the live API and grades the answers), if you want to run these same kinds of checks without manual clicking. |
+| [part-3-trust-safety/07-production-concerns.md](v2-baseline/part-3-trust-safety/07-production-concerns.md) | Stage 7 fallback/telemetry design + its own manual test steps. |
+| [part-3-trust-safety/08-prompt-injection-guardrails.md](v2-baseline/part-3-trust-safety/08-prompt-injection-guardrails.md) | Stage 8 guardrail design (threat model, neutralize-and-warn behavior) + indirect-injection manual test steps. |
+| [part-4-autonomy-protocols/10-agentic-assistant.md](v2-baseline/part-4-autonomy-protocols/10-agentic-assistant.md) | Stage 10 agent design, limits, test steps and evidence. See also [agent-boundaries.md](agent-boundaries.md). |
+| [part-4-autonomy-protocols/09-tool-calling-mcp.md](v2-baseline/part-4-autonomy-protocols/09-tool-calling-mcp.md) | Stage 9 MCP tool-calling design (server/client, confirmation gate, hand-rolled tool-call protocol) + the real bug caught during manual testing. |

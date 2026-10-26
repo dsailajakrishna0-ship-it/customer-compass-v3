@@ -113,7 +113,7 @@ the UI.
 ## How to run the app
 
 ```bash
-cd /home/devarapallim/Murali/git-personal/customer-compass-v2
+cd customer-compass-v3
 docker compose up -d db qdrant ollama api-py
 cd apps/web && npm run dev
 ```

@@ -1,7 +1,6 @@
 # Customer Compass V3 — Roadmap Draft + Recommendations 1 + Recommendations 2
 
-> Planning note only — not yet committed to any repo. Move into
-> `docs/` of the new `customer-compass-v3` repo once that repo exists.
+> **Status:** this is the implementation reference for V3. The plan itself is [roadmap.md](roadmap.md); tool IDs (T1–T18), repo findings (R1–R12) and doc findings (D1–D9) cited there come from this file. It is a snapshot of the V2-era planning draft plus recommendations; do not edit it, record changes as ADRs instead.
 
 ## How to read this document
 
@@ -349,7 +348,7 @@ Basis: all `.md` files under `docs/`, `evals/`, `apps/api-py/`, the root README,
 | D3 | Roadmap internal staleness: the "Why a new repo" text says "stages 1 through 9, currently"; the sequencing step still says "merge PR #11"; the phrase "seeded from v2's final state" appears twice (lines 82–83); the title still says 2026-10-19. | `docs/v3-roadmap-draft.md` | Fold the 2026-10-25 revision into the body, delete the superseded text, and date the document once. The "this section wins" rule is fine for a week, not for a living plan. |
 | D4 | The roadmap contradicts itself. Track B bullets say "X vs. our Y" (comparison), but the revision says the framework version replaces the hand-written one. | Track B | Reword Track B as "replace, and record the before/after in an ADR". |
 | D5 | The same facts are repeated in `docs/README.md` (baseline stack), `architecture.md` and `tech-stack.md`. V3's Ollama removal touches about 40 files (see section 3, R2). | docs | Keep one source of truth (`tech-stack.md`) and link to it. Add `docs/adr/` (see R12) so decisions are not re-explained in each file. |
-| D6 | Absolute local paths such as `/home/devarapallim/Murali/git-personal/...` are in `testing-guide.md`, `09-tool-calling-mcp.md` and `conversation-progress.md`. | docs | Use repo-relative paths. A public repo should not carry a local username. |
+| D6 | Absolute local paths (a home directory under the user's own name) are in `testing-guide.md`, `09-tool-calling-mcp.md` and `conversation-progress.md`. | docs | Use repo-relative paths. A public repo should not carry a local username. |
 | D7 | Four overlapping "how to test" docs: `testing-guide.md` (534 lines), `v2-testing-walkthrough.md`, per-stage steps, and `v2-startup-troubleshooting.md`. | docs | In V3, replace manual steps with runnable scripts or tests where possible (`just smoke`, Playwright). Keep prose only for the learning notes. |
 | D8 | Several stage docs carry "Historical-docs" banners that map old paths to new ones. | `part-1/`, `part-2/` | Fine for V2. Do not copy these into V3; start the V3 docs clean and link back to the V2 repo as the baseline. |
 | D9 | Free-model names in docs (`liquid/lfm-2.5-2.6b:free`, `qwen2.5:3b`) will go stale quickly. | `tech-stack.md`, compose | In V3 keep model names only in config (`models.yaml`), not in prose. |

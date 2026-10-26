@@ -15,7 +15,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="$REPO_ROOT/.env"
 LEGACY_VOLUME="customer-compass_ollama-data"
-FRESH_VOLUME="customer-compass-v2_ollama-data"
+FRESH_VOLUME="customer-compass-v3_ollama-data"
 
 if docker volume inspect "$LEGACY_VOLUME" >/dev/null 2>&1; then
   echo "✓ Found an existing Ollama model cache from customer-compass (v1): $LEGACY_VOLUME"

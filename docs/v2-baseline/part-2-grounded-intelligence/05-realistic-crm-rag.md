@@ -3,12 +3,6 @@
 **Part:** II — Grounded Intelligence
 **Status:** Implemented
 
-> **v2 stack note:** file paths below (`apps/api/src/*.ts`) and URLs are from
-> the original Express API. Current equivalents: `apps/api-py/app/crm/queries.py`,
-> `app/chat/router.py` (the query router that picks DB facts, documents, or both), `app/rag/retrieve.py`, `app/routes/chat.py`, served at
-> `http://localhost:8001/api/v1/chat/crm`. `chat/citations.ts` was not ported
-> (citation shaping lives in `routes/chat.py`). Tests: `cd apps/api-py && uv run pytest`.
-
 ## Goal
 
 Make the assistant feel like a CRM copilot by combining structured database facts
@@ -38,7 +32,7 @@ documents, and never retrieve another customer’s material for a scoped questio
 ## How to run the app
 
 ```bash
-cd /home/devarapallim/Murali/git-personal/customer-compass
+cd customer-compass-v3
 docker compose up -d db ollama
 npm install
 npm run dev

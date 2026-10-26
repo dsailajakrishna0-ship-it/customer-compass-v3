@@ -1,6 +1,6 @@
-# v2 startup — known issues & lessons learned
+# Startup troubleshooting and user guide
 
-Notes from the first real local run of `customer-compass-v2`, right after the
+Notes from the first real local run of the V2 stack (`customer-compass-v2`, now seeded into V3), right after the
 infra migration PR (Qdrant, the vector DB + Ollama, the local model runner, cache reuse). Keep this updated as new
 startup quirks are found — especially while v1 (`customer-compass`) and v2
 coexist on the same machine.
@@ -26,7 +26,7 @@ each mode, and example questions to try.
 | **General chat** | Plain LLM conversation, no CRM data at all | Quick sanity-check that the model itself is reachable; general knowledge questions unrelated to this CRM |
 | **Document knowledge (RAG)** | Answers are grounded only in ingested documents (emails, notes), with numbered citations | "What did we discuss with this customer?" type questions — anything that should be backed by a real document |
 | **CRM copilot (facts + documents)** | Combines live structured database facts (deals, pipeline) *and* cited documents, clearly separated | The most realistic "assistant" experience — ask about deals/status *and* conversation history in one question |
-| **Tool calling (MCP)** | The model calls live tools mid-conversation (company summary, open deals, document search) and can propose a follow-up task that you confirm in your next message | "Create a follow-up task for Acme" style requests; see [Stage 9](part-4-autonomy-protocols/09-tool-calling-mcp.md) |
+| **Tool calling (MCP)** | The model calls live tools mid-conversation (company summary, open deals, document search) and can propose a follow-up task that you confirm in your next message | "Create a follow-up task for Acme" style requests; see [Stage 9](v2-baseline/part-4-autonomy-protocols/09-tool-calling-mcp.md) |
 
 ### 3. Choose a Model
 
@@ -65,7 +65,7 @@ already exists on the machine, `docker compose up` fails to (re)create v2's
 `db` with the same name — and depending on compose version, this can abort
 the whole `up` command partway (see #2 below).
 
-**Fix applied:** v2's `db` container is now named `customer-compass-v2-db`,
+**Fix applied:** v2's `db` container is now named `customer-compass-v3-db`,
 matching the naming already used for `ollama`/`qdrant`. No action needed
 going forward — just make sure you're on a version of this repo that
 includes that fix.

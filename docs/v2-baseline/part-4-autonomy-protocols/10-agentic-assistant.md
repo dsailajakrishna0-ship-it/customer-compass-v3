@@ -23,7 +23,7 @@ Use case: **Account Follow-up Recommender**. Three agents, each with one job.
 Evidence gathering is **not** an agent. It is deterministic code reusing the
 Stage 9 tools: those steps make no decisions, so calling them agents would be
 misleading. V3 Track C turns them into an Evidence Gatherer agent and a
-Document Researcher agent ([../v3-roadmap-draft.md](../v3-roadmap-draft.md)).
+Document Researcher agent ([../../roadmap.md](../../roadmap.md)).
 
 ## Flow
 
@@ -64,7 +64,7 @@ a task after explicit user approval. Its execution trace is inspectable.
 ## How to run the app
 
 ```bash
-cd customer-compass-v2
+cd customer-compass-v3
 docker compose up -d --build api-py db qdrant ollama
 cd apps/web && npm run dev     # http://localhost:5173
 ```
@@ -108,4 +108,4 @@ Files (under `apps/api-py/app/`):
 - `mcp/tools.py` — Stage 9 tools reused; no parallel action mechanism.
 - Web: `components/chat/AgentRunPanel.tsx`, the "agent" mode in `ChatSessionContext.tsx`.
 
-When to use which pattern: [../agent-boundaries.md](../agent-boundaries.md).
+When to use which pattern: [../agent-boundaries.md](../../agent-boundaries.md).
