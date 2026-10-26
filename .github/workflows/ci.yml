@@ -1,0 +1,120 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Cancel superseded runs on the same branch or PR
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  JUST_VERSION: "1.59.0" # rust-just on PyPI
+
+jobs:
+  api:
+    name: API (lint, types, tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          enable-cache: true
+          cache-dependency-glob: apps/api-py/uv.lock
+      - name: Install dependencies and just
+        run: |
+          uv tool install "rust-just==${JUST_VERSION}"
+          cd apps/api-py && uv sync --locked
+      - name: Ruff
+        run: |
+          cd apps/api-py
+          uv run ruff check .
+          uv run ruff format --check .
+      - name: Mypy
+        run: cd apps/api-py && uv run mypy
+      - name: Tests (starts Postgres through Compose)
+        run: just test-api
+
+  web:
+    name: Web (lint, types, tests, build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  docs:
+    name: Docs (links)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # --offline checks relative links and anchors only; external sites are too flaky for a gate
+      - uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: --offline --include-fragments --no-progress --exclude-path node_modules '**/*.md'
+          fail: true
+
+  smoke:
+    name: Compose smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Build and start the core stack
+        run: docker compose up -d --build --wait db qdrant ollama api-py
+      - name: Health check
+        run: curl --fail --retry 10 --retry-delay 3 --retry-connrefused --retry-all-errors http://localhost:8001/health
+      - name: Logs on failure
+        if: failure()
+        run: docker compose logs --no-color --tail 100
+      - name: Stop
+        if: always()
+        run: docker compose down -v
+
+  security:
+    name: Security (secrets, dependencies, images)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # gitleaks scans history
+      - name: Secret scan (gitleaks)
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+      - name: Python dependency audit (pip-audit)
+        run: |
+          cd apps/api-py
+          uv export --no-dev --no-hashes --no-emit-project -o "$RUNNER_TEMP/requirements.txt"
+          uvx pip-audit -r "$RUNNER_TEMP/requirements.txt" --no-deps --disable-pip
+      - name: Web dependency audit (npm)
+        run: npm audit --omit=dev --audit-level=high
+      - name: Trivy (repo files and Dockerfile)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scanners: vuln,secret,misconfig
+          severity: HIGH,CRITICAL
+          skip-dirs: node_modules,apps/api-py/.venv
+          exit-code: "1"
+      - name: Build the API image
+        run: docker build -t customer-compass-api:ci apps/api-py
+      - name: Trivy (API image)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: customer-compass-api:ci
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
