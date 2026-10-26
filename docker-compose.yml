@@ -26,7 +26,7 @@ services:
   # multi-GB download. If no prior cache is found, a new volume is created
   # and models are pulled fresh on first use. See README for details.
   ollama:
-    image: ollama/ollama:0.13.5
+    image: ollama/ollama:0.40.10
     container_name: customer-compass-v3-ollama
     ports:
       - "11435:11434"
