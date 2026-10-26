@@ -287,6 +287,7 @@ No alternative planned — this holds the core CRM data and is not swapped.
 | Python lint, format, types, tests | ruff, mypy, pytest + pytest-cov |
 | Web lint and tests | ESLint (typescript-eslint), Vitest + Testing Library |
 | Hooks and commands | pre-commit, just (`justfile`), Dev Container |
+| Release | GitHub Actions on `v*` tags, GHCR images, GitHub Releases ([ADR 0004](adr/0004-release-and-image-publishing.md)) |
 | CI and supply chain | GitHub Actions, gitleaks, pip-audit, Trivy, lychee, Dependabot ([ADR 0003](adr/0003-ci-and-supply-chain-checks.md)) |
 
 Versions and reasons: [ADR 0002](adr/0002-developer-tooling.md).
