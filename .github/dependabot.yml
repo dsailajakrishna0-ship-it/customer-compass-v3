@@ -18,6 +18,9 @@ updates:
   - package-ecosystem: docker
     directory: /apps/api-py
     schedule: { interval: weekly }
+  - package-ecosystem: docker
+    directory: /apps/web
+    schedule: { interval: weekly }
   - package-ecosystem: docker-compose
     directory: /
     schedule: { interval: weekly }

@@ -8,6 +8,21 @@
 
 `main` is protected but had no automated checks. From Stage 1 on, every change must show it did not break the seed's behaviour. The checks must be free for a public repo and use open-source tools (see [ADR 0001](0001-v3-goals-and-tooling-rule.md)).
 
+## What CI/CD is, and which platform
+
+CI (continuous integration) runs the same checks on every change automatically, so a broken change is caught before it reaches `main`. CD (continuous delivery) turns a tagged version into publishable artifacts, here container images and a release (sub-stage 0.5). Both are described as code in the repository.
+
+**Platform chosen: GitHub Actions** on GitHub-hosted runners. The repo is public, so minutes are free; there is no server to run; and it integrates with branch protection, required checks, Dependabot, GHCR and Releases.
+
+| Platform | Why not here |
+| --- | --- |
+| Jenkins | Open source and very flexible, but you host, patch and secure the server and plugins yourself. Too much operations work for a learning project. |
+| CircleCI | Good hosted CI that works across Git providers; free tier is limited and needs a separate account and token. Worth a separate comparison later, not as the gate. |
+| GitLab CI | Excellent, but built into GitLab; the code lives on GitHub. |
+| Azure Pipelines, Bitbucket Pipelines, Buildkite | Tied to other ecosystems, or need self-hosted agents. |
+
+The ideas (pipeline, job, runner, cache, secret, required check) are the same everywhere; only the configuration syntax differs.
+
 ## Decision
 
 One workflow, `.github/workflows/ci.yml`, with five jobs that run on every pull request and on pushes to `main`:

@@ -55,6 +55,10 @@ just up         # start the stack      just down   # stop it
 
 Optional: `uv tool install pre-commit && pre-commit install` to run the checks on every commit. A Dev Container with everything installed is in `.devcontainer/`. Tool choices: [ADR 0002](docs/adr/0002-developer-tooling.md).
 
+## Releases
+
+Pushing a tag such as `v3.0.0-alpha.1` publishes the API and web images to GitHub Container Registry and creates a GitHub Release ([ADR 0004](docs/adr/0004-release-and-image-publishing.md)).
+
 ## Repository layout
 
 | Path | What is in it |

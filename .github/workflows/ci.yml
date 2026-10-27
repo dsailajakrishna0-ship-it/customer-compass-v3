@@ -75,6 +75,8 @@ jobs:
         run: docker compose up -d --build --wait db qdrant ollama api-py
       - name: Health check
         run: curl --fail --retry 10 --retry-delay 3 --retry-connrefused --retry-all-errors http://localhost:8001/health
+      - name: Build the web image (the release workflow publishes it)
+        run: docker build -f apps/web/Dockerfile -t customer-compass-web:ci .
       - name: Logs on failure
         if: failure()
         run: docker compose logs --no-color --tail 100
