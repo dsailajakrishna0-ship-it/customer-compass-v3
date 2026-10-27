@@ -9,7 +9,7 @@ RUN npm ci --workspace=@customer-compass/web
 COPY apps/web apps/web
 RUN npm run build --workspace=@customer-compass/web
 
-FROM nginxinc/nginx-unprivileged:1.29-alpine
+FROM nginxinc/nginx-unprivileged:1.31-alpine
 # pull in Alpine security fixes published after the base image was built, then drop root again
 USER root
 RUN apk upgrade --no-cache
