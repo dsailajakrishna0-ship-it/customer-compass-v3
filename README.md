@@ -39,7 +39,9 @@ npm ci
 npm run dev                       # web app at http://localhost:5173
 ```
 
-Then open the app and click **Ingest documents** once. API docs are at <http://localhost:8001/docs>. Full run and test guide, with every chat mode and sample questions: [docs/testing-guide.md](docs/testing-guide.md). Problems starting up: [docs/troubleshooting.md](docs/troubleshooting.md).
+The `migrate` service creates the database schema and demo CRM data automatically before the API starts.
+
+> Upgrading from a V2-style database volume? Recreate it once: `docker compose down -v` (this also removes the Qdrant and Ollama volumes), then `up` again. To keep the volumes, run `uv run alembic stamp 0002` then `uv run alembic upgrade head` in `apps/api-py` instead. Then open the app and click **Ingest documents** once. API docs are at <http://localhost:8001/docs>. Full run and test guide, with every chat mode and sample questions: [docs/testing-guide.md](docs/testing-guide.md). Problems starting up: [docs/troubleshooting.md](docs/troubleshooting.md).
 
 ## Developer commands
 
@@ -65,7 +67,7 @@ Pushing a tag such as `v3.0.0-alpha.1` publishes the API and web images to GitHu
 | --- | --- |
 | `apps/web` | React + Vite + TypeScript UI |
 | `apps/api-py` | FastAPI service: chat, RAG, CRM queries, guardrails, MCP tools, agent |
-| `db` | Postgres schema and seed data |
+| `apps/api-py/migrations` | Alembic database migrations: schema and synthetic demo data |
 | `sample-data` | Synthetic CRM documents |
 | `evals` | promptfoo evaluation suites |
 | `docs` | Plan, architecture, decisions, guides, and the frozen V2 stage records |

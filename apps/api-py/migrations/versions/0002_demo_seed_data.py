@@ -1,77 +1,19 @@
--- Postgres schema: relational CRM data (companies, contacts, deals, interactions) plus tasks and audit log
-CREATE TABLE companies (
-  id SERIAL PRIMARY KEY,
-  name TEXT NOT NULL,
-  industry TEXT NOT NULL,
-  website TEXT,
-  relationship_status TEXT NOT NULL CHECK (relationship_status IN ('lead', 'customer', 'former_customer')),
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
+"""Synthetic demo CRM data: companies, contacts, deals and interactions.
 
-CREATE TABLE contacts (
-  id SERIAL PRIMARY KEY,
-  company_id INTEGER NOT NULL REFERENCES companies(id),
-  full_name TEXT NOT NULL,
-  job_title TEXT,
-  email TEXT NOT NULL
-);
+All data is fictional (.example domains). The tests and the sample documents refer to it.
 
-CREATE TABLE deals (
-  id SERIAL PRIMARY KEY,
-  company_id INTEGER NOT NULL REFERENCES companies(id),
-  name TEXT NOT NULL,
-  amount NUMERIC(12, 2) NOT NULL,
-  status TEXT NOT NULL CHECK (status IN ('open', 'won', 'lost')),
-  expected_close_date DATE
-);
+Revision ID: 0002
+Revises: 0001
+"""
 
-CREATE TABLE interactions (
-  id SERIAL PRIMARY KEY,
-  company_id INTEGER NOT NULL REFERENCES companies(id),
-  interaction_type TEXT NOT NULL CHECK (interaction_type IN ('email', 'call', 'meeting', 'note', 'support')),
-  subject TEXT NOT NULL,
-  occurred_at TIMESTAMPTZ NOT NULL,
-  summary TEXT NOT NULL
-);
+from alembic import op
 
--- Stage 9 (tool calling / MCP): follow-up tasks the model can propose via the
--- create_followup_task tool. A row only appears here once a proposal has been
--- explicitly confirmed by the user -- a "proposed, not yet confirmed" action
--- is tracked only in tool_audit_log, never written here.
-CREATE TABLE tasks (
-  id SERIAL PRIMARY KEY,
-  company_id INTEGER NOT NULL REFERENCES companies(id),
-  note TEXT NOT NULL,
-  status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'done')),
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
+revision = "0002"
+down_revision = "0001"
+branch_labels = None
+depends_on = None
 
--- Stage 9: durable record of every MCP tool invocation (read and mutating),
--- so tool usage has a queryable history the same way Stage 7 (usage) and
--- Stage 8 (guardrail) telemetry do, rather than log-lines-only.
-CREATE TABLE tool_audit_log (
-  id SERIAL PRIMARY KEY,
-  tool_name TEXT NOT NULL,
-  arguments JSONB NOT NULL,
-  status TEXT NOT NULL CHECK (status IN ('executed', 'proposed', 'confirmed', 'error')),
-  result_summary TEXT,
-  company_id INTEGER REFERENCES companies(id),
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- Stage 8.c: every guardrail detection (input, document, tool result, model
--- output). The API also creates this with IF NOT EXISTS at startup so
--- volumes created before Stage 8.c get it without a reset.
-CREATE TABLE security_audit_log (
-  id SERIAL PRIMARY KEY,
-  event_type TEXT NOT NULL CHECK (event_type IN ('input', 'document', 'tool', 'output')),
-  endpoint TEXT NOT NULL,
-  pattern TEXT NOT NULL,
-  location TEXT NOT NULL,
-  excerpt TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
+SEED = """
 INSERT INTO companies (name, industry, website, relationship_status) VALUES
   ('Acme Fabrication', 'Manufacturing', 'https://acme-fabrication.example', 'customer'),
   ('Northstar Logistics', 'Logistics', 'https://northstar-logistics.example', 'lead'),
@@ -124,3 +66,15 @@ INSERT INTO interactions (company_id, interaction_type, subject, occurred_at, su
   (7, 'call', 'Renewal discussion', '2026-09-18T10:00:00Z', 'Dr. Kim confirmed renewal and asked about expanding to a second clinic location.'),
   (7, 'support', 'Data handling and compliance question', '2026-09-22T15:30:00Z', 'James asked how patient-adjacent operational data is stored and whether it meets their compliance requirements.'),
   (7, 'email', 'Positive feedback on uptime', '2026-09-25T12:00:00Z', 'Dr. Kim praised the service uptime over the past quarter and asked about the expansion timeline.');
+"""
+
+
+def upgrade() -> None:
+    for statement in SEED.split(";\n"):
+        if statement.strip():
+            op.execute(statement)
+
+
+def downgrade() -> None:
+    # The rows are removed when 0001 drops the tables; nothing to undo on its own.
+    pass

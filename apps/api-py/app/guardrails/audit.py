@@ -13,7 +13,7 @@ logger = logging.getLogger("app.guardrails.audit")
 
 RETENTION_DAYS = int(os.environ.get("SECURITY_AUDIT_RETENTION_DAYS", "90"))
 
-# Also in db/init.sql; created here too so existing Docker volumes get it without a reset
+# Also created by migration 0001; kept here so older databases still get it at startup
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS security_audit_log (
   id SERIAL PRIMARY KEY,

@@ -218,9 +218,9 @@ Free options worth exploring later:
 | **Active (default)** | Qdrant (self-hosted, Docker, collection `document_chunks`) | v2 migration |
 | **Previously (v1)** | PostgreSQL + `pgvector` extension (same DB as CRM tables) | Stage 3 |
 
-Postgres still runs from the `pgvector/pgvector:pg17` image and
-`db/002-rag.sql` still defines a `vector(1024)` column, but both are unused
-legacy in v2 — all vector search goes through Qdrant.
+Postgres now runs from the plain `postgres:17` image; the unused pgvector
+extension and `vector(1024)` column were removed by migration 0003
+([ADR 0005](adr/0005-database-migrations.md)). All vector search goes through Qdrant.
 
 `pgvector` is genuinely production-viable at this project's scale (the V2
 discussion is in the `customer-compass-v2` repo, tag `v2-final`) — this is not a "toy vs. real"
@@ -276,9 +276,11 @@ the real MCP client) bridges that gap instead of branching per provider.
 
 | | Technology | Status |
 | --- | --- | --- |
-| **Active** | PostgreSQL 17 (Docker) | Stage 1 |
+| **Active** | PostgreSQL 17 (plain `postgres` image, Docker) | Stage 1 |
+| **Schema management** | Alembic migrations in `apps/api-py/migrations` (run by the `migrate` Compose service) | V3 sub-stage 0.6 |
 
-No alternative planned — this holds the core CRM data and is not swapped.
+No alternative planned for the database itself — it holds the core CRM data and is not swapped.
+Migration tool choice and alternatives: [ADR 0005](adr/0005-database-migrations.md).
 
 ## Developer tooling
 

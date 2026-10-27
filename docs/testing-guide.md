@@ -49,7 +49,9 @@ docker compose stop
 documents and seeded CRM rows) so the next session starts fast — just re-run
 the `docker compose up -d ...` command above to resume. Only use
 `docker compose down -v` if you deliberately want to wipe the Postgres/Qdrant
-volumes and reseed from scratch (e.g. after an `init.sql` change).
+volumes and rebuild from scratch: the `migrate` service recreates the schema and
+demo CRM rows on the next `up` (e.g. after changing a migration, or once after
+upgrading from a V2-style database volume).
 
 ## 2. URLs to open and monitor
 

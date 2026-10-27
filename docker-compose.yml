@@ -1,7 +1,8 @@
 services:
-  # Postgres: relational CRM data (companies, deals, tasks, audit log); pgvector image, vector column unused
+  # Postgres: relational CRM data (companies, deals, tasks, audit log). The schema and demo data
+  # are created by Alembic migrations (the `migrate` service below), not by init scripts.
   db:
-    image: pgvector/pgvector:0.8.7-pg17
+    image: postgres:17.11
     container_name: customer-compass-v3-db
     environment:
       POSTGRES_DB: customer_compass
@@ -11,13 +12,26 @@ services:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      - ./db/init.sql:/docker-entrypoint-initdb.d/001-init.sql:ro
-      - ./db/002-rag.sql:/docker-entrypoint-initdb.d/002-rag.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U customer_compass -d customer_compass"]
       interval: 5s
       timeout: 5s
       retries: 10
+
+  # migrate: one-shot job that applies Alembic migrations (apps/api-py/migrations) and exits;
+  # api-py starts only after it succeeds. Same image as api-py, so it is built once.
+  migrate:
+    build:
+      context: ./apps/api-py
+    image: customer-compass-v3-api-py
+    container_name: customer-compass-v3-migrate
+    command: ["/app/.venv/bin/alembic", "upgrade", "head"]
+    environment:
+      DATABASE_URL: postgresql://customer_compass:customer_compass_dev@db:5432/customer_compass
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
 
   # Model cache: if you already ran the original `customer-compass` repo on
   # this machine, run `./scripts/setup-ollama-cache.sh` once before `up` —
@@ -58,6 +72,7 @@ services:
   api-py:
     build:
       context: ./apps/api-py
+    image: customer-compass-v3-api-py
     container_name: customer-compass-v3-api-py
     environment:
       DATABASE_URL: postgresql://customer_compass:customer_compass_dev@db:5432/customer_compass
@@ -93,6 +108,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
       qdrant:
         condition: service_started
       ollama:
