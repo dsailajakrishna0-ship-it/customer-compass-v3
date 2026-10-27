@@ -9,7 +9,7 @@ For the per-stage build history, see [tech-stack.md](tech-stack.md) and the
 
 ## System diagram
 
-> In short: **React + Vite** is the browser UI, **FastAPI** is the backend, **Postgres** holds the CRM tables (`pgvector` unused in v2), **Qdrant** is the vector DB, **Ollama** runs the local generating model (`qwen2.5:3b`), **OpenRouter** gives access to hosted cloud generating models, and Google **`gemini-embedding-001`** is the embedding model (text → vectors, not a chat model).
+> In short: **React + Vite** is the browser UI, **FastAPI** is the backend, **Postgres** holds the CRM tables (schema built by Alembic migrations), **Qdrant** is the vector DB, **Ollama** runs the local generating model (`qwen2.5:3b`), **OpenRouter** gives access to hosted cloud generating models, and Google **`gemini-embedding-001`** is the embedding model (text → vectors, not a chat model).
 
 ```
 ┌─────────────────────────────┐
@@ -43,7 +43,7 @@ For the per-stage build history, see [tech-stack.md](tech-stack.md) and the
         ▼                   ▼                   ▼
 ┌───────────────┐   ┌───────────────┐   ┌─────────────────────┐
 │   Postgres      │   │    Qdrant      │   │  Ollama (local)      │
-│ (pgvector image,│   │ (vector store  │   │  or OpenRouter        │
+│ (postgres:17,   │   │ (vector store  │   │  or OpenRouter        │
 │  relational data│   │  for document  │   │  (cloud, OpenAI-     │
 │  only in v2:    │   │  chunk         │   │  compatible API)      │
 │  companies,     │   │  embeddings;   │   │                       │
@@ -79,8 +79,8 @@ stage: [tech-stack.md](tech-stack.md).
 
 Postgres and Qdrant have different jobs and neither replaces the other here:
 
-- **Postgres** (`pgvector/pgvector:pg17` image, but pgvector's vector type
-  itself is unused in v2 — see note below) holds all relational/structured
+- **Postgres** (plain `postgres:17` image; schema and demo data come from
+  Alembic migrations, see [ADR 0005](adr/0005-database-migrations.md)) holds all relational/structured
   CRM data: companies, contacts, deals, interactions, and ingestion run
   history, plus the Stage 9 `tasks` and `tool_audit_log` tables. This is
   what `/api/v1/companies*`, `/api/v1/tasks`, `/api/v1/tool-audit-log` and

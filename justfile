@@ -37,8 +37,12 @@ fmt:
 # all tests
 test: test-api test-web
 
-# API tests with coverage (needs Postgres, started for you)
-test-api: db
+# apply database migrations to the local Postgres (DATABASE_URL overrides the target)
+migrate:
+    cd {{api}} && uv run alembic upgrade head
+
+# API tests with coverage (needs Postgres, started and migrated for you)
+test-api: db migrate
     cd {{api}} && uv run pytest -q --cov --cov-report=term-missing:skip-covered
 
 # web tests

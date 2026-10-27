@@ -13,6 +13,9 @@ RUN uv sync --locked --no-install-project --no-dev
 
 # Then copy the actual app code
 COPY app ./app
+# Database migrations, run by the `migrate` service in docker-compose.yml
+COPY alembic.ini ./
+COPY migrations ./migrations
 
 RUN uv sync --locked --no-dev
 
