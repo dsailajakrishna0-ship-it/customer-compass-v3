@@ -1,0 +1,338 @@
+[
+  {
+    "id": "ret-01",
+    "question": "What did Maya Chen ask about the renewal of the Premium Operations Plan?",
+    "company": null,
+    "relevant": [
+      "acme-call-renewal.md"
+    ]
+  },
+  {
+    "id": "ret-02",
+    "question": "Does the premium tier include onboarding support for two more factory floors?",
+    "company": null,
+    "relevant": [
+      "acme-call-renewal.md",
+      "product-premium-operations-plan.md"
+    ]
+  },
+  {
+    "id": "ret-03",
+    "question": "What pricing breakdown did Ravi Patel request from us?",
+    "company": null,
+    "relevant": [
+      "acme-email-discount.md"
+    ]
+  },
+  {
+    "id": "ret-04",
+    "question": "Does a multi-site discount apply at three or more locations?",
+    "company": null,
+    "relevant": [
+      "acme-email-discount.md",
+      "product-premium-operations-plan.md"
+    ]
+  },
+  {
+    "id": "ret-05",
+    "question": "Why does the Export full history button time out?",
+    "company": null,
+    "relevant": [
+      "acme-support-export-timeout.md",
+      "product-premium-operations-plan.md"
+    ]
+  },
+  {
+    "id": "ret-06",
+    "question": "What is the workaround for exporting more than 90 days of history?",
+    "company": null,
+    "relevant": [
+      "acme-support-export-timeout.md",
+      "product-premium-operations-plan.md"
+    ]
+  },
+  {
+    "id": "ret-07",
+    "question": "What pilot did Carlos Mendez ask pricing for?",
+    "company": null,
+    "relevant": [
+      "goldenvalley-email-pricing.md"
+    ]
+  },
+  {
+    "id": "ret-08",
+    "question": "Will the pilot pricing roll into the full contract?",
+    "company": null,
+    "relevant": [
+      "goldenvalley-email-pricing.md"
+    ]
+  },
+  {
+    "id": "ret-09",
+    "question": "How does Fleet Visibility help Golden Valley Foods find out about shipment delays?",
+    "company": null,
+    "relevant": [
+      "goldenvalley-note-discovery.md",
+      "product-fleet-visibility.md"
+    ]
+  },
+  {
+    "id": "ret-10",
+    "question": "Do co-packers need to adopt new software for Fleet Visibility?",
+    "company": null,
+    "relevant": [
+      "goldenvalley-note-discovery.md"
+    ]
+  },
+  {
+    "id": "ret-11",
+    "question": "Is Elena Torres planning to renew the Retail support package?",
+    "company": null,
+    "relevant": [
+      "harborpine-note-checkin.md"
+    ]
+  },
+  {
+    "id": "ret-12",
+    "question": "Does the support package cover major holidays?",
+    "company": null,
+    "relevant": [
+      "harborpine-note-checkin.md"
+    ]
+  },
+  {
+    "id": "ret-13",
+    "question": "How was the point-of-sale sync issue at Harbor & Pine handled?",
+    "company": null,
+    "relevant": [
+      "harborpine-note-checkin.md"
+    ]
+  },
+  {
+    "id": "ret-14",
+    "question": "How much time does Northstar's team spend checking carrier portals by hand?",
+    "company": null,
+    "relevant": [
+      "northstar-note-discovery.md"
+    ]
+  },
+  {
+    "id": "ret-15",
+    "question": "What are Jordan Brooks' top priorities for delivery visibility?",
+    "company": null,
+    "relevant": [
+      "northstar-note-discovery.md"
+    ]
+  },
+  {
+    "id": "ret-16",
+    "question": "Can delay alerts be configured per fleet customer?",
+    "company": null,
+    "relevant": [
+      "northstar-support-alerting.md",
+      "product-fleet-visibility.md"
+    ]
+  },
+  {
+    "id": "ret-17",
+    "question": "What delay thresholds do Northstar's fleet customers care about?",
+    "company": null,
+    "relevant": [
+      "northstar-support-alerting.md"
+    ]
+  },
+  {
+    "id": "ret-18",
+    "question": "Is alerting included in the base Fleet Visibility package?",
+    "company": null,
+    "relevant": [
+      "product-fleet-visibility.md",
+      "northstar-support-alerting.md"
+    ]
+  },
+  {
+    "id": "ret-19",
+    "question": "How long is a typical Fleet Visibility rollout?",
+    "company": null,
+    "relevant": [
+      "product-fleet-visibility.md"
+    ]
+  },
+  {
+    "id": "ret-20",
+    "question": "What does the base Fleet Visibility package include?",
+    "company": null,
+    "relevant": [
+      "product-fleet-visibility.md"
+    ]
+  },
+  {
+    "id": "ret-21",
+    "question": "How is each additional site priced on the Premium Operations Plan?",
+    "company": null,
+    "relevant": [
+      "product-premium-operations-plan.md"
+    ]
+  },
+  {
+    "id": "ret-22",
+    "question": "How many implementation sessions are included per year?",
+    "company": null,
+    "relevant": [
+      "product-premium-operations-plan.md",
+      "acme-call-renewal.md"
+    ]
+  },
+  {
+    "id": "ret-23",
+    "question": "What did Dr. Sarah Kim ask about expanding to a second clinic?",
+    "company": null,
+    "relevant": [
+      "riverside-call-renewal.md",
+      "riverside-email-feedback.md"
+    ]
+  },
+  {
+    "id": "ret-24",
+    "question": "How early must a new location be provisioned for scheduling data to sync from day one?",
+    "company": null,
+    "relevant": [
+      "riverside-call-renewal.md"
+    ]
+  },
+  {
+    "id": "ret-25",
+    "question": "What feedback did Riverside give about uptime?",
+    "company": null,
+    "relevant": [
+      "riverside-email-feedback.md"
+    ]
+  },
+  {
+    "id": "ret-26",
+    "question": "Does the platform support configurable data-retention windows?",
+    "company": null,
+    "relevant": [
+      "riverside-support-compliance.md"
+    ]
+  },
+  {
+    "id": "ret-27",
+    "question": "Is an audit log of data-access events available?",
+    "company": null,
+    "relevant": [
+      "riverside-support-compliance.md"
+    ]
+  },
+  {
+    "id": "ret-28",
+    "question": "Why did Summit Builders leave?",
+    "company": null,
+    "relevant": [
+      "summit-note-churn.md"
+    ]
+  },
+  {
+    "id": "ret-29",
+    "question": "Might Summit Builders revisit Site Ops Suite later?",
+    "company": null,
+    "relevant": [
+      "summit-note-churn.md"
+    ]
+  },
+  {
+    "id": "ret-30",
+    "question": "What did Priya Nandakumar ask about Analytics Pro?",
+    "company": null,
+    "relevant": [
+      "vertex-call-renewal.md"
+    ]
+  },
+  {
+    "id": "ret-31",
+    "question": "Can the Analytics Pro upgrade be billed mid-cycle?",
+    "company": null,
+    "relevant": [
+      "vertex-call-renewal.md"
+    ]
+  },
+  {
+    "id": "ret-32",
+    "question": "What is the default API rate limit?",
+    "company": null,
+    "relevant": [
+      "vertex-support-rate-limit.md"
+    ]
+  },
+  {
+    "id": "ret-33",
+    "question": "How can Vertex get a temporary rate-limit increase for bulk jobs?",
+    "company": null,
+    "relevant": [
+      "vertex-support-rate-limit.md"
+    ]
+  },
+  {
+    "id": "ret-34",
+    "question": "What is the export problem and its workaround?",
+    "company": "Acme Fabrication",
+    "relevant": [
+      "acme-support-export-timeout.md",
+      "product-premium-operations-plan.md"
+    ]
+  },
+  {
+    "id": "ret-35",
+    "question": "What did they ask about alerts?",
+    "company": "Northstar Logistics",
+    "relevant": [
+      "northstar-support-alerting.md",
+      "northstar-note-discovery.md",
+      "product-fleet-visibility.md"
+    ]
+  },
+  {
+    "id": "ret-36",
+    "question": "What compliance question came up?",
+    "company": "Riverside Health Group",
+    "relevant": [
+      "riverside-support-compliance.md"
+    ]
+  },
+  {
+    "id": "unans-01",
+    "question": "What is our refund policy?",
+    "company": null,
+    "relevant": []
+  },
+  {
+    "id": "unans-02",
+    "question": "Who is the CEO of Vertex Analytics?",
+    "company": null,
+    "relevant": []
+  },
+  {
+    "id": "unans-03",
+    "question": "What is the weather in Chicago today?",
+    "company": null,
+    "relevant": []
+  },
+  {
+    "id": "unans-04",
+    "question": "Which programming language is the platform written in?",
+    "company": null,
+    "relevant": []
+  },
+  {
+    "id": "unans-05",
+    "question": "What discount did Harbor & Pine negotiate on hardware?",
+    "company": null,
+    "relevant": []
+  },
+  {
+    "id": "unans-06",
+    "question": "How many employees does Acme Fabrication have?",
+    "company": null,
+    "relevant": []
+  }
+]

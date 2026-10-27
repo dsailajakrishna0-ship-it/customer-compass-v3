@@ -1,4 +1,49 @@
-# Retrieval Evaluation (Stage 6)
+# Evaluation
+
+## V3 baseline (sub-stage 0.7)
+
+A fixed question set and one runner, `run_eval.py`, so every later change is measured against the seed (V2's behaviour) instead of judged by feel.
+
+| Suite | Golden set | What is measured | Needs |
+| --- | --- | --- | --- |
+| `retrieval` | `golden/retrieval.json`: 36 answerable and 6 unanswerable questions over the 16 sample documents | recall@1/3/5, MRR (a document counts once, at its best rank), and the share of unanswerable questions that return nothing | stack up, documents ingested, `GOOGLE_API_KEY` |
+| `tools` | `golden/tool_calls.json`: 10 cases | right MCP tool chosen, right arguments, no task written without confirmation | API and a model |
+| `agent` | `golden/agent.json`: 10 cases | routing, outcome, company chosen, no task written, steps and latency | API and a model |
+| `adversarial` | `adversarial-prompts.json`: 24 attacks and 6 benign prompts | attack detection rate and false positives of the rule-based guard | nothing (offline) |
+
+```bash
+just eval-offline     # adversarial suite only, no stack needed
+just eval-baseline    # measure every suite and overwrite baseline/v2.json (only on purpose)
+just eval             # measure again and compare with baseline/v2.json
+```
+
+`just eval` exits non-zero if any metric moves by more than its tolerance: 0 for the guard, ±0.02 for retrieval, ±0.2 for tools and agent (those depend on a sampled model). Latency and step counts are reported, never compared. `baseline/v2.json` also records the git commit, model names and embedding model it was taken with.
+
+How to add a case: append to the matching JSON file with the next id, keep ground truth to documents that really answer the question, then re-take the baseline in the same PR and say why it changed. `tests/test_eval_baseline.py` checks the sets stay well-formed and the scoring maths is right; it runs in CI with no keys.
+
+### Baseline results (seed code, taken 2026-10-27)
+
+Measured on the V2 seed with `qwen2.5:3b` (Ollama) for chat, `gemini-embedding-001` for embeddings, 16 documents / 28 chunks.
+
+| Suite | Result |
+| --- | --- |
+| retrieval | recall@1 0.84, recall@3 0.99, recall@5 0.99, MRR 1.00; unanswerable questions declined by retrieval: 0 of 6 |
+| tools | right tool 10/10, right arguments 10/10, no unconfirmed writes |
+| agent | route, status and company all 10/10; 6 to 10 trace steps; about 41 s per case on CPU |
+| adversarial | rule guard detects 11 of 24 attacks (0.46), 0 false positives |
+
+**Read these numbers with care.**
+
+- **Ceiling effects:** MRR, tool accuracy and agent accuracy are already at 1.0, so these sets cannot show an improvement and will only show regressions. Stage 4 (hybrid search, reranking) should be judged on recall@1 and on harder questions added then.
+- **Recall@1 headroom:** many questions have two or three relevant documents, so recall@1 cannot exceed 1/n for them.
+- **No decline at retrieval:** the 0.45 similarity cutoff lets chunks through for all six unanswerable questions, so declining depends entirely on the model. This is the weakest spot in the seed.
+- **Guard gaps:** the guard's low detection rate is real, not noise (paraphrase, encoding, indirect injection).
+
+The known gaps are part of the result: the rule-based guard misses paraphrased, encoded and indirect injections (see `rules_catch: false` in `adversarial-prompts.json`), which Stage 5.3 compares against NeMo Guardrails and Llama Guard.
+
+## Older promptfoo suites
+
+The sections below describe the V2 promptfoo suites, still run with `just eval-promptfoo`. They remain until Stage 5.2 adds Ragas or DeepEval next to them.
 
 Evaluates the live `apps/api-py` RAG/CRM chat endpoints against the
 `sample-data/documents` corpus, using [promptfoo](https://www.promptfoo.dev/) — an eval harness that sends test questions to the live API and grades the answers.

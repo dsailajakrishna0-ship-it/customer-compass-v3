@@ -1,0 +1,82 @@
+[
+  {
+    "id": "tool-01",
+    "message": "What is the status of Acme Fabrication?",
+    "expect_tool": "get_company_summary",
+    "expect_args_contain": {
+      "company_name": "Acme"
+    }
+  },
+  {
+    "id": "tool-02",
+    "message": "List the open deals for Harbor & Pine.",
+    "expect_tool": "get_open_deals",
+    "expect_args_contain": {
+      "company_name": "Harbor"
+    }
+  },
+  {
+    "id": "tool-03",
+    "message": "What are Northstar Logistics' open deals?",
+    "expect_tool": "get_open_deals",
+    "expect_args_contain": {
+      "company_name": "Northstar"
+    }
+  },
+  {
+    "id": "tool-04",
+    "message": "Give me a summary of Vertex Analytics.",
+    "expect_tool": "get_company_summary",
+    "expect_args_contain": {
+      "company_name": "Vertex"
+    }
+  },
+  {
+    "id": "tool-05",
+    "message": "Search the documents for what Vertex Analytics said about API rate limits.",
+    "expect_tool": "search_documents",
+    "expect_args_contain": {
+      "query": "rate limit"
+    }
+  },
+  {
+    "id": "tool-06",
+    "message": "Search the notes for Fleet Visibility alert thresholds.",
+    "expect_tool": "search_documents",
+    "expect_args_contain": {
+      "query": "alert"
+    }
+  },
+  {
+    "id": "tool-07",
+    "message": "Create a follow-up task for Acme Fabrication to send the pricing breakdown.",
+    "expect_tool": "create_followup_task",
+    "expect_args_contain": {
+      "company_name": "Acme",
+      "note": "pricing"
+    }
+  },
+  {
+    "id": "tool-08",
+    "message": "Add a task for Riverside Health Group: send the expansion timeline.",
+    "expect_tool": "create_followup_task",
+    "expect_args_contain": {
+      "company_name": "Riverside",
+      "note": "timeline"
+    }
+  },
+  {
+    "id": "tool-09",
+    "message": "How many deals has Summit Builders won and lost?",
+    "expect_tool": "get_company_summary",
+    "expect_args_contain": {
+      "company_name": "Summit"
+    }
+  },
+  {
+    "id": "tool-10",
+    "message": "Hello, what can you help me with?",
+    "expect_tool": null,
+    "expect_args_contain": {}
+  }
+]
