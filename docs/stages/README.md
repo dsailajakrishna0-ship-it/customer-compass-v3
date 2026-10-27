@@ -33,7 +33,7 @@ Written first for the project owner, learning the topics for the first time. The
 
 ## How to write a stage guide
 
-Use this skeleton. Keep every section; write "none this stage" instead of deleting one.
+Use this skeleton. Keep every section except **V2 vs V3**, which is included only when the stage replaces V2 code, configuration or tools with something new. A stage that only adds a capability, or only introduces a concept, leaves that section out.
 
 ````markdown
 # Stage N — Title
@@ -57,8 +57,8 @@ One diagram of the whole stage.
 ## What this stage added to the tech stack
 Table: tool, what it does in plain words, where to look in the repo.
 
-## V2 vs V3 in this area
-Before and after table.
+## V2 vs V3 in this area        (only if this stage replaces something)
+Before and after table: what V2 did, what V3 does now, and why it changed.
 
 ## Glossary
 Terms first used here.

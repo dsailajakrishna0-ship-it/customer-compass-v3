@@ -12,7 +12,7 @@ V2's stage documents are hand-written implementation notes: long, text only, and
 
 Two layers:
 
-1. **Stage guides** in `docs/stages/`, one per roadmap stage, written **in the stage that introduces the concepts**, from a shared template: plain-language introduction, diagrams, worked examples from this project's data, V2 vs V3, glossary and self-check questions. A stage is done only when its guide is.
+1. **Stage guides** in `docs/stages/`, one per roadmap stage, written **in the stage that introduces the concepts**, from a shared template: plain-language introduction, diagrams, worked examples from this project's data, V2 vs V3, glossary and self-check questions. A "V2 vs V3" comparison is included only when the stage replaces V2 code, configuration or tools. A stage is done only when its guide is.
 2. **`docs/concepts/`**, assembled in Stage 9 from the guides: concept map, glossary, questions and answers by level, reading paths. Until then it is a placeholder that states this.
 
 `docs/tech-stack.md` is the map: a full "at a glance" table (every tool, its purpose in plain words, the stage that adds it, its status) and a "progress by stage" table, updated in the same pull request as each stage.

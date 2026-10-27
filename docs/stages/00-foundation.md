@@ -291,14 +291,13 @@ The full list, with purposes and the stage each tool joins, is in [tech-stack.md
 
 ## V2 vs V3 in this area
 
-| | V2 (seed) | V3 after Stage 0 |
-| --- | --- | --- |
-| Checks | Run by hand, if remembered | Automatic on every pull request, required to merge |
-| Code style | Mixed, no formatter | One formatter, linter and type checker |
-| Database | Created once from SQL files | Versioned migrations, repeatable |
-| Containers | API ran as root, `latest` image tags | Non-root, pinned tags, scanned |
-| Releases | None | Tag-triggered images and notes |
-| Quality evidence | A few promptfoo cases | 42 retrieval + 10 tool + 10 agent + 30 guard cases, saved baseline |
+Only what Stage 0 **replaced**; the CI checks, linters, scans and release flow are new and have no V2 counterpart.
+
+| | V2 (seed) | V3 after Stage 0 | Why it changed |
+| --- | --- | --- | --- |
+| Database setup | Two SQL files run once on an empty disk | Versioned Alembic migrations, plain `postgres:17` image | Schema can now change without wiping data |
+| Containers | API ran as root, images tagged `latest` | Non-root users, pinned tags, scanned | Smaller blast radius, repeatable builds |
+| Quality evidence | A promptfoo suite of about 20 cases, mostly model-graded | 42 retrieval, 10 tool, 10 agent and 30 guard cases scored by code, with a saved baseline | Measurable, repeatable, independent of the chat model |
 
 ## Glossary
 
