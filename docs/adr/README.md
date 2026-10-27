@@ -12,6 +12,8 @@ One short file per decision, so the reason for a choice is not buried in a long 
 | [0002](0002-developer-tooling.md) | Developer tooling | Accepted |
 | [0003](0003-ci-and-supply-chain-checks.md) | CI and supply-chain checks | Accepted |
 | [0004](0004-release-and-image-publishing.md) | Release and image publishing | Accepted |
+| [0005](0005-database-migrations.md) | Database migrations | Accepted |
+| [0006](0006-evaluation-baseline.md) | Evaluation baseline | Accepted |
 
 ## Template
 

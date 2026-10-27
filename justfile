@@ -57,6 +57,18 @@ build:
 seed:
     curl -fsS -X POST http://localhost:8001/api/v1/documents/ingest
 
-# retrieval evals (stack must be up and seeded); see evals/README.md
+# reproduce the saved baseline (evals/baseline/v2.json); stack must be up and seeded, see evals/README.md
 eval:
+    uv run --project {{api}} python evals/run_eval.py --check evals/baseline/v2.json
+
+# measure all suites and overwrite the saved baseline (do this only on purpose)
+eval-baseline:
+    uv run --project {{api}} python evals/run_eval.py --out evals/baseline/v2.json
+
+# offline suite only: the rule-based guard against the adversarial prompts (no stack needed)
+eval-offline:
+    uv run --project {{api}} python evals/run_eval.py --suites adversarial
+
+# the older promptfoo suite (needs the stack and an Ollama judge model); see evals/README.md
+eval-promptfoo:
     cd evals && OLLAMA_BASE_URL=http://localhost:11435 npx promptfoo@latest eval -c promptfooconfig.yaml

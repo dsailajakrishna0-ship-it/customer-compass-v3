@@ -1,0 +1,72 @@
+[
+  {
+    "id": "agent-01",
+    "message": "Analyze the Acme Fabrication account and recommend next steps.",
+    "expect_route": "agent",
+    "expect_status": "completed",
+    "expect_company": "Acme Fabrication"
+  },
+  {
+    "id": "agent-02",
+    "message": "Recommend a follow-up for Vertex Analytics.",
+    "expect_route": "agent",
+    "expect_status": "completed",
+    "expect_company": "Vertex Analytics"
+  },
+  {
+    "id": "agent-03",
+    "message": "What should we do next with Riverside Health Group?",
+    "expect_route": "agent",
+    "expect_status": "completed",
+    "expect_company": "Riverside Health Group"
+  },
+  {
+    "id": "agent-04",
+    "message": "Review the account for Northstar Logistics.",
+    "expect_route": "agent",
+    "expect_status": "completed",
+    "expect_company": "Northstar Logistics"
+  },
+  {
+    "id": "agent-05",
+    "message": "Analyze Golden Valley Foods and suggest a next action.",
+    "expect_route": "agent",
+    "expect_status": "completed",
+    "expect_company": "Golden Valley Foods"
+  },
+  {
+    "id": "agent-06",
+    "message": "Recommend next steps for Harbor & Pine.",
+    "expect_route": "agent",
+    "expect_status": "completed",
+    "expect_company": "Harbor & Pine"
+  },
+  {
+    "id": "agent-07",
+    "message": "Analyze Summit Builders and propose a follow-up.",
+    "expect_route": "agent",
+    "expect_status": "completed",
+    "expect_company": "Summit Builders"
+  },
+  {
+    "id": "agent-08",
+    "message": "What is Acme Fabrication's industry?",
+    "expect_route": "direct",
+    "expect_status": null,
+    "expect_company": null
+  },
+  {
+    "id": "agent-09",
+    "message": "Recommend next steps for Contoso Limited.",
+    "expect_route": "agent",
+    "expect_status": "company_not_found",
+    "expect_company": null
+  },
+  {
+    "id": "agent-10",
+    "message": "Analyze our accounts and recommend what to do.",
+    "expect_route": "agent",
+    "expect_status": "company_not_found",
+    "expect_company": null
+  }
+]
