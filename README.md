@@ -74,7 +74,7 @@ Pushing a tag such as `v3.0.0-alpha.1` publishes the API and web images to GitHu
 
 ## Documentation
 
-Start at [docs/README.md](docs/README.md). Plan: [docs/roadmap.md](docs/roadmap.md). Decisions: [docs/adr/](docs/adr/README.md). The hand-built V2 learning record: [docs/v2-baseline/](docs/v2-baseline/README.md).
+Start at [docs/README.md](docs/README.md). **Learn the concepts:** one guide per stage in [docs/stages/](docs/stages/README.md), starting with [Stage 0](docs/stages/00-foundation.md). Plan: [docs/roadmap.md](docs/roadmap.md). Decisions: [docs/adr/](docs/adr/README.md). The hand-built V2 learning record: [docs/v2-baseline/](docs/v2-baseline/README.md).
 
 ## Contributing
 

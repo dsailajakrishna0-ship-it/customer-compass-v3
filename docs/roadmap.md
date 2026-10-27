@@ -27,12 +27,13 @@ repo findings (R1–R12) and doc findings (D1–D9) are cited below. Decisions a
 - Each tool choice gets a one-page decision record in `docs/adr/` with the pinned version.
 - Stage 0 changes no product behaviour. From Stage 1 on, a change is accepted only if eval scores stay within the agreed tolerance.
 - Verify tool versions, licences and free-tier limits on the project's own page before adopting a tool.
+- Every stage ships its **stage guide** in [`stages/`](stages/README.md) (concepts, diagrams, worked examples, glossary, questions) and updates the [tech-stack](tech-stack.md) tables. A stage is done only when its guide is. The [`concepts/`](concepts/README.md) section is assembled in Stage 9 ([ADR 0007](adr/0007-documentation-track.md)).
 
 ## Status
 
 | Stage | Name | Status |
 | --- | --- | --- |
-| 0 | Foundation | In progress (0.1–0.6 done; 0.7 in review) |
+| 0 | Foundation | In progress (0.1–0.6 done; 0.7 in review; 0.8 in progress) |
 | 1 | Model layer (cloud-only) | Planned |
 | 2 | Tools and MCP | Planned |
 | 3 | LangGraph port | Planned |
@@ -71,6 +72,7 @@ flowchart LR
 | **0.5 CD** (free) | Release workflow on tag `v*`: build the API and web images, push to GHCR, create a GitHub Release with the changelog. | Tagging `v3.0.0-alpha.1` produces images and a release without manual steps. |
 | **0.6 Database migrations** (R5, T12) | Alembic baseline from `init.sql` and `002-rag.sql` (schema), demo seed data as its own migration, and a third migration that drops the unused pgvector column and extension. Plain `postgres:17` image; a `migrate` Compose job runs before the API ([ADR 0005](adr/0005-database-migrations.md)). | A fresh database is built only by migrations, and V2 data tests pass. |
 | **0.7 Evaluation baseline** | Golden set: 30–50 retrieval questions, 10 tool-call cases, 10 agent cases, 20 adversarial cases (extending Stage 8). Add recall@k and MRR tests. Run on the seeded code and save the report. | `evals/baseline/v2.json` committed; `just eval` reproduces it within tolerance. |
+| **0.8 Documentation track** | Stage guides folder with a template and diagram style; the [Stage 0 guide](stages/00-foundation.md); tech-stack restructured with an "at a glance" table and V3 progress by stage; `concepts/` placeholder; PR template checkbox ([ADR 0007](adr/0007-documentation-track.md)). | Every diagram renders and every number in the Stage 0 guide matches the repo. |
 
 ## Stage 1 — Model layer (cloud-only)
 
@@ -133,7 +135,10 @@ flowchart LR
 
 ## Stage 9 — Close-out
 
-Final docs pass, V3 retrospective, tag `v3.0.0`, and a V2-vs-V3 comparison table (quality, latency, tokens, lines of code).
+| Sub-stage | Tasks | Exit criteria |
+| --- | --- | --- |
+| **9.1 Concepts section** | Assemble [`concepts/`](concepts/README.md) from the stage guides: concept map, A-to-Z glossary, questions and answers by level, "which stage taught what" table, reading paths for a learner, a teammate new to AI and a wider audience. | Every answer links to the guide that proves it; numbers re-checked against the final baseline. |
+| **9.2 Close-out** | Final docs pass, V3 retrospective, V2-vs-V3 comparison table (quality, latency, tokens, lines of code), tag `v3.0.0`. | Tag `v3.0.0` produces the release; no stale status anywhere. |
 
 ## Risks
 

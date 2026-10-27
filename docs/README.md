@@ -10,7 +10,15 @@ Start here. The repo is the V3 learning project, seeded from `customer-compass-v
 | [recommendations-2.md](recommendations-2.md) | Implementation reference: findings on the V2 docs and code (D, R IDs), the tooling table (T1–T18), diagrams and risks. Frozen snapshot. |
 | [adr/](adr/README.md) | One short decision record per tool or design choice, with pinned versions. |
 
+## Learn the concepts
+
+| Document | What it is |
+| --- | --- |
+| [stages/](stages/README.md) | **One guide per stage**, written when the stage is built: plain-language explanations, diagrams, worked examples from this project's data, glossary and self-check questions. Start with [Stage 0](stages/00-foundation.md). |
+| [concepts/](concepts/README.md) | Study companion assembled at the end (Stage 9): concept map, glossary, questions and answers, reading paths. Not written yet. |
+
 ## Understand the system
+
 
 | Document | What it is |
 | --- | --- |
@@ -37,5 +45,5 @@ Start here. The repo is the V3 learning project, seeded from `customer-compass-v
 - Stack facts (versions, models, providers) live in [tech-stack.md](tech-stack.md) only; other documents link to it.
 - Decisions live in [adr/](adr/README.md), not in stage prose.
 - Use repo-relative paths in docs, never absolute paths from a local machine.
-- Update the affected docs in the same PR that changes behaviour.
+- Update the affected docs in the same PR that changes behaviour. A PR that adds a technology or concept also updates its [stage guide](stages/README.md) and the [tech-stack](tech-stack.md) tables.
 - The synthetic CRM data in this repo is original and does not reproduce any existing CRM product.
