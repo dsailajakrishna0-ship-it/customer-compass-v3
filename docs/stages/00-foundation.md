@@ -20,24 +20,9 @@ None of this changes what the app does. It changes how **safely** we can change 
 
 ## The big picture: the life of a change
 
-```mermaid
-flowchart LR
-    A["Edit code<br/>on a branch"] --> B["pre-commit<br/>quick local checks"]
-    B --> C["Open a<br/>pull request"]
-    C --> D{{"CI: five checks<br/>run in parallel"}}
-    D -->|"any fails"| X["Merge blocked<br/>fix and push again"]
-    X --> D
-    D -->|"all pass"| E["Squash merge<br/>into main"]
-    E --> F["Push a tag<br/>v3.0.0-alpha.1"]
-    F --> G["Release workflow<br/>build, scan, publish"]
-    G --> H[("Images on GHCR<br/>+ GitHub Release")]
-    classDef ok fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
-    classDef bad fill:#ffebee,stroke:#c62828,color:#b71c1c
-    classDef store fill:#e3f2fd,stroke:#1976d2,color:#0d47a1
-    class E,G ok
-    class X bad
-    class H store
-```
+![The life of a change: edit code on a branch, run quick pre-commit checks, open a pull request, and five CI checks run in parallel. If any fails the merge is blocked and the author fixes and pushes again. When all pass the change is squash-merged into main. Pushing a tag then starts the release workflow, which builds, scans and publishes images to GHCR and creates a GitHub Release.](../img/diagrams/stage0-life-of-a-change.png)
+
+<sub>Diagram source: [stage0-life-of-a-change.mmd](../diagrams/stage0-life-of-a-change.mmd)</sub>
 
 Every box on this path is automatic or enforced. `main` is **protected**: nobody (including the owner by accident) can push straight to it, and a pull request cannot merge until all five checks are green.
 
@@ -116,37 +101,17 @@ No behaviour changed, but the assumption is now written down, and the checker wi
 
 **The idea.** A **migration** is a small, numbered, versioned script that moves the database from one shape to the next. The database remembers which one it is on, in a one-row table called `alembic_version`. Running `alembic upgrade head` applies only the missing steps, so every environment ends up identical.
 
-```mermaid
-flowchart LR
-    B(["empty<br/>database"]) -->|"0001<br/>baseline schema"| S1["10 tables"]
-    S1 -->|"0002<br/>demo CRM data"| S2["+ 7 companies,<br/>deals, contacts"]
-    S2 -->|"0003<br/>drop unused pgvector"| S3["current<br/>schema"]
-    S3 -.->|"next stages add<br/>0004, 0005 ..."| N["tickets, contracts,<br/>meeting notes"]
-    classDef done fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
-    classDef plan fill:#eceff1,stroke:#607d8b,color:#263238
-    class S1,S2,S3 done
-    class N plan
-```
+![Migration chain: an empty database becomes ten tables with migration 0001, gains demo CRM data with 0002, and loses the unused pgvector column with 0003. Later stages add further migrations for tickets, contracts and meeting notes.](../img/diagrams/stage0-migration-chain.png)
+
+<sub>Diagram source: [stage0-migration-chain.mmd](../diagrams/stage0-migration-chain.mmd)</sub>
 
 ### How the stack starts now
 
 A one-shot **`migrate`** job runs before the API, so the API never sees a half-built database:
 
-```mermaid
-sequenceDiagram
-    autonumber
-    participant C as docker compose
-    participant DB as db (Postgres 17)
-    participant M as migrate (one-shot)
-    participant A as api-py
-    C->>DB: start
-    DB-->>C: healthy (pg_isready)
-    C->>M: start after db is healthy
-    M->>DB: alembic upgrade head (0001 to 0003)
-    M-->>C: exit 0 (completed)
-    C->>A: start after migrate completed successfully
-    A-->>C: /health ok
-```
+![Start-up order: docker compose starts the database and waits until it is healthy, then runs the one-shot migrate job (alembic upgrade head) and waits for it to complete successfully, then starts the API, which reports healthy.](../img/diagrams/stage0-compose-startup.png)
+
+<sub>Diagram source: [stage0-compose-startup.mmd](../diagrams/stage0-compose-startup.mmd)</sub>
 
 > [!NOTE]
 > Why not keep the pgvector column "just in case"? It was unused (vectors live in Qdrant), and it forced a special database image. Migration `0003` removes it, and it is written so it works both on fresh databases (does nothing) and on V2-style ones (removes the column). We proved they end up identical by comparing `pg_dump` schema output: **0 differences**.
@@ -180,21 +145,9 @@ Every third-party action in the workflows is pinned to an exact **commit SHA**, 
 - **Semantic versioning:** `MAJOR.MINOR.PATCH`, for example `3.0.0`. A hyphen means *pre-release*: `3.0.0-alpha.1`.
 - **Tag:** a permanent name on one commit. Pushing a tag starting with `v` is what triggers a release.
 
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Dev as You
-    participant GH as GitHub Actions
-    participant T as Trivy
-    participant R as GHCR
-    Dev->>GH: git push origin v3.0.0-alpha.1
-    Note over GH: Is this commit on main? If not, stop.
-    Note over GH: Build the api and web images
-    GH->>T: scan each image
-    T-->>GH: no fixable HIGH or CRITICAL findings
-    GH->>R: push images tagged 3.0.0-alpha.1
-    Note over GH: Create the GitHub Release (pre-release)
-```
+![Release sequence: you push a version tag. GitHub Actions checks the commit is on main, builds the API and web images, and asks Trivy to scan each one. With no fixable high or critical findings it pushes the images to GHCR and creates a GitHub Release marked as a pre-release.](../img/diagrams/stage0-release-flow.png)
+
+<sub>Diagram source: [stage0-release-flow.mmd](../diagrams/stage0-release-flow.mmd)</sub>
 
 The gate order matters: **scan before publish**, so a vulnerable image never reaches the registry.
 
@@ -210,22 +163,9 @@ This is the first AI concept in the project, and it comes first on purpose.
 
 ### What we measure, step by step
 
-```mermaid
-flowchart TB
-    subgraph search["Step 1 - search"]
-        direction LR
-        Q["Question"] --> E["Embed: text<br/>to numbers"] --> V[("Qdrant<br/>28 chunks")] --> C["Closest chunks,<br/>best first"]
-    end
-    subgraph score["Step 2 - score"]
-        direction LR
-        D["One entry per<br/>document"] --> R["Ranked<br/>documents"] --> M["Compare with the<br/>right documents"] --> S["recall@k<br/>and MRR"]
-    end
-    search --> score
-    classDef store fill:#e3f2fd,stroke:#1976d2,color:#0d47a1
-    classDef ok fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
-    class V store
-    class S ok
-```
+![Two steps. Search: the question is embedded as numbers, matched against the 28 chunks in Qdrant, and the closest chunks come back best first. Score: keep one entry per document, form a ranked list, compare it with the hand-labelled right documents, and compute recall at k and MRR.](../img/diagrams/stage0-retrieval-scoring.png)
+
+<sub>Diagram source: [stage0-retrieval-scoring.mmd](../diagrams/stage0-retrieval-scoring.mmd)</sub>
 
 Two scores:
 

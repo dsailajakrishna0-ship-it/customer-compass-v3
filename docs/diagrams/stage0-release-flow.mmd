@@ -1,0 +1,13 @@
+sequenceDiagram
+    autonumber
+    actor Dev as You
+    participant GH as GitHub Actions
+    participant T as Trivy
+    participant R as GHCR
+    Dev->>GH: git push origin v3.0.0-alpha.1
+    Note over GH: Is this commit on main? If not, stop.
+    Note over GH: Build the api and web images
+    GH->>T: scan each image
+    T-->>GH: no fixable HIGH or CRITICAL findings
+    GH->>R: push images tagged 3.0.0-alpha.1
+    Note over GH: Create the GitHub Release (pre-release)

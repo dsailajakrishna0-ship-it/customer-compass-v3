@@ -1,0 +1,13 @@
+sequenceDiagram
+    autonumber
+    participant C as docker compose
+    participant DB as db (Postgres 17)
+    participant M as migrate (one-shot)
+    participant A as api-py
+    C->>DB: start
+    DB-->>C: healthy (pg_isready)
+    C->>M: start after db is healthy
+    M->>DB: alembic upgrade head (0001 to 0003)
+    M-->>C: exit 0 (completed)
+    C->>A: start after migrate completed successfully
+    A-->>C: /health ok

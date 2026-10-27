@@ -80,11 +80,26 @@ Official documentation only.
 - **Be honest.** Say what we measured and what we did not. Include the failures and surprises; they teach the most.
 - **One idea per diagram**, no more than about ten boxes, and a sentence under it saying what to notice.
 - **Link, do not copy.** Stack facts live in tech-stack.md, decisions in the ADRs.
-- **Verify before you publish.** Render every diagram and check every number against the repo or the baseline.
+- **Verify before you publish.** Look at every rendered image and check every number against the repo or the baseline.
 
 ### Diagram style
 
-Mermaid, so diagrams live in the markdown and are reviewed like code. Use the same colours everywhere:
+Diagrams are written in **Mermaid** text, kept in [`../diagrams/`](../diagrams/) (one `.mmd` file each), and **rendered to PNG images that are committed** in `docs/img/diagrams/`. The guides embed the image, so a diagram displays in every viewer: GitHub's page and diff views, editor previews, anything. (Raw Mermaid code blocks only draw where the viewer supports Mermaid, and GitHub's Mermaid version can be older than the one we test with.)
+
+To add or change a diagram:
+
+1. Write or edit `docs/diagrams/<name>.mmd`.
+2. Run `just diagrams` (needs Docker; the first run pulls a Mermaid CLI image, pinned to 12.0.0).
+3. Look at the PNG it produced in `docs/img/diagrams/`. Fix anything cramped or too wide.
+4. Embed it with a descriptive alt text that says what the diagram shows, and link the source:
+
+```markdown
+![One or two sentences saying what the diagram shows.](../img/diagrams/<name>.png)
+
+<sub>Diagram source: [<name>.mmd](../diagrams/<name>.mmd)</sub>
+```
+
+Keep diagrams narrow: if a flow has more than about five boxes in a row, wrap it into two rows with subgraphs (`direction LR` inside each, and link the subgraphs, not the inner nodes) or draw it top to bottom. Use the same colours everywhere:
 
 | Meaning | Style |
 | --- | --- |

@@ -41,6 +41,7 @@ Stages refer to [the roadmap](roadmap.md). "Seed" means it came with V2's final 
 | **pre-commit, just, Dev Container** | Quick checks on commit; one-word commands; a ready-made environment | 0.3 | In use |
 | **Dependabot** | Opens pull requests to upgrade dependencies | 0.4 | In use |
 | **gitleaks, pip-audit, Trivy, lychee** | Scan for leaked secrets, vulnerable packages and images, and broken links | 0.4 | In use |
+| **Mermaid + Mermaid CLI** | Draws the diagrams in the docs from text and renders them to images | 0.8 | In use |
 | **GHCR + GitHub Releases** | Store the built images and publish versions | 0.5 | In use |
 | **nginx (web image)** | Serves the built web app inside a container | 0.5 | In use |
 | **Alembic (+ SQLAlchemy, psycopg)** | Versioned, repeatable database changes | 0.6 | In use |

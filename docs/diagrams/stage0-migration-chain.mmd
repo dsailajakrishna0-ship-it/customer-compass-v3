@@ -1,0 +1,9 @@
+flowchart TB
+    B(["Empty database"]) -->|"migration 0001: baseline schema"| S1["10 tables"]
+    S1 -->|"migration 0002: demo CRM data"| S2["+ 7 companies, deals, contacts"]
+    S2 -->|"migration 0003: drop unused pgvector"| S3["Current schema"]
+    S3 -.->|"next stages add 0004, 0005 ..."| N["Tickets, contracts,<br/>meeting notes"]
+    classDef done fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    classDef plan fill:#eceff1,stroke:#607d8b,color:#263238
+    class S1,S2,S3 done
+    class N plan

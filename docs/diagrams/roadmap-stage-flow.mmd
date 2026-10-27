@@ -1,0 +1,14 @@
+flowchart TB
+    subgraph first["Foundation to retrieval"]
+        direction LR
+        S0["0 Foundation"] --> S1["1 Model layer"] --> S2["2 Tools + MCP"] --> S3["3 LangGraph port"] --> S4["4 Retrieval upgrade"]
+    end
+    subgraph second["Quality to close-out"]
+        direction LR
+        S5["5 Observability + evals"] --> S6["6 CRM modules + auth"] --> S7["7 Agents + supervisor"] --> S8["8 Product features"] --> S9["9 Close-out"]
+    end
+    first --> second
+    classDef now fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    classDef next fill:#eceff1,stroke:#607d8b,color:#263238
+    class S0 now
+    class S1,S2,S3,S4,S5,S6,S7,S8,S9 next

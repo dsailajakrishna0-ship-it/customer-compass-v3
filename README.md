@@ -10,16 +10,9 @@ V3 starts fresh, seeded from [`customer-compass-v2`](https://github.com/dsailaja
 
 ## How it fits together
 
-```mermaid
-flowchart LR
-    UI["Web UI<br/>React + Vite"] -->|"HTTP /api/v1"| API["API<br/>FastAPI (Python)"]
-    API --> PG[("Postgres<br/>CRM data, tasks, audit log")]
-    API --> QD[("Qdrant<br/>document vectors")]
-    API --> LLM["LLM providers<br/>chat + embeddings"]
-    API --> MCP["MCP tools<br/>CRM, documents, tasks"]
-    classDef store fill:#e3f2fd,stroke:#1976d2,color:#0d47a1
-    class PG,QD store
-```
+![Architecture overview: the React and Vite web UI calls the FastAPI API over HTTP. The API reads and writes Postgres (CRM data, tasks, audit log) and Qdrant (document vectors), calls LLM providers for chat and embeddings, and uses MCP tools for CRM, documents and tasks.](docs/img/diagrams/readme-how-it-fits-together.png)
+
+<sub>Diagram source: [readme-how-it-fits-together.mmd](docs/diagrams/readme-how-it-fits-together.mmd)</sub>
 
 Details: [docs/architecture.md](docs/architecture.md). Technology choices: [docs/tech-stack.md](docs/tech-stack.md).
 

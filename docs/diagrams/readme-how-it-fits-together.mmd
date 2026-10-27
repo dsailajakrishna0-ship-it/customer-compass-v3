@@ -1,0 +1,8 @@
+flowchart LR
+    UI["Web UI<br/>React + Vite"] -->|"HTTP /api/v1"| API["API<br/>FastAPI (Python)"]
+    API --> PG[("Postgres<br/>CRM data, tasks, audit log")]
+    API --> QD[("Qdrant<br/>document vectors")]
+    API --> LLM["LLM providers<br/>chat + embeddings"]
+    API --> MCP["MCP tools<br/>CRM, documents, tasks"]
+    classDef store fill:#e3f2fd,stroke:#1976d2,color:#0d47a1
+    class PG,QD store

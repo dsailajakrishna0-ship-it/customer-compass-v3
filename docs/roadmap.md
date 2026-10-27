@@ -44,22 +44,9 @@ repo findings (R1–R12) and doc findings (D1–D9) are cited below. Decisions a
 | 8 | Product features | Planned |
 | 9 | Close-out | Planned |
 
-```mermaid
-flowchart LR
-    S0["0 Foundation"] --> S1["1 Model layer"]
-    S1 --> S2["2 Tools + MCP"]
-    S2 --> S3["3 LangGraph port"]
-    S3 --> S4["4 Retrieval upgrade"]
-    S4 --> S5["5 Observability + evals"]
-    S5 --> S6["6 CRM modules + auth"]
-    S6 --> S7["7 Agents + supervisor"]
-    S7 --> S8["8 Product features"]
-    S8 --> S9["9 Close-out"]
-    classDef now fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
-    classDef next fill:#eceff1,stroke:#607d8b,color:#263238
-    class S0 now
-    class S1,S2,S3,S4,S5,S6,S7,S8,S9 next
-```
+![The ten roadmap stages in order: 0 Foundation (current), then 1 Model layer, 2 Tools and MCP, 3 LangGraph port, 4 Retrieval upgrade, 5 Observability and evals, 6 CRM modules and auth, 7 Agents and supervisor, 8 Product features, 9 Close-out.](img/diagrams/roadmap-stage-flow.png)
+
+<sub>Diagram source: [roadmap-stage-flow.mmd](diagrams/roadmap-stage-flow.mmd)</sub>
 
 ## Stage 0 — Foundation (startup tasks)
 
