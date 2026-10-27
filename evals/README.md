@@ -21,6 +21,24 @@ just eval             # measure again and compare with baseline/v2.json
 
 How to add a case: append to the matching JSON file with the next id, keep ground truth to documents that really answer the question, then re-take the baseline in the same PR and say why it changed. `tests/test_eval_baseline.py` checks the sets stay well-formed and the scoring maths is right; it runs in CI with no keys.
 
+### Baseline results (seed code, taken 2026-10-27)
+
+Measured on the V2 seed with `qwen2.5:3b` (Ollama) for chat, `gemini-embedding-001` for embeddings, 16 documents / 28 chunks.
+
+| Suite | Result |
+| --- | --- |
+| retrieval | recall@1 0.84, recall@3 0.99, recall@5 0.99, MRR 1.00; unanswerable questions declined by retrieval: 0 of 6 |
+| tools | right tool 10/10, right arguments 10/10, no unconfirmed writes |
+| agent | route, status and company all 10/10; 6 to 10 trace steps; about 41 s per case on CPU |
+| adversarial | rule guard detects 11 of 24 attacks (0.46), 0 false positives |
+
+**Read these numbers with care.**
+
+- **Ceiling effects:** MRR, tool accuracy and agent accuracy are already at 1.0, so these sets cannot show an improvement and will only show regressions. Stage 4 (hybrid search, reranking) should be judged on recall@1 and on harder questions added then.
+- **Recall@1 headroom:** many questions have two or three relevant documents, so recall@1 cannot exceed 1/n for them.
+- **No decline at retrieval:** the 0.45 similarity cutoff lets chunks through for all six unanswerable questions, so declining depends entirely on the model. This is the weakest spot in the seed.
+- **Guard gaps:** the guard's low detection rate is real, not noise (paraphrase, encoding, indirect injection).
+
 The known gaps are part of the result: the rule-based guard misses paraphrased, encoded and indirect injections (see `rules_catch: false` in `adversarial-prompts.json`), which Stage 5.3 compares against NeMo Guardrails and Llama Guard.
 
 ## Older promptfoo suites

@@ -129,3 +129,19 @@ def test_compare_flags_a_suite_missing_from_the_baseline():
     current = _report(mrr=0.8)
     baseline = {"tolerances": {}, "suites": {}}
     assert run_eval.compare(baseline, current) == ["retrieval: not in the baseline"]
+
+
+# ----------------------------------------------------------- the saved baseline
+
+
+def test_saved_baseline_covers_every_suite():
+    baseline = json.loads((EVALS / "baseline" / "v2.json").read_text())
+    assert set(baseline["suites"]) == set(run_eval.SUITES)
+    assert baseline["environment"]["embedding_model"]
+
+
+def test_saved_adversarial_baseline_still_matches_the_guard():
+    """The guard is deterministic: if its rules change, the baseline must be re-taken on purpose."""
+    baseline = json.loads((EVALS / "baseline" / "v2.json").read_text())
+    current = run_eval.run_adversarial()
+    assert run_eval.compare(baseline, {"suites": {"adversarial": current}}) == []

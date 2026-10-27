@@ -187,6 +187,7 @@ async def run_agent(api_url: str) -> dict:
             results.append(
                 {
                     "id": case["id"],
+                    "error": _error(reply),
                     "route": route,
                     "status": status,
                     "company": company,
@@ -213,13 +214,13 @@ async def run_agent(api_url: str) -> dict:
 
 
 async def _post(client: httpx.AsyncClient, url: str, body: dict) -> dict | list:
+    # A failed call counts as a failed case (and is flagged as an error), not a crash
     try:
         response = await client.post(url, json=body)
+        if response.status_code >= 500:
+            return {"error": f"HTTP {response.status_code}"}
         return response.json()
-    except (
-        httpx.HTTPError,
-        ValueError,
-    ) as exc:  # a failed call counts as a failed case, not a crash
+    except (httpx.HTTPError, ValueError) as exc:
         return {"error": str(exc)}
 
 
@@ -270,11 +271,20 @@ def compare(baseline: dict, current: dict) -> list[str]:
     return problems
 
 
+def _error(reply: object) -> str | None:
+    return reply.get("error") if isinstance(reply, dict) else None
+
+
 def _print_table(report: dict) -> None:
     for suite, data in report["suites"].items():
         print(f"\n{suite}")
         for name, value in data["metrics"].items():
             print(f"  {name:<28} {value}")
+        errored = [c["id"] for c in data["cases"] if c.get("error")]
+        if errored:
+            print(
+                f"  WARNING: {len(errored)} case(s) errored (network or API), results not trustworthy: {', '.join(errored)}"
+            )
 
 
 async def _run(suites: list[str], api_url: str) -> dict:

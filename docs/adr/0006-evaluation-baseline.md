@@ -23,7 +23,13 @@ Stage 1 onward replaces hand-written parts with frameworks. Without numbers from
 - **Running the live suites in CI:** needs secrets and a sampled model, so it would be flaky; a nightly or manual run is the follow-up.
 - **Bigger sets:** 42 + 10 + 10 + 30 cases is enough to see a regression on a 16-document corpus; more cases would mostly repeat the same documents.
 
+## Result
+
+The seed scores retrieval MRR 1.00 and recall@3 0.99, tool choice 10/10 and agent outcome 10/10, but detects only 11 of 24 attacks, and retrieval declines none of the 6 unanswerable questions (full table in [`evals/README.md`](../../evals/README.md)).
+
 ## Consequences
+
+- Most suites are already at the ceiling, so they can catch regressions but not show gains. Harder cases are added with the stage that needs them, and the baseline is re-taken in the same PR.
 
 - Retrieval metrics depend on the live embedding service; re-embedding with another model (Stage 4.3) changes them on purpose and needs a new baseline in the same PR.
 - Tool and agent results come from a sampled model; the ±0.2 band hides small changes. Stage 1.4's typed fake model makes the logic testable without that noise.
