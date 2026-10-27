@@ -1,7 +1,7 @@
 # Image: builds the React app with Node, then serves the static files with unprivileged nginx on port 8080.
 # Build from the repository root (the npm workspace lockfile lives there):
 #   docker build -f apps/web/Dockerfile -t customer-compass-web .
-FROM node:22-alpine AS build
+FROM node:26-alpine AS build
 WORKDIR /repo
 COPY package.json package-lock.json ./
 COPY apps/web/package.json apps/web/
