@@ -8,6 +8,7 @@ Until then, learn each idea in the stage that introduces it. The guides are the 
 
 | Part | What you get |
 | --- | --- |
+| **Final architecture** | The whole system drawn once, after the last stage: system context, containers and the main request flows, with the tool each part uses. Replaces the stage-by-stage maps, which only show what each step changed |
 | **Concept map** | One diagram of how all the ideas connect: retrieval, tools, agents, guardrails, evaluation, operations |
 | **Glossary, A to Z** | Every term from every stage guide, one definition each, linked back to the stage that explains it |
 | **Questions and answers** | Grouped by level (beginner, intermediate, advanced) and by topic, with short answers and links to the full explanation |

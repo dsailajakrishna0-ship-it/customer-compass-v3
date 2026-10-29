@@ -85,6 +85,16 @@ When sub-stage *N+1* lands:
 
 A stage's last sub-stage leaves the tour showing the whole stage; the next stage starts a new tour and diagram.
 
+**Keep the map small.** A map that only ever adds boxes becomes unreadable, so it is redrawn, not just extended:
+
+- **Budget:** at most about 12 boxes per module map.
+- **Collapse the old:** modules from earlier sub-stages or earlier stages that this sub-stage did not touch, and that no new or changed module talks to directly, are merged into one small grey box such as "Earlier: config, logs, middleware (1.1)". Their details stay in the tables, which are never shortened.
+- **Keep the context:** a collapsed module that a new or changed one depends on stays as its own grey box, so the arrow still makes sense.
+- **Bright and amber stay full size**, so what is new is always the first thing you see.
+- **A new stage starts fresh:** the previous stage's modules appear only as one grey "Earlier stages" box, or as the boxes the new modules connect to.
+
+The one place everything is drawn together is at the end: the final architecture overview in the [concepts](../concepts/README.md) section and a refreshed [architecture.md](../architecture.md) (roadmap sub-stage 9.1).
+
 ## Where to look in the repo
 Table of "you want to see" and the file (for stages where the code tour is not needed).
 
