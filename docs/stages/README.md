@@ -67,7 +67,23 @@ Terms first used here.
 5 to 8 questions in `<details>` blocks, each with a short answer.
 
 ## Code tour
-For code stages: a module map (diagram), a table of every **new** file (purpose, key names, who uses it), a table of **existing** files that changed and why, a suggested reading order, and the path of one request or operation through the code. Each sub-stage PR extends it. Stages with no code (or only configuration) say so in one line.
+For code stages: a module map (diagram), a table of every **new** file (purpose, key names, who uses it), a table of **existing** files that changed and why, a suggested reading order, and the path of one request or operation through the code. Stages with no code (or only configuration) say so in one line.
+
+**The tour is cumulative, and it shows what is new.** Each sub-stage PR extends the same tour, and the highlighting moves forward so a reader sees how the code grew:
+
+| State | Diagram style | Table marker |
+| --- | --- | --- |
+| **New in this sub-stage** | bright green, thick border | 🟢 |
+| **Changed in this sub-stage** (an existing module was modified) | amber | 🟡 |
+| **Existing, untouched**, including everything added in earlier sub-stages | grey | ⚪ |
+
+When sub-stage *N+1* lands:
+
+1. In the module map (`docs/diagrams/stageN-module-map.mmd`), turn the modules from earlier sub-stages **grey**, add the new modules in **bright green** and the changed ones in **amber**, update the legend title ("state after sub-stage 1.2"), and run `just diagrams`.
+2. In the tables, keep the earlier rows and change their marker to ⚪ (the "Added in" column keeps the history), then add the new rows with 🟢 or 🟡. Group them so the newest sub-stage is easy to find.
+3. Append the new steps to "what happens, in order" and extend the reading order if a new module is worth reading early.
+
+A stage's last sub-stage leaves the tour showing the whole stage; the next stage starts a new tour and diagram.
 
 ## Where to look in the repo
 Table of "you want to see" and the file (for stages where the code tour is not needed).
@@ -108,6 +124,9 @@ Keep diagrams narrow: if a flow has more than about five boxes in a row, wrap it
 | Meaning | Style |
 | --- | --- |
 | Done, current, success | `fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20` |
+| Code tour: new in this sub-stage | `fill:#a5d6a7,stroke:#1b5e20,stroke-width:3px,color:#0d3b12` |
+| Code tour: changed in this sub-stage | `fill:#fff3cd,stroke:#f9a825,stroke-width:2px,color:#5d4037` |
+| Code tour: existing, untouched | `fill:#eceff1,stroke:#b0bec5,color:#78909c` |
 | Data stores | `fill:#e3f2fd,stroke:#1976d2,color:#0d47a1` |
 | Planned, future | `fill:#eceff1,stroke:#607d8b,color:#263238` |
 | Problem, blocked, failure | `fill:#ffebee,stroke:#c62828,color:#b71c1c` |

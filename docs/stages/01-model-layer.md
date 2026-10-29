@@ -134,7 +134,7 @@ The fix is two lines (keep `httpx` and `httpcore` at WARNING) and a regression t
 
 ## Code tour: what was added in 1.1, and why
 
-Green boxes are new modules; everything else already existed and now asks `config.py` for its settings.
+Bright green is new in this sub-stage, amber is an existing module that changed, grey is existing and untouched. In later sub-stages the green boxes turn grey and the newly added modules turn bright, so you can see how the code grows. Markers in the tables: 🟢 new, 🟡 changed, ⚪ earlier.
 
 ![Module map: main.py starts the app and sets up logs.py and middleware.py; routes call services; routes and services read all settings from config.py, which combines environment variables with models.yaml.](../img/diagrams/stage1-module-map.png)
 
@@ -142,28 +142,28 @@ Green boxes are new modules; everything else already existed and now asks `confi
 
 ### New files
 
-| File | What it is for | Names to look at | Used by |
-| --- | --- | --- | --- |
-| [`app/config.py`](../../apps/api-py/app/config.py) | The single source of every setting and the model catalogue | `Settings` (24 typed fields), `get_settings()`, `get_model_catalog()`, `reset_settings()`, `subprocess_env()` | Every service module, the migrations, the eval runner |
-| [`models.yaml`](../../apps/api-py/models.yaml) | The default model and the last-known-good free-model list | `openrouter.default`, `openrouter.last_known_good` | `config.py`, which validates it; the `/llm/models` route |
-| [`app/logs.py`](../../apps/api-py/app/logs.py) | Sets up JSON logging for both new and existing log calls | `configure_logging()` | `main.py` at start-up |
-| [`app/middleware.py`](../../apps/api-py/app/middleware.py) | Gives each request an id, returns it in a header, logs one summary line | `RequestIdMiddleware`, `REQUEST_ID_HEADER` | `main.py` (added as the outermost layer) |
-| [`tests/test_config.py`](../../apps/api-py/tests/test_config.py) | 10 tests: defaults unchanged, overrides, bad values, secrets, catalogue rules, "only config.py reads the environment" | | CI |
-| [`tests/test_logging.py`](../../apps/api-py/tests/test_logging.py) | 8 tests: request ids, unsafe ids, JSON lines, crash logging, no key leak | | CI |
-| [`tests/test_llm_models_route.py`](../../apps/api-py/tests/test_llm_models_route.py) | 2 tests: the live model list and the fallback | | CI |
+| | Added in | File | What it is for | Names to look at | Used by |
+| --- | --- | --- | --- | --- | --- |
+| 🟢 | 1.1 | [`app/config.py`](../../apps/api-py/app/config.py) | The single source of every setting and the model catalogue | `Settings` (24 typed fields), `get_settings()`, `get_model_catalog()`, `reset_settings()`, `subprocess_env()` | Every service module, the migrations, the eval runner |
+| 🟢 | 1.1 | [`models.yaml`](../../apps/api-py/models.yaml) | The default model and the last-known-good free-model list | `openrouter.default`, `openrouter.last_known_good` | `config.py`, which validates it; the `/llm/models` route |
+| 🟢 | 1.1 | [`app/logs.py`](../../apps/api-py/app/logs.py) | Sets up JSON logging for both new and existing log calls | `configure_logging()` | `main.py` at start-up |
+| 🟢 | 1.1 | [`app/middleware.py`](../../apps/api-py/app/middleware.py) | Gives each request an id, returns it in a header, logs one summary line | `RequestIdMiddleware`, `REQUEST_ID_HEADER` | `main.py` (added as the outermost layer) |
+| 🟢 | 1.1 | [`tests/test_config.py`](../../apps/api-py/tests/test_config.py) | 10 tests: defaults unchanged, overrides, bad values, secrets, catalogue rules, "only config.py reads the environment" | | CI |
+| 🟢 | 1.1 | [`tests/test_logging.py`](../../apps/api-py/tests/test_logging.py) | 8 tests: request ids, unsafe ids, JSON lines, crash logging, no key leak | | CI |
+| 🟢 | 1.1 | [`tests/test_llm_models_route.py`](../../apps/api-py/tests/test_llm_models_route.py) | 2 tests: the live model list and the fallback | | CI |
 
 ### Existing files that changed, and what changed
 
-| File | Change |
-| --- | --- |
-| `app/main.py` | Calls `configure_logging()`, adds the middleware, exposes the `X-Request-ID` header to browsers |
-| `app/routes/llm.py` | Falls back to `models.yaml` instead of returning 503; adds `"source"` to the response |
-| `app/db.py`, `app/rag/embeddings.py`, `app/rag/qdrant_store.py`, `app/rag/retrieve.py`, `app/rag/ingest.py` | Read the database URL, Qdrant settings, the embedding model and API key from settings. `qdrant_store.collection_name()` replaces the old `COLLECTION_NAME` constant |
-| `app/llm/ollama.py`, `app/llm/cloud.py`, `app/llm/provider.py`, `app/routes/chat.py` | Model URLs, names and keys from settings. `provider.default_llm_provider()` replaces the old constant |
-| `app/guardrails/llm_guard.py`, `app/guardrails/audit.py`, `app/agent/policies.py` | Guard mode, retention days and the agent limits from settings |
-| `app/mcp/client.py` | Passes the environment to the tool-server process through `subprocess_env()` |
-| `migrations/env.py`, `evals/run_eval.py` | Use the same settings as the API |
-| `Dockerfile`, `docker-compose.yml`, `.env.example` | Copy `models.yaml` into the image, turn off uvicorn's access log, new `LOG_LEVEL` and `LOG_FORMAT` |
+| | Changed in | File | Change |
+| --- | --- | --- | --- |
+| 🟡 | 1.1 | `app/main.py` | Calls `configure_logging()`, adds the middleware, exposes the `X-Request-ID` header to browsers |
+| 🟡 | 1.1 | `app/routes/llm.py` | Falls back to `models.yaml` instead of returning 503; adds `"source"` to the response |
+| 🟡 | 1.1 | `app/db.py`, `app/rag/embeddings.py`, `app/rag/qdrant_store.py`, `app/rag/retrieve.py`, `app/rag/ingest.py` | Read the database URL, Qdrant settings, the embedding model and API key from settings. `qdrant_store.collection_name()` replaces the old `COLLECTION_NAME` constant |
+| 🟡 | 1.1 | `app/llm/ollama.py`, `app/llm/cloud.py`, `app/llm/provider.py`, `app/routes/chat.py` | Model URLs, names and keys from settings. `provider.default_llm_provider()` replaces the old constant |
+| 🟡 | 1.1 | `app/guardrails/llm_guard.py`, `app/guardrails/audit.py`, `app/agent/policies.py` | Guard mode, retention days and the agent limits from settings |
+| 🟡 | 1.1 | `app/mcp/client.py` | Passes the environment to the tool-server process through `subprocess_env()` |
+| 🟡 | 1.1 | `migrations/env.py`, `evals/run_eval.py` | Use the same settings as the API |
+| 🟡 | 1.1 | `Dockerfile`, `docker-compose.yml`, `.env.example` | Copy `models.yaml` into the image, turn off uvicorn's access log, new `LOG_LEVEL` and `LOG_FORMAT` |
 
 ### A good reading order
 
