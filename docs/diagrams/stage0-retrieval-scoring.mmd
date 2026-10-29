@@ -1,0 +1,14 @@
+flowchart TB
+    subgraph search["Step 1 - search"]
+        direction LR
+        Q["Question"] --> E["Embed: text<br/>to numbers"] --> V[("Qdrant<br/>28 chunks")] --> C["Closest chunks,<br/>best first"]
+    end
+    subgraph score["Step 2 - score"]
+        direction LR
+        D["One entry per<br/>document"] --> R["Ranked<br/>documents"] --> M["Compare with the<br/>right documents"] --> S["recall@k<br/>and MRR"]
+    end
+    search --> score
+    classDef store fill:#e3f2fd,stroke:#1976d2,color:#0d47a1
+    classDef ok fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    class V store
+    class S ok

@@ -1,25 +1,81 @@
 # Tech stack and alternatives
 
-> **Status:** this file is the **single source of truth** for what technology is active and what it replaced; other docs link here instead of restating it. It currently describes the seed state (V2 @ `v2-final`). Each V3 stage updates it in the same PR that changes the stack (see [roadmap.md](roadmap.md)).
+> **Status:** this file is the **single source of truth** for which technology is used, why, and which stage added or removed it; other docs link here instead of restating it. Each V3 stage updates it in the same PR that changes the stack (see [roadmap.md](roadmap.md)). Each stage's own guide in [stages/](stages/README.md) explains the concepts behind the tools it adds.
 
-This is a living, cross-cutting reference of the technology used in Customer
-Compass. It's organized two ways:
+How to read this file:
 
-1. **[Progress by stage](#progress-by-stage)** — a color-coded, chronological
-   walkthrough of what each stage added, best for seeing the stack build up
-   incrementally as a learner.
-2. **By capability** (LLM inference, embeddings, vector storage, tool
-   calling, etc.) — the detailed reference further down, best for looking up
-   what's active/swappable for one specific technology area.
+1. **[V3 tech stack at a glance](#v3-tech-stack-at-a-glance)**: every technology in one table, what it is for in plain words, the stage that adds it, and its status.
+2. **[V3 progress by stage](#v3-progress-by-stage)**: what each stage added or removed.
+3. **[V2 progress by stage](#v2-progress-by-stage-the-seed)** and the **by-capability sections** below it: the detailed V2 reference and the swappable alternatives, best for looking up one technology area.
 
-Either way, this file exists so a learner can see, at a glance, what is
-currently active, what swappable alternative is already wired in (or
-planned), and what other free options are worth exploring next.
+**Update this file whenever a stage adds, replaces or removes a technology.** Status values: **In use**, **Planned** (chosen when its stage starts, with an [ADR](adr/README.md)), **Replaced**, **Removed**.
 
-**Update this file whenever a new stage introduces a new technology choice or
-a new swappable alternative.** Individual stage documents describe the
-*implementation details and acceptance criteria*; this file is the map across
-all of them.
+## V3 tech stack at a glance
+
+Stages refer to [the roadmap](roadmap.md). "Seed" means it came with V2's final state.
+
+### The application
+
+| Technology | What it does, in plain words | Stage | Status |
+| --- | --- | --- | --- |
+| **React 19 + Vite + TypeScript** | The web screens the user sees and the tool that builds them | Seed | In use |
+| **React Router** | Moves between pages without reloading | Seed | In use |
+| **FastAPI + Uvicorn** | The Python web server (the API) behind the screens | Seed | In use |
+| **PostgreSQL 17** | Stores companies, contacts, deals, tasks and the audit trail | Seed | In use |
+| **asyncpg** | Lets Python talk to Postgres quickly | Seed | In use |
+| **Qdrant** | Stores document meaning as numbers and finds the closest matches | Seed | In use |
+| **Google `gemini-embedding-001`** | Turns text into numbers (embeddings) for similarity search | Seed | In use; compared with an open model in 4.3 |
+| **OpenRouter** | One doorway to many hosted models, including free ones | Seed | In use; moves behind LiteLLM in 1.2 |
+| **Ollama** (`qwen2.5:3b`) | Runs a small language model on the local computer | Seed | **Removed** in 1.3 (cloud-only) |
+| **MCP Python SDK (stdio)** | Lets the model call tools in a standard way | Seed | **Replaced** by FastMCP in 2.2 |
+| **Rule-based guardrails** (our code) | Blocks prompt-injection patterns | Seed | In use; compared with NeMo Guardrails and Llama Guard in 5.3 |
+| **promptfoo** | Runs test questions against the live API and grades answers | Seed | In use; Ragas or DeepEval added in 5.2 |
+
+### Added in V3
+
+| Technology | What it does, in plain words | Stage | Status |
+| --- | --- | --- | --- |
+| **GitHub Actions** | Runs our checks and releases automatically | 0.4, 0.5 | In use |
+| **ruff, mypy** | Finds style problems and likely bugs; checks the types fit together | 0.3 | In use |
+| **ESLint, Vitest, Testing Library** | Finds problems in, and tests, the web code | 0.3 | In use |
+| **pre-commit, just, Dev Container** | Quick checks on commit; one-word commands; a ready-made environment | 0.3 | In use |
+| **Dependabot** | Opens pull requests to upgrade dependencies | 0.4 | In use |
+| **gitleaks, pip-audit, Trivy, lychee** | Scan for leaked secrets, vulnerable packages and images, and broken links | 0.4 | In use |
+| **Mermaid + Mermaid CLI** | Draws the diagrams in the docs from text and renders them to images | 0.8 | In use |
+| **GHCR + GitHub Releases** | Store the built images and publish versions | 0.5 | In use |
+| **nginx (web image)** | Serves the built web app inside a container | 0.5 | In use |
+| **Alembic (+ SQLAlchemy, psycopg)** | Versioned, repeatable database changes | 0.6 | In use |
+| **Evaluation runner** (our code) | Scores retrieval (recall@k, MRR), tool choice and agent outcomes | 0.7 | In use |
+| **pydantic-settings, structlog** | One typed place for settings; readable logs with request ids | 1.1 | Planned |
+| **LiteLLM** | One interface to many model providers, with fallback and retries | 1.2 | Planned |
+| **Pydantic** (structured output and tool schemas) | Makes the model answer in a checked shape | 2.1 | Planned |
+| **FastMCP** (streamable HTTP) | A long-running tool server instead of a new process per chat turn | 2.2 | Planned |
+| **LangGraph** (+ Postgres checkpointer) | Models the agent steps as a graph, pausable for human approval | 3.2 | Planned |
+| **Hybrid search + reranker** (Qdrant, FastEmbed) | Combines keyword and meaning search, then re-orders results | 4.1 | Planned |
+| **Docling** | Reads PDFs, Word and spreadsheets, not only Markdown | 4.2 | Planned |
+| **FastEmbed / sentence-transformers** | Open-source embeddings that run without an API key | 4.3 | Planned (comparison) |
+| **Langfuse + OpenTelemetry** | Shows every model call and agent step as a trace | 5.1 | Planned |
+| **Ragas or DeepEval** | Scores answer quality with metrics beyond recall and MRR | 5.2 | Planned |
+| **NeMo Guardrails, Llama Guard, Presidio** | Stronger prompt-injection and personal-data protection | 5.3 | Planned (comparison) |
+| **Authentication and permissions** (library chosen in 6.1) | Who may do what | 6.1 | Planned |
+| **React Hook Form + Zod, Playwright** | Form handling with validation; browser-driven end-to-end tests | 8.1, 8.2 | Planned |
+
+Optional comparisons (decided by an ADR, never adopted by default): Pydantic AI or the OpenAI Agents SDK against the LangGraph node (T18), and the frontend extras in T17 of [recommendations-2](recommendations-2.md).
+
+## V3 progress by stage
+
+| Stage | Added | Replaced or removed | Stage guide |
+| --- | --- | --- | --- |
+| 0 Foundation | CI/CD, code-quality tools, migrations, releases, evaluation baseline | none (no behaviour change) | [Stage 0](stages/00-foundation.md) |
+| 1 Model layer | pydantic-settings, structlog, LiteLLM | Ollama removed | planned |
+| 2 Tools and MCP | Native tool calling, FastMCP | stdio MCP, fenced `tool_call` text | planned |
+| 3 LangGraph port | LangGraph, Postgres checkpointer | hand-written workflow code | planned |
+| 4 Retrieval upgrade | Hybrid search, reranker, Docling, open embeddings (comparison) | Markdown-only ingestion | planned |
+| 5 Observability and evals | Langfuse, OpenTelemetry, Ragas or DeepEval, guardrail comparison | log-line tracing | planned |
+| 6 CRM modules and auth | Auth, tickets, contracts, meeting notes | none | planned |
+| 7 Agents and supervisor | Added only if evals show a gain | none | planned |
+| 8 Product features | Add-company form, uploads, Playwright | none | planned |
+| 9 Close-out | The [concepts](concepts/README.md) section, retrospective, V2-vs-V3 table | none | planned |
 
 ## How swapping works
 
@@ -37,9 +93,9 @@ toggle** — never a silent replacement. Two mechanisms are used:
    supports env-var defaults (`LLM_PROVIDER`, `OPENROUTER_MODEL`) for clients
    that don't specify one (e.g. curl/tests).
 
-## Progress by stage
+## V2 progress by stage (the seed)
 
-A chronological, color-coded view of what each stage added — read top to
+A chronological, color-coded view of what each **V2** stage (the hand-built seed, numbered 1 to 10) added — read top to
 bottom to see the stack build up incrementally. Completed stages get a
 distinct color per stage; planned/not-yet-built stages are grey. The
 per-capability tables further below are the detailed reference for the same

@@ -10,16 +10,9 @@ V3 starts fresh, seeded from [`customer-compass-v2`](https://github.com/dsailaja
 
 ## How it fits together
 
-```mermaid
-flowchart LR
-    UI["Web UI<br/>React + Vite"] -->|"HTTP /api/v1"| API["API<br/>FastAPI (Python)"]
-    API --> PG[("Postgres<br/>CRM data, tasks, audit log")]
-    API --> QD[("Qdrant<br/>document vectors")]
-    API --> LLM["LLM providers<br/>chat + embeddings"]
-    API --> MCP["MCP tools<br/>CRM, documents, tasks"]
-    classDef store fill:#e3f2fd,stroke:#1976d2,color:#0d47a1
-    class PG,QD store
-```
+![Architecture overview: the React and Vite web UI calls the FastAPI API over HTTP. The API reads and writes Postgres (CRM data, tasks, audit log) and Qdrant (document vectors), calls LLM providers for chat and embeddings, and uses MCP tools for CRM, documents and tasks.](docs/img/diagrams/readme-how-it-fits-together.png)
+
+<sub>Diagram source: [readme-how-it-fits-together.mmd](docs/diagrams/readme-how-it-fits-together.mmd)</sub>
 
 Details: [docs/architecture.md](docs/architecture.md). Technology choices: [docs/tech-stack.md](docs/tech-stack.md).
 
@@ -74,7 +67,7 @@ Pushing a tag such as `v3.0.0-alpha.1` publishes the API and web images to GitHu
 
 ## Documentation
 
-Start at [docs/README.md](docs/README.md). Plan: [docs/roadmap.md](docs/roadmap.md). Decisions: [docs/adr/](docs/adr/README.md). The hand-built V2 learning record: [docs/v2-baseline/](docs/v2-baseline/README.md).
+Start at [docs/README.md](docs/README.md). **Learn the concepts:** one guide per stage in [docs/stages/](docs/stages/README.md), starting with [Stage 0](docs/stages/00-foundation.md). Plan: [docs/roadmap.md](docs/roadmap.md). Decisions: [docs/adr/](docs/adr/README.md). The hand-built V2 learning record: [docs/v2-baseline/](docs/v2-baseline/README.md).
 
 ## Contributing
 

@@ -1,0 +1,18 @@
+flowchart TB
+    subgraph local["On your machine"]
+        direction LR
+        A["Edit code<br/>on a branch"] --> B["pre-commit:<br/>quick local checks"] --> C["Open a<br/>pull request"]
+    end
+    subgraph gh["On GitHub"]
+        direction LR
+        D{{"CI: five checks<br/>run in parallel"}} -->|"all pass"| E["Squash merge<br/>into main"] --> F["Push a tag<br/>v3.0.0-alpha.1"] --> G["Release workflow:<br/>build, scan, publish"] --> H[("Images on GHCR<br/>+ GitHub Release")]
+        D -->|"any fails"| X["Merge blocked:<br/>fix and push again"]
+        X --> D
+    end
+    local --> gh
+    classDef ok fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    classDef bad fill:#ffebee,stroke:#c62828,color:#b71c1c
+    classDef store fill:#e3f2fd,stroke:#1976d2,color:#0d47a1
+    class E,G ok
+    class X bad
+    class H store
