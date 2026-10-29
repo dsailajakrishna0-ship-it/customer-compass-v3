@@ -241,13 +241,16 @@ def _git_sha() -> str:
 
 
 def _environment() -> dict:
+    from app.config import get_settings
+
+    settings = get_settings()
     return {
-        "llm_provider": os.environ.get("LLM_PROVIDER", "ollama"),
-        "ollama_model": os.environ.get("OLLAMA_MODEL", "qwen2.5:3b"),
-        "openrouter_model": os.environ.get("OPENROUTER_MODEL", "liquid/lfm-2.5-2.6b:free"),
-        "embedding_model": os.environ.get("GOOGLE_EMBEDDING_MODEL", "gemini-embedding-001"),
-        "qdrant_collection": os.environ.get("QDRANT_COLLECTION", "document_chunks"),
-        "guard_mode": os.environ.get("GUARD_MODE", "rules"),
+        "llm_provider": settings.llm_provider,
+        "ollama_model": settings.ollama_model,
+        "openrouter_model": settings.default_openrouter_model,
+        "embedding_model": settings.google_embedding_model,
+        "qdrant_collection": settings.qdrant_collection,
+        "guard_mode": settings.guard_mode,
     }
 
 

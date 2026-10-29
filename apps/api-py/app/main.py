@@ -17,8 +17,11 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from app.config import get_settings
 from app.db import close_pool, get_pool
 from app.guardrails.audit import ensure_schema_and_purge
+from app.logs import configure_logging
+from app.middleware import REQUEST_ID_HEADER, RequestIdMiddleware
 from app.rag.qdrant_store import close_client
 from app.routes.agent import router as agent_router
 from app.routes.chat import router as chat_router
@@ -36,6 +39,8 @@ async def lifespan(_app: FastAPI):
     await close_pool()
     await close_client()
 
+
+configure_logging(get_settings().log_level, get_settings().log_format)
 
 # Backend: FastAPI is the Python web framework serving every /api/v1 route the React UI calls
 app = FastAPI(title="Customer Compass API (Python)", lifespan=lifespan)
@@ -62,7 +67,10 @@ app.add_middleware(
     allow_origins=["http://localhost:5173"],
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=[REQUEST_ID_HEADER],
 )
+# Added last, so it is the outermost layer: every response (even CORS and error ones) carries the id
+app.add_middleware(RequestIdMiddleware)
 
 app.include_router(documents_router, prefix="/api/v1")
 app.include_router(chat_router, prefix="/api/v1")

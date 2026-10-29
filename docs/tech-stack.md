@@ -46,7 +46,7 @@ Stages refer to [the roadmap](roadmap.md). "Seed" means it came with V2's final 
 | **nginx (web image)** | Serves the built web app inside a container | 0.5 | In use |
 | **Alembic (+ SQLAlchemy, psycopg)** | Versioned, repeatable database changes | 0.6 | In use |
 | **Evaluation runner** (our code) | Scores retrieval (recall@k, MRR), tool choice and agent outcomes | 0.7 | In use |
-| **pydantic-settings, structlog** | One typed place for settings; readable logs with request ids | 1.1 | Planned |
+| **pydantic-settings, structlog, PyYAML** | One typed, validated place for settings and the model catalogue; JSON logs with a request id on every line | 1.1 | In use |
 | **LiteLLM** | One interface to many model providers, with fallback and retries | 1.2 | Planned |
 | **Pydantic** (structured output and tool schemas) | Makes the model answer in a checked shape | 2.1 | Planned |
 | **FastMCP** (streamable HTTP) | A long-running tool server instead of a new process per chat turn | 2.2 | Planned |
@@ -67,7 +67,7 @@ Optional comparisons (decided by an ADR, never adopted by default): Pydantic AI 
 | Stage | Added | Replaced or removed | Stage guide |
 | --- | --- | --- | --- |
 | 0 Foundation | CI/CD, code-quality tools, migrations, releases, evaluation baseline | none (no behaviour change) | [Stage 0](stages/00-foundation.md) |
-| 1 Model layer | pydantic-settings, structlog, LiteLLM | Ollama removed | planned |
+| 1 Model layer | 1.1: pydantic-settings, structlog, `models.yaml`; planned: LiteLLM | planned: Ollama removed | [Stage 1](stages/01-model-layer.md) (in progress) |
 | 2 Tools and MCP | Native tool calling, FastMCP | stdio MCP, fenced `tool_call` text | planned |
 | 3 LangGraph port | LangGraph, Postgres checkpointer | hand-written workflow code | planned |
 | 4 Retrieval upgrade | Hybrid search, reranker, Docling, open embeddings (comparison) | Markdown-only ingestion | planned |

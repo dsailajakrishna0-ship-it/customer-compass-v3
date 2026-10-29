@@ -3,13 +3,14 @@ discovers its tools, and invokes them. Used by the chat route's tool-calling
 loop (app/routes/chat.py).
 """
 
-import os
 import sys
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
+
+from app.config import subprocess_env
 
 
 @dataclass
@@ -33,7 +34,7 @@ def _server_params() -> StdioServerParameters:
     return StdioServerParameters(
         command=sys.executable,
         args=["-m", "app.mcp.server"],
-        env=dict(os.environ),
+        env=subprocess_env(),
     )
 
 

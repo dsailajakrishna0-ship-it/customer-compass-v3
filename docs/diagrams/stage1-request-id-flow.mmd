@@ -1,0 +1,13 @@
+sequenceDiagram
+    autonumber
+    actor B as Browser or curl
+    participant M as Request-ID middleware
+    participant R as Route and services
+    participant L as Log output (JSON)
+    B->>M: GET /api/v1/companies (maybe with X-Request-ID)
+    Note over M: Keep a plain caller id, otherwise make a new one
+    M->>R: handle the request
+    R->>L: any log line, with request_id added automatically
+    R-->>M: response
+    M->>L: one summary line: status, duration_ms, request_id
+    M-->>B: response with the X-Request-ID header

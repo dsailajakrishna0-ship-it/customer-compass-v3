@@ -7,12 +7,16 @@ Cached briefly since OpenRouter's public /models catalog is large and
 doesn't change second-to-second.
 """
 
+import logging
 import time
 
 import httpx
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
+
+from app.config import get_model_catalog
 
 router = APIRouter(prefix="/llm", tags=["llm"])
+logger = logging.getLogger("app.routes.llm")
 
 # A couple of well-known paid models shown for reference only, so a learner
 # can see what "the same dropdown, but paid" looks like. These are never
@@ -28,7 +32,7 @@ _cache: dict | None = None
 async def list_models():
     global _cache
     if _cache and time.monotonic() - _cache["fetched_at"] < CACHE_TTL_SECONDS:
-        return {"free": _cache["free"], "paid": _cache["paid"]}
+        return {"free": _cache["free"], "paid": _cache["paid"], "source": "live"}
 
     try:
         async with httpx.AsyncClient(timeout=15.0) as client:
@@ -46,8 +50,10 @@ async def list_models():
         ]
 
         _cache = {"fetched_at": time.monotonic(), "free": free, "paid": paid}
-        return {"free": free, "paid": paid}
-    except Exception as exc:  # noqa: BLE001 - mirrors the Express route's catch-all 503
-        raise HTTPException(
-            status_code=503, detail="Could not reach OpenRouter to list available models."
-        ) from exc
+        return {"free": free, "paid": paid, "source": "live"}
+    except Exception as exc:  # noqa: BLE001 - any failure falls back to the saved list
+        # Free models rotate and OpenRouter can be unreachable: serve the last-known-good list
+        # from models.yaml so the dropdown still works, and say so in the response.
+        logger.warning("openrouter model list unavailable, using models.yaml (%s)", exc)
+        fallback = [m.model_dump() for m in get_model_catalog().openrouter.last_known_good]
+        return {"free": fallback, "paid": [], "source": "fallback"}

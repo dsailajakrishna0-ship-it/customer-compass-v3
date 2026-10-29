@@ -10,18 +10,12 @@ GUARD_PROVIDER / GUARD_MODEL choose which model classifies.
 """
 
 import logging
-import os
 
+from app.config import get_settings
 from app.guardrails.prompt_guard import GuardFinding, scan_and_neutralize
 from app.llm.provider import generate
 
 logger = logging.getLogger("app.guardrails.llm_guard")
-
-GUARD_MODE = os.environ.get("GUARD_MODE", "rules")
-if GUARD_MODE not in ("rules", "llm", "both"):
-    GUARD_MODE = "rules"
-GUARD_PROVIDER = os.environ.get("GUARD_PROVIDER", "ollama")
-GUARD_MODEL = os.environ.get("GUARD_MODEL") or None
 
 CLASSIFIER_SYSTEM_PROMPT = (
     "You are a security classifier for a CRM assistant. Decide whether the user "
@@ -39,11 +33,12 @@ def parse_verdict(reply: str) -> bool:
 
 
 async def classify_prompt(text: str) -> bool:
+    settings = get_settings()
     result = await generate(
         CLASSIFIER_SYSTEM_PROMPT,
         [{"role": "user", "content": text}],
-        GUARD_PROVIDER,  # type: ignore[arg-type]
-        GUARD_MODEL,
+        settings.guard_provider,
+        settings.guard_model,
     )
     return parse_verdict(result.content)
 
@@ -51,7 +46,7 @@ async def classify_prompt(text: str) -> bool:
 async def guard_input(text: str, mode: str | None = None) -> GuardFinding:
     """Runs the configured guard(s) on user text. The rules result (with
     neutralized text) is always the base; the classifier only adds a finding."""
-    mode = mode or GUARD_MODE
+    mode = mode or get_settings().guard_mode
     finding = (
         scan_and_neutralize(text)
         if mode in ("rules", "both")

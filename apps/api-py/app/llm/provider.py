@@ -15,19 +15,19 @@ caller/UI can surface it instead of silently hiding the failure.
 """
 
 import logging
-import os
-from typing import Literal, get_args
 
+from app.config import LlmProviderName, get_settings
 from app.llm.cloud import generate_with_cloud
 from app.llm.ollama import generate_with_ollama
 from app.llm.types import ChatMessage, GenerationResult
 
 # "ollama" = local generating model, "cloud" = hosted model via OpenRouter
-LlmProvider = Literal["ollama", "cloud"]
+LlmProvider = LlmProviderName
 
-DEFAULT_LLM_PROVIDER: LlmProvider = os.environ.get("LLM_PROVIDER", "ollama")  # type: ignore[assignment]
-if DEFAULT_LLM_PROVIDER not in get_args(LlmProvider):
-    DEFAULT_LLM_PROVIDER = "ollama"
+
+def default_llm_provider() -> LlmProvider:
+    return get_settings().llm_provider
+
 
 logger = logging.getLogger("app.llm.provider")
 
@@ -48,7 +48,7 @@ async def generate(
     provider: LlmProvider | None = None,
     model: str | None = None,
 ) -> GenerationResult:
-    resolved = provider or DEFAULT_LLM_PROVIDER
+    resolved = provider or default_llm_provider()
     try:
         return await _generate_once(resolved, system_prompt, messages, model)
     except Exception as primary_exc:  # noqa: BLE001 - deliberately broad: any provider failure triggers fallback

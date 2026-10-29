@@ -1,0 +1,20 @@
+# Free-tier model catalogue, read at start-up by app/config.py (override the path with MODELS_FILE).
+#
+#   default          used when a request does not name a model (the OPENROUTER_MODEL variable wins if set)
+#   last_known_good  shown in the web UI's model dropdown when OpenRouter's live list cannot be fetched
+#
+# Free models come and go. Every id below was present in https://openrouter.ai/api/v1/models on
+# 2026-10-30. They are NOT ranked by quality yet: Stage 1.2 orders a fallback chain using the evals.
+openrouter:
+  default: liquid/lfm-2.5-2.6b:free
+  last_known_good:
+    - id: liquid/lfm-2.5-2.6b:free
+      name: "LiquidAI: LFM2.5-2.6B (free)"
+    - id: google/gemma-4-31b-it:free
+      name: "Google: Gemma 4 31B (free)"
+    - id: google/gemma-4-26b-a4b-it:free
+      name: "Google: Gemma 4 26B A4B  (free)"
+    - id: poolside/laguna-xs-2.1:free
+      name: "Poolside: Laguna XS 2.1 (free)"
+    - id: nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free
+      name: "NVIDIA: Nemotron 3 Nano Omni (free)"
