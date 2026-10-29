@@ -54,7 +54,3 @@ def configure_logging(
         uvicorn_logger = logging.getLogger(name)
         uvicorn_logger.handlers = []
         uvicorn_logger.propagate = True
-
-
-def get_logger(name: str) -> structlog.stdlib.BoundLogger:
-    return structlog.stdlib.get_logger(name)

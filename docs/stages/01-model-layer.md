@@ -132,6 +132,55 @@ The fix is two lines (keep `httpx` and `httpcore` at WARNING) and a regression t
 
 ---
 
+## Code tour: what was added in 1.1, and why
+
+Green boxes are new modules; everything else already existed and now asks `config.py` for its settings.
+
+![Module map: main.py starts the app and sets up logs.py and middleware.py; routes call services; routes and services read all settings from config.py, which combines environment variables with models.yaml.](../img/diagrams/stage1-module-map.png)
+
+<sub>Diagram source: [stage1-module-map.mmd](../diagrams/stage1-module-map.mmd)</sub>
+
+### New files
+
+| File | What it is for | Names to look at | Used by |
+| --- | --- | --- | --- |
+| [`app/config.py`](../../apps/api-py/app/config.py) | The single source of every setting and the model catalogue | `Settings` (24 typed fields), `get_settings()`, `get_model_catalog()`, `reset_settings()`, `subprocess_env()` | Every service module, the migrations, the eval runner |
+| [`models.yaml`](../../apps/api-py/models.yaml) | The default model and the last-known-good free-model list | `openrouter.default`, `openrouter.last_known_good` | `config.py`, which validates it; the `/llm/models` route |
+| [`app/logs.py`](../../apps/api-py/app/logs.py) | Sets up JSON logging for both new and existing log calls | `configure_logging()` | `main.py` at start-up |
+| [`app/middleware.py`](../../apps/api-py/app/middleware.py) | Gives each request an id, returns it in a header, logs one summary line | `RequestIdMiddleware`, `REQUEST_ID_HEADER` | `main.py` (added as the outermost layer) |
+| [`tests/test_config.py`](../../apps/api-py/tests/test_config.py) | 10 tests: defaults unchanged, overrides, bad values, secrets, catalogue rules, "only config.py reads the environment" | | CI |
+| [`tests/test_logging.py`](../../apps/api-py/tests/test_logging.py) | 8 tests: request ids, unsafe ids, JSON lines, crash logging, no key leak | | CI |
+| [`tests/test_llm_models_route.py`](../../apps/api-py/tests/test_llm_models_route.py) | 2 tests: the live model list and the fallback | | CI |
+
+### Existing files that changed, and what changed
+
+| File | Change |
+| --- | --- |
+| `app/main.py` | Calls `configure_logging()`, adds the middleware, exposes the `X-Request-ID` header to browsers |
+| `app/routes/llm.py` | Falls back to `models.yaml` instead of returning 503; adds `"source"` to the response |
+| `app/db.py`, `app/rag/embeddings.py`, `app/rag/qdrant_store.py`, `app/rag/retrieve.py`, `app/rag/ingest.py` | Read the database URL, Qdrant settings, the embedding model and API key from settings. `qdrant_store.collection_name()` replaces the old `COLLECTION_NAME` constant |
+| `app/llm/ollama.py`, `app/llm/cloud.py`, `app/llm/provider.py`, `app/routes/chat.py` | Model URLs, names and keys from settings. `provider.default_llm_provider()` replaces the old constant |
+| `app/guardrails/llm_guard.py`, `app/guardrails/audit.py`, `app/agent/policies.py` | Guard mode, retention days and the agent limits from settings |
+| `app/mcp/client.py` | Passes the environment to the tool-server process through `subprocess_env()` |
+| `migrations/env.py`, `evals/run_eval.py` | Use the same settings as the API |
+| `Dockerfile`, `docker-compose.yml`, `.env.example` | Copy `models.yaml` into the image, turn off uvicorn's access log, new `LOG_LEVEL` and `LOG_FORMAT` |
+
+### A good reading order
+
+1. **`config.py`**: start at the `Settings` class, then `get_settings()`. Everything else depends on it.
+2. **`test_config.py`**: read the test names; together they describe the rules in plain sentences.
+3. **`middleware.py`**: about 60 lines. Follow `__call__` from top to bottom: read the id, bind it, call the app, log.
+4. **`logs.py`**: how standard `logging` and `structlog` are joined into one pipeline.
+5. **`routes/llm.py`**: the small, visible effect of the model catalogue.
+
+### What happens, in order, when a request arrives
+
+1. The server starts `main.py`, which sets up logging (`logs.py`) and registers the middleware.
+2. A request reaches `RequestIdMiddleware`, which picks or generates an id and stores it for the duration of the request.
+3. The matching route runs. Anything it logs, or any service it calls logs, automatically carries the id.
+4. Services ask `get_settings()` for values (database URL, model names, limits). The first call builds and validates the settings; later calls reuse them.
+5. The response goes back through the middleware, which adds the `X-Request-ID` header and logs one summary line.
+
 ## What this stage added to the tech stack (so far)
 
 | Tool | What it does in plain words | Where to look |
@@ -202,16 +251,6 @@ The embeddings call sends the key as a URL parameter, and the HTTP library logs 
 
 The UI keeps working, but the saved list can be out of date: a model in it may no longer exist. That is why the response says <code>"source": "fallback"</code>, and why the list is re-checked from time to time.
 </details>
-
-## Where to look in the repo
-
-| You want to see | Open |
-| --- | --- |
-| Every setting and its default | [`apps/api-py/app/config.py`](../../apps/api-py/app/config.py) |
-| The model catalogue | [`apps/api-py/models.yaml`](../../apps/api-py/models.yaml) |
-| Logging setup | [`apps/api-py/app/logs.py`](../../apps/api-py/app/logs.py) |
-| The request id middleware | [`apps/api-py/app/middleware.py`](../../apps/api-py/app/middleware.py) |
-| The tests | [`test_config.py`](../../apps/api-py/tests/test_config.py), [`test_logging.py`](../../apps/api-py/tests/test_logging.py), [`test_llm_models_route.py`](../../apps/api-py/tests/test_llm_models_route.py) |
 
 ## Further reading
 

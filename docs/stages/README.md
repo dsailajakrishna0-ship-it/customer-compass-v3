@@ -66,8 +66,11 @@ Terms first used here.
 ## Check your understanding
 5 to 8 questions in `<details>` blocks, each with a short answer.
 
+## Code tour
+For code stages: a module map (diagram), a table of every **new** file (purpose, key names, who uses it), a table of **existing** files that changed and why, a suggested reading order, and the path of one request or operation through the code. Each sub-stage PR extends it. Stages with no code (or only configuration) say so in one line.
+
 ## Where to look in the repo
-Table of "you want to see" and the file.
+Table of "you want to see" and the file (for stages where the code tour is not needed).
 
 ## Further reading
 Official documentation only.
@@ -79,6 +82,7 @@ Official documentation only.
 - **Use our own data.** A worked example from the 16 sample documents beats a generic one.
 - **Be honest.** Say what we measured and what we did not. Include the failures and surprises; they teach the most.
 - **One idea per diagram**, no more than about ten boxes, and a sentence under it saying what to notice.
+- **Teach the code, not only the idea.** Every code stage ends its concepts with a code tour, so a reader knows which file to open and in what order.
 - **Link, do not copy.** Stack facts live in tech-stack.md, decisions in the ADRs.
 - **Verify before you publish.** Look at every rendered image and check every number against the repo or the baseline.
 

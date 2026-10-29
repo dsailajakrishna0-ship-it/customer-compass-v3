@@ -1,0 +1,14 @@
+flowchart TB
+    M["main.py<br/>starts the app"] --> L["logs.py<br/>JSON log setup"]
+    M --> W["middleware.py<br/>request id"]
+    M --> R["routes/*<br/>chat, llm, documents, agent"]
+    R --> S["Services<br/>llm/, rag/, guardrails/, agent/, mcp/"]
+    S --> C["config.py<br/>typed settings"]
+    R --> C
+    C --> Y[("models.yaml<br/>model catalogue")]
+    C --> E[/"Environment<br/>variables"/]
+    W -.->|"adds request_id to every log line"| L
+    classDef new fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    classDef store fill:#e3f2fd,stroke:#1976d2,color:#0d47a1
+    class L,W,C new
+    class Y,E store
