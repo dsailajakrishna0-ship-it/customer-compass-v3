@@ -28,6 +28,8 @@ Diagrams are written as Mermaid text in `docs/diagrams/`, rendered to committed 
 
 ## Consequences
 
+- AI terms are colour-marked by a script from a reviewed list (`docs/ai-terms.yaml`), not by hand, so marking stays consistent and CI can fail when a doc drifts. Markers are coloured squares because GitHub strips text colours from markdown.
+
 - Each stage PR is larger: it carries its guide and tech-stack update.
 - The Stage 0 guide sets the format; later guides are reviewed against the template in `docs/stages/README.md`.
 - Concept explanations live in one place per stage, so stack facts are linked, not duplicated.

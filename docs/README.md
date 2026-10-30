@@ -15,6 +15,7 @@ Start here. The repo is the V3 learning project, seeded from `customer-compass-v
 | Document | What it is |
 | --- | --- |
 | [stages/](stages/README.md) | **One guide per stage**, written when the stage is built: plain-language explanations, diagrams, worked examples from this project's data, glossary and self-check questions. Start with [Stage 0](stages/00-foundation.md). |
+| [ai-terms.md](ai-terms.md) | **The AI colour code.** Every AI term in the docs is marked with a coloured square (🟪 concept, 🟦 tool, 🟩 data store or service, 🟧 model) and listed here A to Z in plain words, so the AI parts stand out from the ordinary software around them. |
 | [concepts/](concepts/README.md) | Study companion assembled at the end (Stage 9): concept map, glossary, questions and answers, reading paths. Not written yet. |
 
 ## Understand the system

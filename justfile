@@ -76,3 +76,11 @@ eval-promptfoo:
 # render docs/diagrams/*.mmd to docs/img/diagrams/*.png (needs Docker; the first run pulls a ~2.4 GB image)
 diagrams:
     for f in docs/diagrams/*.mmd; do n=$(basename "$f" .mmd); docker run --rm --user "$(id -u):$(id -g)" -v "$PWD/docs":/data ghcr.io/mermaid-js/mermaid-cli/mermaid-cli:12.0.0 -p /data/diagrams/mermaid-puppeteer.json -i "/data/diagrams/$n.mmd" -o "/data/img/diagrams/$n.png" -s 2 -b white || exit 1; echo "rendered $n"; done
+
+# apply the AI colour code to the docs and regenerate docs/ai-terms.md (edit docs/ai-terms.yaml first)
+ai-terms:
+    uv run --project {{api}} python scripts/ai_terms.py write
+
+# fail if the docs or docs/ai-terms.md are out of date with docs/ai-terms.yaml (CI runs the same check)
+ai-terms-check:
+    uv run --project {{api}} python scripts/ai_terms.py check

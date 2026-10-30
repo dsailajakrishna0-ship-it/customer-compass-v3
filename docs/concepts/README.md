@@ -4,12 +4,14 @@
 
 Until then, learn each idea in the stage that introduces it. The guides are the primary material; this section will be the study companion.
 
+**AI colour code:** 🟪 concept · 🟦 framework or tool · 🟩 data store or service · 🟧 model. Unmarked technical terms are ordinary software. [A to Z list](../ai-terms.md)
+
 ## What it will contain
 
 | Part | What you get |
 | --- | --- |
 | **Final architecture** | The whole system drawn once, after the last stage: system context, containers and the main request flows, with the tool each part uses. Replaces the stage-by-stage maps, which only show what each step changed |
-| **Concept map** | One diagram of how all the ideas connect: retrieval, tools, agents, guardrails, evaluation, operations |
+| **Concept map** | One diagram of how all the ideas connect: 🟪retrieval, tools, 🟪agents, 🟪guardrails, evaluation, operations |
 | **Glossary, A to Z** | Every term from every stage guide, one definition each, linked back to the stage that explains it |
 | **Questions and answers** | Grouped by level (beginner, intermediate, advanced) and by topic, with short answers and links to the full explanation |
 | **Which stage taught what** | A table from concept to stage guide, tool and repo files |
