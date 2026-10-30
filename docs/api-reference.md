@@ -18,6 +18,7 @@ FastAPI (the Python backend); interactive Swagger docs are also available live a
   the frontend's older contract (ported from the original Express API)
   reads `error`, while FastAPI's default `HTTPException` body is `detail`;
   a global exception handler in `app/main.py` adds both.
+- Every response carries an `X-Request-ID` header. Send your own (letters, digits, `.`, `_`, `-`, up to 64 characters) to use it as the id, otherwise one is generated. The same id is on every log line of that request, so it is the handle for following a request through the logs.
 
 ---
 
@@ -266,17 +267,18 @@ Returns recorded guardrail detections, newest first. Query params: `limit`
 
 Lists OpenRouter's current free-tier models (used to populate the web UI's
 "OpenRouter model" dropdown) plus a couple of disabled example paid models,
-shown for reference only. Cached server-side for 5 minutes.
+shown for reference only. Cached server-side for 5 minutes. If OpenRouter cannot be reached, the saved list from `apps/api-py/models.yaml` is returned instead (`"source": "fallback"`).
 
 **Response 200**
 ```json
 {
   "free": [{ "id": "liquid/lfm-2.5-2.6b:free", "name": "LiquidAI: LFM2.5-2.6B (free)" }],
-  "paid": [{ "id": "openai/gpt-4o-mini", "name": "OpenAI: GPT-4o-mini" }]
+  "paid": [{ "id": "openai/gpt-4o-mini", "name": "OpenAI: GPT-4o-mini" }],
+  "source": "live"
 }
 ```
 
-**Response 503** — couldn't reach OpenRouter.
+`source` is `"live"` (OpenRouter's current list) or `"fallback"` (the last-known-good list in `models.yaml`, with `"paid": []`). This route no longer returns 503.
 
 ---
 

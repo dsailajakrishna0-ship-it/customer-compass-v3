@@ -2,15 +2,11 @@
 
 from fastapi import APIRouter, HTTPException
 
+from app.config import get_settings
 from app.db import get_pool
 from app.rag.ingest import ingest_documents
-from app.rag.qdrant_store import COLLECTION_NAME, count_chunks
-from app.rag.retrieve import (
-    VECTOR_HNSW_EF,
-    VECTOR_INDEX_MIN_POINTS,
-    choose_search_strategy,
-    get_point_count,
-)
+from app.rag.qdrant_store import collection_name, count_chunks
+from app.rag.retrieve import choose_search_strategy, get_point_count
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -21,11 +17,11 @@ async def vector_search_info():
     points = await get_point_count()
     strategy, _ = choose_search_strategy(points)
     return {
-        "collection": COLLECTION_NAME,
+        "collection": collection_name(),
         "points": points,
         "strategy": strategy,
-        "minPointsForHnsw": VECTOR_INDEX_MIN_POINTS,
-        "hnswEf": VECTOR_HNSW_EF,
+        "minPointsForHnsw": get_settings().vector_index_min_points,
+        "hnswEf": get_settings().vector_hnsw_ef,
     }
 
 

@@ -22,7 +22,7 @@ from app.guardrails.prompt_guard import (
     scan_output,
     wrap_untrusted_context,
 )
-from app.llm.provider import DEFAULT_LLM_PROVIDER, ChatMessage, LlmProvider, generate
+from app.llm.provider import ChatMessage, LlmProvider, default_llm_provider, generate
 from app.llm.types import GenerationResult
 from app.mcp.client import call_tool, list_tool_specs, mcp_session
 from app.mcp.tools import looks_like_confirmation
@@ -197,7 +197,7 @@ def _facts_json(facts) -> dict | None:
 @router.post("")
 async def general_chat(body: ChatRequest):
     """General-purpose chat, no CRM/document grounding (Stage 2 behavior)."""
-    resolved_provider = body.provider or DEFAULT_LLM_PROVIDER
+    resolved_provider = body.provider or default_llm_provider()
     try:
         question_finding = await guard_input(body.messages[-1].content)
         messages = body.message_dicts
@@ -223,7 +223,7 @@ async def general_chat(body: ChatRequest):
 @router.post("/rag")
 async def rag_chat(body: ChatRequest):
     """Retrieval-augmented chat: retrieves cited chunks and grounds the answer in them."""
-    resolved_provider = body.provider or DEFAULT_LLM_PROVIDER
+    resolved_provider = body.provider or default_llm_provider()
     question = body.messages[-1].content
     question_finding = await guard_input(question)
 
@@ -289,7 +289,7 @@ async def crm_chat(body: ChatRequest):
     """CRM copilot chat: routes a question to structured DB facts, document RAG
     retrieval, or both, depending on keyword-based classification. Never replaces
     "" or "/rag" — additive, so their behavior is unchanged."""
-    resolved_provider = body.provider or DEFAULT_LLM_PROVIDER
+    resolved_provider = body.provider or default_llm_provider()
     question = body.messages[-1].content
     question_finding = await guard_input(question)
 
@@ -412,7 +412,7 @@ async def tools_chat(body: ChatRequest):
     schema/discovery/execution layer (a separate stdio subprocess); only the
     "how the model signals a call" bridge is custom, since not every
     provider/model this project targets has native function-calling."""
-    resolved_provider = body.provider or DEFAULT_LLM_PROVIDER
+    resolved_provider = body.provider or default_llm_provider()
     question = body.messages[-1].content
     question_finding = await guard_input(question)
     # The confirmation decision is made here, from the user's own raw latest

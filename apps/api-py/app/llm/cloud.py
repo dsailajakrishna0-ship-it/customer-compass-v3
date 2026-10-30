@@ -7,11 +7,11 @@ https://openrouter.ai/models?max_price=0 for the current free-model list, or
 GET /llm/models on this API (backs the web UI's model dropdown).
 """
 
-import os
 import time
 
 import httpx
 
+from app.config import get_settings
 from app.llm.types import ChatMessage, GenerationResult
 
 # Enables cloud LLMs: OpenRouter is an OpenAI-compatible gateway to hosted models
@@ -19,7 +19,6 @@ OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 # RAG/CRM answers often quote multiple cited chunks plus a summary; 350 was
 # cutting those off mid-sentence (observed during Stage 6 manual testing).
 MAX_RESPONSE_TOKENS = 700
-DEFAULT_OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "liquid/lfm-2.5-2.6b:free")
 
 # Stage 7 cost tracking: every model the web UI's dropdown currently offers is
 # a ":free" OpenRouter model (GET /llm/models filters to free + a disabled
@@ -44,14 +43,15 @@ async def generate_with_cloud(
 ) -> GenerationResult:
     """`model` is an optional per-request override (from the web UI's "OpenRouter
     model" dropdown); when omitted, falls back to OPENROUTER_MODEL / the
-    hardcoded default above."""
-    api_key = os.environ.get("OPENROUTER_API_KEY")
+    `default` in models.yaml."""
+    settings = get_settings()
+    api_key = settings.openrouter_api_key.get_secret_value()
     if not api_key:
         raise RuntimeError(
             "OPENROUTER_API_KEY is not set. Add it to apps/api-py/.env to use LLM_PROVIDER=cloud."
         )
 
-    resolved_model = model or DEFAULT_OPENROUTER_MODEL
+    resolved_model = model or settings.default_openrouter_model
 
     started_at = time.perf_counter()
     async with httpx.AsyncClient(timeout=60.0) as client:

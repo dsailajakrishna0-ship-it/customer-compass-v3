@@ -10,6 +10,8 @@ from alembic.config import Config
 from alembic.script import ScriptDirectory
 from sqlalchemy.engine import make_url
 
+from app.config import reset_settings
+
 API_DIR = Path(__file__).resolve().parent.parent
 BASE_URL = os.environ.get(
     "DATABASE_URL",
@@ -51,6 +53,7 @@ def scratch_database_url(monkeypatch):
         conn.execute(f"DROP DATABASE IF EXISTS {SCRATCH_DB}")
         conn.execute(f"CREATE DATABASE {SCRATCH_DB}")
     monkeypatch.setenv("DATABASE_URL", scratch_url)
+    reset_settings()
     yield scratch_url
     with psycopg.connect(admin_url, autocommit=True) as conn:
         conn.execute(f"DROP DATABASE IF EXISTS {SCRATCH_DB} WITH (FORCE)")

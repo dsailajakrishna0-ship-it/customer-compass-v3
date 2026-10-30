@@ -11,8 +11,6 @@ system of record for ingestion metadata/history; Qdrant only holds chunk
 vectors + their citable payload.
 """
 
-import os
-
 from qdrant_client import AsyncQdrantClient
 from qdrant_client.models import (
     Distance,
@@ -23,11 +21,15 @@ from qdrant_client.models import (
     VectorParams,
 )
 
+from app.config import get_settings
 from app.rag.embeddings import EMBEDDING_DIMENSIONS
 
 # Vector DB: Qdrant stores chunk embeddings and does nearest-neighbour search
-QDRANT_URL = os.environ.get("QDRANT_URL", "http://localhost:6333")
-COLLECTION_NAME = os.environ.get("QDRANT_COLLECTION", "document_chunks")
+
+
+def collection_name() -> str:
+    return get_settings().qdrant_collection
+
 
 _client: AsyncQdrantClient | None = None
 
@@ -35,7 +37,7 @@ _client: AsyncQdrantClient | None = None
 def get_client() -> AsyncQdrantClient:
     global _client
     if _client is None:
-        _client = AsyncQdrantClient(url=QDRANT_URL)
+        _client = AsyncQdrantClient(url=get_settings().qdrant_url)
     return _client
 
 
@@ -51,10 +53,10 @@ async def recreate_collection() -> None:
     or leaves stale points behind (mirrors the Express pipeline's
     `TRUNCATE document_chunks` behavior)."""
     client = get_client()
-    if await client.collection_exists(COLLECTION_NAME):
-        await client.delete_collection(COLLECTION_NAME)
+    if await client.collection_exists(collection_name()):
+        await client.delete_collection(collection_name())
     await client.create_collection(
-        collection_name=COLLECTION_NAME,
+        collection_name=collection_name(),
         # Cosine distance: compares vector direction, so similar meaning scores close to 1
         vectors_config=VectorParams(size=EMBEDDING_DIMENSIONS, distance=Distance.COSINE),
     )
@@ -64,7 +66,7 @@ async def upsert_chunks(points: list[PointStruct]) -> None:
     if len(points) == 0:
         return
     client = get_client()
-    await client.upsert(collection_name=COLLECTION_NAME, points=points)
+    await client.upsert(collection_name=collection_name(), points=points)
 
 
 async def count_chunks(document_id: int | None = None) -> int:
@@ -75,6 +77,6 @@ async def count_chunks(document_id: int | None = None) -> int:
             must=[FieldCondition(key="document_id", match=MatchValue(value=document_id))]
         )
     result = await client.count(
-        collection_name=COLLECTION_NAME, count_filter=query_filter, exact=True
+        collection_name=collection_name(), count_filter=query_filter, exact=True
     )
     return result.count

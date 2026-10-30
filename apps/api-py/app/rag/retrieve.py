@@ -8,7 +8,6 @@ offsets), so no join back to Postgres is needed here.
 """
 
 import logging
-import os
 import time
 from dataclasses import dataclass
 from typing import cast
@@ -22,8 +21,9 @@ from qdrant_client.models import (
     SearchParams,
 )
 
+from app.config import get_settings
 from app.rag.embeddings import embed_text
-from app.rag.qdrant_store import COLLECTION_NAME, get_client
+from app.rag.qdrant_store import collection_name, get_client
 
 # Retrieval: embed the question, then ask Qdrant for the top-k most similar chunks
 DEFAULT_TOP_K = 4
@@ -43,14 +43,11 @@ DEFAULT_TOP_K = 4
 MIN_SIMILARITY = 0.45
 
 # Stage 3.a scale-aware search: small collections are searched exactly (every
-# vector compared, always correct); at or above this many points the search
-# switches to approximate HNSW with the effort below. Qdrant does a similar
-# switch internally; making it explicit here shows which path ran.
-VECTOR_INDEX_MIN_POINTS = int(os.environ.get("VECTOR_INDEX_MIN_POINTS", "10000"))
-# hnsw_ef: how many candidates HNSW explores per query (higher = more accurate, slower)
-VECTOR_HNSW_EF = int(os.environ.get("VECTOR_HNSW_EF", "64"))
-# The point count is cached so retrieval does not call Qdrant's count on every question
-VECTOR_COUNT_CACHE_SECONDS = float(os.environ.get("VECTOR_COUNT_CACHE_SECONDS", "60"))
+# vector compared, always correct); at or above `vector_index_min_points` the search
+# switches to approximate HNSW with `vector_hnsw_ef` (how many candidates HNSW explores
+# per query: higher = more accurate, slower). Qdrant does a similar switch internally;
+# making it explicit here shows which path ran. The point count is cached for
+# `vector_count_cache_seconds` so retrieval does not call Qdrant's count on every question.
 
 logger = logging.getLogger("app.rag.retrieve")
 
@@ -59,18 +56,22 @@ _count_cache: tuple[float, int] | None = None
 
 def choose_search_strategy(point_count: int) -> tuple[str, SearchParams]:
     """Pure decision: ("exact", ...) below the threshold, ("hnsw", ...) at or above it."""
-    if point_count < VECTOR_INDEX_MIN_POINTS:
+    settings = get_settings()
+    if point_count < settings.vector_index_min_points:
         return "exact", SearchParams(exact=True)
-    return "hnsw", SearchParams(hnsw_ef=VECTOR_HNSW_EF)
+    return "hnsw", SearchParams(hnsw_ef=settings.vector_hnsw_ef)
 
 
 async def get_point_count() -> int:
-    """Number of points in the collection, cached for VECTOR_COUNT_CACHE_SECONDS."""
+    """Number of points in the collection, cached for `vector_count_cache_seconds`."""
     global _count_cache
     now = time.monotonic()
-    if _count_cache is not None and now - _count_cache[0] < VECTOR_COUNT_CACHE_SECONDS:
+    if (
+        _count_cache is not None
+        and now - _count_cache[0] < get_settings().vector_count_cache_seconds
+    ):
         return _count_cache[1]
-    result = await get_client().count(collection_name=COLLECTION_NAME, exact=False)
+    result = await get_client().count(collection_name=collection_name(), exact=False)
     _count_cache = (now, result.count)
     return result.count
 
@@ -118,10 +119,10 @@ async def retrieve_relevant_chunks(
     query_embedding = await embed_text(question)
     client = get_client()
     strategy, search_params = choose_search_strategy(await get_point_count())
-    logger.info("vector_search strategy=%s collection=%s", strategy, COLLECTION_NAME)
+    logger.info("vector_search strategy=%s collection=%s", strategy, collection_name())
 
     results = await client.query_points(
-        collection_name=COLLECTION_NAME,
+        collection_name=collection_name(),
         query=query_embedding,
         query_filter=_company_filter(company_id),
         search_params=search_params,

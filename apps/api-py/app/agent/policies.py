@@ -5,10 +5,11 @@ The limits live in code, not in a prompt, so no model output can raise them.
 Nothing here writes data: creating a task needs the separate confirm step.
 """
 
-import os
 import re
 import time
 from dataclasses import dataclass
+
+from app.config import get_settings
 
 
 class BudgetExceeded(Exception):
@@ -25,10 +26,11 @@ class AgentLimits:
 
     @classmethod
     def from_env(cls) -> "AgentLimits":
+        settings = get_settings()
         return cls(
-            max_steps=int(os.environ.get("AGENT_MAX_STEPS", "8")),
-            timeout_seconds=float(os.environ.get("AGENT_TIMEOUT_SECONDS", "180")),
-            max_revisions=int(os.environ.get("AGENT_MAX_REVISIONS", "1")),
+            max_steps=settings.agent_max_steps,
+            timeout_seconds=settings.agent_timeout_seconds,
+            max_revisions=settings.agent_max_revisions,
         )
 
 

@@ -16,6 +16,8 @@ COPY app ./app
 # Database migrations, run by the `migrate` service in docker-compose.yml
 COPY alembic.ini ./
 COPY migrations ./migrations
+# Free-model catalogue read by app/config.py
+COPY models.yaml ./
 
 RUN uv sync --locked --no-dev
 
@@ -24,4 +26,4 @@ RUN useradd --system --no-create-home --uid 10001 appuser
 USER appuser
 
 EXPOSE 8001
-CMD ["/app/.venv/bin/uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001"]
+CMD ["/app/.venv/bin/uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001", "--no-access-log"]

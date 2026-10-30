@@ -1,0 +1,23 @@
+flowchart TB
+    M["main.py<br/>starts the app"] --> L["logs.py<br/>JSON log setup"]
+    M --> W["middleware.py<br/>request id"]
+    M --> R["routes/*<br/>chat, llm, documents, agent"]
+    R --> S["Services<br/>llm/, rag/, guardrails/, agent/, mcp/"]
+    S --> C["config.py<br/>typed settings"]
+    R --> C
+    C --> Y[("models.yaml<br/>model catalogue")]
+    C --> E[/"Environment<br/>variables"/]
+    W -.->|"adds request_id to every log line"| L
+    subgraph legend["Legend: state after sub-stage 1.1"]
+        direction LR
+        K1["new in this sub-stage"]
+        K2["changed in this sub-stage"]
+        K3["existing, untouched"]
+    end
+    S ~~~ legend
+    classDef new fill:#a5d6a7,stroke:#1b5e20,stroke-width:3px,color:#0d3b12
+    classDef changed fill:#fff3cd,stroke:#f9a825,stroke-width:2px,color:#5d4037
+    classDef existing fill:#eceff1,stroke:#b0bec5,color:#78909c
+    class L,W,C,Y,K1 new
+    class M,R,S,K2 changed
+    class E,K3 existing

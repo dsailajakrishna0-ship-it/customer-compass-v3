@@ -83,7 +83,9 @@ services:
       OLLAMA_URL: http://ollama:11434
       OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:3b}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}  # key for hosted cloud models via OpenRouter
-      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-liquid/lfm-2.5-2.6b:free}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-}  # empty: the default in apps/api-py/models.yaml
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      LOG_FORMAT: ${LOG_FORMAT:-json}  # json (one object per line) or console (readable)
       GUARD_MODE: ${GUARD_MODE:-rules}  # Stage 8.d: rules | llm | both
       GUARD_PROVIDER: ${GUARD_PROVIDER:-ollama}
       GUARD_MODEL: ${GUARD_MODEL:-}

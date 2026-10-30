@@ -1,18 +1,19 @@
 import pytest
 
+from app.config import get_settings
 from app.rag import retrieve
 
 
 def test_small_collection_uses_exact_search():
-    strategy, params = retrieve.choose_search_strategy(retrieve.VECTOR_INDEX_MIN_POINTS - 1)
+    strategy, params = retrieve.choose_search_strategy(get_settings().vector_index_min_points - 1)
     assert strategy == "exact"
     assert params.exact is True
 
 
 def test_threshold_and_above_use_hnsw():
-    strategy, params = retrieve.choose_search_strategy(retrieve.VECTOR_INDEX_MIN_POINTS)
+    strategy, params = retrieve.choose_search_strategy(get_settings().vector_index_min_points)
     assert strategy == "hnsw"
-    assert params.hnsw_ef == retrieve.VECTOR_HNSW_EF
+    assert params.hnsw_ef == get_settings().vector_hnsw_ef
     assert not params.exact
 
 

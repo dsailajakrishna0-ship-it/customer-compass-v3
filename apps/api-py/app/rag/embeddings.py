@@ -13,13 +13,12 @@ smaller output dimensionality (768) via `outputDimensionality` while keeping
 good embedding quality, instead of the model's full 3072-dim output.
 """
 
-import os
-
 import httpx
 
-GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "")
-# Embedding model (Google gemini-embedding-001): turns text into 768-number vectors for similarity search
-EMBEDDING_MODEL = os.environ.get("GOOGLE_EMBEDDING_MODEL", "gemini-embedding-001")
+from app.config import get_settings
+
+# The embedding model (default Google gemini-embedding-001, see Settings) turns text into
+# 768-number vectors for similarity search
 EMBEDDING_DIMENSIONS = 768
 
 _API_BASE = "https://generativelanguage.googleapis.com/v1beta"
@@ -30,7 +29,10 @@ async def embed_texts(texts: list[str]) -> list[list[float]]:
     batch-embed endpoint for embedContent), preserving input order."""
     if len(texts) == 0:
         return []
-    if not GOOGLE_API_KEY:
+    settings = get_settings()
+    api_key = settings.google_api_key.get_secret_value()
+    model = settings.google_embedding_model
+    if not api_key:
         raise RuntimeError(
             "GOOGLE_API_KEY is not set. Add it to apps/api-py/.env to use embeddings."
         )
@@ -39,10 +41,10 @@ async def embed_texts(texts: list[str]) -> list[list[float]]:
         embeddings: list[list[float]] = []
         for text in texts:
             response = await client.post(
-                f"{_API_BASE}/models/{EMBEDDING_MODEL}:embedContent",
-                params={"key": GOOGLE_API_KEY},
+                f"{_API_BASE}/models/{model}:embedContent",
+                params={"key": api_key},
                 json={
-                    "model": f"models/{EMBEDDING_MODEL}",
+                    "model": f"models/{model}",
                     "content": {"parts": [{"text": text}]},
                     "outputDimensionality": EMBEDDING_DIMENSIONS,
                 },

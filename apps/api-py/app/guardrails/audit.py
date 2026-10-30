@@ -4,14 +4,12 @@ attempts can be reviewed later, not just seen in a log line. Writing never
 breaks a chat request: failures are logged and swallowed."""
 
 import logging
-import os
 
+from app.config import get_settings
 from app.db import get_pool
 from app.guardrails.prompt_guard import GuardEvent
 
 logger = logging.getLogger("app.guardrails.audit")
-
-RETENTION_DAYS = int(os.environ.get("SECURITY_AUDIT_RETENTION_DAYS", "90"))
 
 # Also created by migration 0001; kept here so older databases still get it at startup
 _SCHEMA = """
@@ -34,7 +32,7 @@ async def ensure_schema_and_purge() -> None:
         await pool.execute(_SCHEMA)
         await pool.execute(
             "DELETE FROM security_audit_log WHERE created_at < NOW() - make_interval(days => $1)",
-            RETENTION_DAYS,
+            get_settings().security_audit_retention_days,
         )
     except Exception as exc:  # noqa: BLE001 - DB may be down at boot; /health reports that
         logger.warning("security_audit_log setup skipped: %s", exc)

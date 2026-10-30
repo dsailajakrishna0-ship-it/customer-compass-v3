@@ -11,7 +11,6 @@ something that happens implicitly on every chat request. Ingestion is a
 distinct lifecycle step from query-time retrieval.
 """
 
-import os
 import uuid
 from dataclasses import dataclass
 from pathlib import Path
@@ -19,9 +18,10 @@ from pathlib import Path
 import frontmatter
 from qdrant_client.models import PointStruct
 
+from app.config import get_settings
 from app.db import get_pool
 from app.rag.chunking import chunk_text
-from app.rag.embeddings import EMBEDDING_MODEL, embed_texts
+from app.rag.embeddings import embed_texts
 from app.rag.qdrant_store import recreate_collection, upsert_chunks
 
 DOCUMENT_TYPES = {"email", "call", "note", "support", "product"}
@@ -46,9 +46,9 @@ class IngestSummary:
 
 
 def _documents_dir() -> Path:
-    override = os.environ.get("SAMPLE_DATA_DIR")
+    override = get_settings().sample_data_dir
     if override:
-        return Path(override)
+        return override
     # Local dev default: apps/api-py/app/rag/ingest.py -> repo root -> sample-data/documents.
     # In Docker, SAMPLE_DATA_DIR is set explicitly (see docker-compose.yml) because the
     # container image only contains apps/api-py, not the whole repo.
@@ -98,7 +98,7 @@ async def ingest_documents() -> IngestSummary:
 
     run_row = await pool.fetchrow(
         "INSERT INTO ingestion_runs (embedding_model) VALUES ($1) RETURNING id",
-        EMBEDDING_MODEL,
+        get_settings().google_embedding_model,
     )
     ingestion_run_id = run_row["id"]
 

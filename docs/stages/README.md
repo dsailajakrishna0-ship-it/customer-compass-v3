@@ -9,7 +9,7 @@ The [tech-stack](../tech-stack.md#v3-tech-stack-at-a-glance) lists every tool, w
 | Stage | Guide | Concepts | Status |
 | --- | --- | --- | --- |
 | 0 | [Foundation](00-foundation.md) | CI/CD, linting and types, migrations, supply-chain security, releases, evaluation metrics | Written |
-| 1 | Model layer | Settings, model gateways, fallback, rate limits | Written in Stage 1 |
+| 1 | [Model layer](01-model-layer.md) | Settings, logging and request ids (1.1); gateways, fallback, rate limits (1.2 to 1.4) | In progress: 1.1 written |
 | 2 | Tools and MCP | Tool calling, structured output, MCP | Written in Stage 2 |
 | 3 | LangGraph port | Agent graphs, state, checkpoints, human-in-the-loop | Written in Stage 3 |
 | 4 | Retrieval upgrade | Hybrid search, reranking, document parsing, embeddings | Written in Stage 4 |
@@ -66,8 +66,37 @@ Terms first used here.
 ## Check your understanding
 5 to 8 questions in `<details>` blocks, each with a short answer.
 
+## Code tour
+For code stages: a module map (diagram), a table of every **new** file (purpose, key names, who uses it), a table of **existing** files that changed and why, a suggested reading order, and the path of one request or operation through the code. Stages with no code (or only configuration) say so in one line.
+
+**The tour is cumulative, and it shows what is new.** Each sub-stage PR extends the same tour, and the highlighting moves forward so a reader sees how the code grew:
+
+| State | Diagram style | Table marker |
+| --- | --- | --- |
+| **New in this sub-stage** | bright green, thick border | 🟢 |
+| **Changed in this sub-stage** (an existing module was modified) | amber | 🟡 |
+| **Existing, untouched**, including everything added in earlier sub-stages | grey | ⚪ |
+
+When sub-stage *N+1* lands:
+
+1. In the module map (`docs/diagrams/stageN-module-map.mmd`), turn the modules from earlier sub-stages **grey**, add the new modules in **bright green** and the changed ones in **amber**, update the legend title ("state after sub-stage 1.2"), and run `just diagrams`.
+2. In the tables, keep the earlier rows and change their marker to ⚪ (the "Added in" column keeps the history), then add the new rows with 🟢 or 🟡. Group them so the newest sub-stage is easy to find.
+3. Append the new steps to "what happens, in order" and extend the reading order if a new module is worth reading early.
+
+A stage's last sub-stage leaves the tour showing the whole stage; the next stage starts a new tour and diagram.
+
+**Keep the map small.** A map that only ever adds boxes becomes unreadable, so it is redrawn, not just extended:
+
+- **Budget:** at most about 12 boxes per module map.
+- **Collapse the old:** modules from earlier sub-stages or earlier stages that this sub-stage did not touch, and that no new or changed module talks to directly, are merged into one small grey box such as "Earlier: config, logs, middleware (1.1)". Their details stay in the tables, which are never shortened.
+- **Keep the context:** a collapsed module that a new or changed one depends on stays as its own grey box, so the arrow still makes sense.
+- **Bright and amber stay full size**, so what is new is always the first thing you see.
+- **A new stage starts fresh:** the previous stage's modules appear only as one grey "Earlier stages" box, or as the boxes the new modules connect to.
+
+The one place everything is drawn together is at the end: the final architecture overview in the [concepts](../concepts/README.md) section and a refreshed [architecture.md](../architecture.md) (roadmap sub-stage 9.1).
+
 ## Where to look in the repo
-Table of "you want to see" and the file.
+Table of "you want to see" and the file (for stages where the code tour is not needed).
 
 ## Further reading
 Official documentation only.
@@ -79,6 +108,7 @@ Official documentation only.
 - **Use our own data.** A worked example from the 16 sample documents beats a generic one.
 - **Be honest.** Say what we measured and what we did not. Include the failures and surprises; they teach the most.
 - **One idea per diagram**, no more than about ten boxes, and a sentence under it saying what to notice.
+- **Teach the code, not only the idea.** Every code stage ends its concepts with a code tour, so a reader knows which file to open and in what order.
 - **Link, do not copy.** Stack facts live in tech-stack.md, decisions in the ADRs.
 - **Verify before you publish.** Look at every rendered image and check every number against the repo or the baseline.
 
@@ -104,6 +134,9 @@ Keep diagrams narrow: if a flow has more than about five boxes in a row, wrap it
 | Meaning | Style |
 | --- | --- |
 | Done, current, success | `fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20` |
+| Code tour: new in this sub-stage | `fill:#a5d6a7,stroke:#1b5e20,stroke-width:3px,color:#0d3b12` |
+| Code tour: changed in this sub-stage | `fill:#fff3cd,stroke:#f9a825,stroke-width:2px,color:#5d4037` |
+| Code tour: existing, untouched | `fill:#eceff1,stroke:#b0bec5,color:#78909c` |
 | Data stores | `fill:#e3f2fd,stroke:#1976d2,color:#0d47a1` |
 | Planned, future | `fill:#eceff1,stroke:#607d8b,color:#263238` |
 | Problem, blocked, failure | `fill:#ffebee,stroke:#c62828,color:#b71c1c` |

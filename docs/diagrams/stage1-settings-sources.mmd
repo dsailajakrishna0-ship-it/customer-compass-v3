@@ -1,0 +1,19 @@
+flowchart LR
+    subgraph inputs["Where values come from"]
+        direction TB
+        E["Environment variables<br/>(from docker compose or your shell)"]
+        D["Defaults written in<br/>app/config.py"]
+        M["models.yaml<br/>default model + free-model list"]
+    end
+    C["Settings<br/>checked once, typed"]
+    E -->|"wins over the default"| C
+    D -->|"used when nothing is set"| C
+    M -->|"default model and<br/>dropdown fallback"| C
+    C -->|"get_settings()"| A["API code, tests,<br/>Alembic, eval runner"]
+    C -.->|"wrong value"| X["Start-up stops with a<br/>clear message"]
+    classDef ok fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    classDef bad fill:#ffebee,stroke:#c62828,color:#b71c1c
+    classDef store fill:#e3f2fd,stroke:#1976d2,color:#0d47a1
+    class C ok
+    class X bad
+    class M store

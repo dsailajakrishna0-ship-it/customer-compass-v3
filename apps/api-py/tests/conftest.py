@@ -9,10 +9,20 @@ loop is closed. This fixture resets both singletons after every test so each
 one starts clean on its own loop.
 """
 
+import pytest
 import pytest_asyncio
 
+from app.config import reset_settings
 from app.db import close_pool
 from app.rag.qdrant_store import close_client
+
+
+@pytest.fixture(autouse=True)
+def _fresh_settings():
+    """Settings are cached; every test starts and ends with a re-read of the environment."""
+    reset_settings()
+    yield
+    reset_settings()
 
 
 @pytest_asyncio.fixture(autouse=True)
