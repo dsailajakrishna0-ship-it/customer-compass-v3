@@ -36,7 +36,7 @@ repo findings (R1–R12) and doc findings (D1–D9) are cited below. Decisions a
 | Stage | Name | Status |
 | --- | --- | --- |
 | 0 | Foundation | Done |
-| 1 | Model layer (cloud-only) | In progress (1.1 in review) |
+| 1 | Model layer (cloud-only) | In progress (1.1 done; 1.2 in review) |
 | 2 | Tools and 🟦MCP | Planned |
 | 3 | 🟦LangGraph port | Planned |
 | 4 | 🟪Retrieval upgrade | Planned |

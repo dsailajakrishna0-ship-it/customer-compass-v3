@@ -187,11 +187,12 @@ any retrieved/tool-returned content) before building the prompt.
 ## 4. `generate()` picks the LLM provider
 
 ```python
-# apps/api-py/app/llm/provider.py (conceptually)
+# apps/api-py/app/llm/gateway.py (conceptually)
 generate(system_prompt, messages, provider, model)
   # provider == "ollama" -> Ollama (qwen2.5:3b)
   # provider == "cloud"  -> OpenRouter with the user-picked free model
-  # on failure: retry once with the other provider, flag usage.fallbackUsed
+  # on failure: next model in an ordered chain (see models.yaml), then the other provider;
+  # flag usage.fallbackUsed / fallbackFromModel
 ```
 
 `provider` and `model` are optional per-request overrides sent from the UI's

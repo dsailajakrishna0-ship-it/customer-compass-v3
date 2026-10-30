@@ -22,8 +22,8 @@ from app.guardrails.prompt_guard import (
     scan_output,
     wrap_untrusted_context,
 )
-from app.llm.provider import ChatMessage, LlmProvider, default_llm_provider, generate
-from app.llm.types import GenerationResult
+from app.llm.gateway import LlmProvider, default_llm_provider, generate
+from app.llm.types import ChatMessage, GenerationResult
 from app.mcp.client import call_tool, list_tool_specs, mcp_session
 from app.mcp.tools import looks_like_confirmation
 from app.rag.retrieve import build_context, retrieve_relevant_chunks
@@ -142,6 +142,7 @@ def _usage_json(result: GenerationResult) -> dict:
         "estimatedCost": result.estimated_cost,
         "fallbackUsed": result.fallback_used,
         "fallbackFrom": result.fallback_from,
+        "fallbackFromModel": result.fallback_from_model,
     }
     logger.info("llm_usage %s", usage)
     return usage

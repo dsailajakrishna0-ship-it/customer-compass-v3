@@ -27,7 +27,7 @@ Stages refer to [the roadmap](roadmap.md). "Seed" means it came with V2's final 
 | **asyncpg** | Lets Python talk to Postgres quickly | Seed | In use |
 | **🟩Qdrant** | Stores document meaning as numbers and finds the closest matches | Seed | In use |
 | **Google `gemini-embedding-001`** | Turns text into numbers (🟪embeddings) for 🟪similarity search | Seed | In use; compared with an open model in 4.3 |
-| **🟩OpenRouter** | One doorway to many hosted models, including free ones | Seed | In use; moves behind 🟦LiteLLM in 1.2 |
+| **🟩OpenRouter** | One doorway to many hosted models, including free ones | Seed | In use, called through 🟦LiteLLM since 1.2 |
 | **🟩Ollama** (`qwen2.5:3b`) | Runs a small 🟪language model on the local computer | Seed | **Removed** in 1.3 (cloud-only) |
 | **🟦MCP Python SDK (stdio)** | Lets the model call tools in a standard way | Seed | **Replaced** by FastMCP in 2.2 |
 | **Rule-based 🟪guardrails** (our code) | Blocks 🟪prompt-injection patterns | Seed | In use; compared with 🟦NeMo Guardrails and 🟧Llama Guard in 5.3 |
@@ -49,7 +49,7 @@ Stages refer to [the roadmap](roadmap.md). "Seed" means it came with V2's final 
 | **Alembic (+ SQLAlchemy, psycopg)** | Versioned, repeatable database changes | 0.6 | In use |
 | **Evaluation runner** (our code) | Scores 🟪retrieval (🟪recall@k, 🟪MRR), tool choice and 🟪agent outcomes | 0.7 | In use |
 | **pydantic-settings, structlog, PyYAML** | One typed, validated place for settings and the model catalogue; JSON logs with a request id on every line | 1.1 | In use |
-| **🟦LiteLLM** | One interface to many model providers, with fallback and retries | 1.2 | Planned |
+| **🟦LiteLLM** | One interface to many model providers, with an ordered fallback chain, retries with backoff and a cool-down | 1.2 | In use |
 | **Pydantic** (🟪structured output and tool schemas) | Makes the model answer in a checked shape | 2.1 | Planned |
 | **🟦FastMCP** (streamable HTTP) | A long-running tool server instead of a new process per chat turn | 2.2 | Planned |
 | **🟦LangGraph** (+ Postgres 🟪checkpointer) | Models the agent steps as a graph, pausable for 🟪human approval | 3.2 | Planned |
@@ -69,7 +69,7 @@ Optional comparisons (decided by an ADR, never adopted by default): 🟦Pydantic
 | Stage | Added | Replaced or removed | Stage guide |
 | --- | --- | --- | --- |
 | 0 Foundation | CI/CD, code-quality tools, migrations, releases, evaluation baseline | none (no behaviour change) | [Stage 0](stages/00-foundation.md) |
-| 1 Model layer | 1.1: pydantic-settings, structlog, `models.yaml`; planned: 🟦LiteLLM | planned: 🟩Ollama removed | [Stage 1](stages/01-model-layer.md) (in progress) |
+| 1 Model layer | 1.1: pydantic-settings, structlog, `models.yaml`; 1.2: 🟦LiteLLM gateway | planned: 🟩Ollama removed | [Stage 1](stages/01-model-layer.md) (in progress) |
 | 2 Tools and 🟦MCP | Native 🟪tool calling, FastMCP | stdio MCP, fenced `tool_call` text | planned |
 | 3 🟦LangGraph port | LangGraph, Postgres 🟪checkpointer | hand-written workflow code | planned |
 | 4 🟪Retrieval upgrade | 🟪Hybrid search, 🟪reranker, 🟦Docling, open 🟪embeddings (comparison) | Markdown-only ingestion | planned |
@@ -163,8 +163,7 @@ information, organized the other way (by technology, not by stage).
 - **Per-request telemetry**: every chat response now includes a `usage`
   object (actual provider/model used, input/output token counts, latency,
   and a rough cost estimate — $0 today since the UI only offers free
-  OpenRouter models, but the `cloud.py` pricing map is wired for real costs
-  once paid models are enabled). Logged server-side (`llm_usage` log line)
+  OpenRouter models, and the gateway reports a real cost when 🟦LiteLLM provides one for a paid model). Logged server-side (`llm_usage` log line)
   and shown in the UI as a small footer under each answer.
 - Found and fixed along the way: the FastAPI migration's (FastAPI is the Python backend) error responses
   used `{"detail": ...}` while the frontend's contract (ported from the old

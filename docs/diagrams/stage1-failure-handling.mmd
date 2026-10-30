@@ -1,0 +1,17 @@
+flowchart TB
+    A["Call the next model in the chain"] --> B{"What came back?"}
+    B -->|"an answer"| OK["Return it, and say if a fallback answered"]
+    B -->|"429: rate limit"| C["Bench that model for 30 s"]
+    B -->|"timeout or server error"| D{"Retries left?"}
+    B -->|"any other error"| N["Move on"]
+    D -->|"yes"| W["Wait, a little longer each time"]
+    W --> A
+    D -->|"no"| C
+    C --> N
+    N --> Z{"Another model in the chain?"}
+    Z -->|"yes"| A
+    Z -->|"no"| F["Stop with one clear error that names the models tried"]
+    classDef ok fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    classDef bad fill:#ffebee,stroke:#c62828,color:#b71c1c
+    class OK ok
+    class F bad

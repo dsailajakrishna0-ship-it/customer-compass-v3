@@ -1,5 +1,8 @@
 """Settings: defaults, overrides, validation, secrets, the model catalogue, and the one-reader rule."""
 
+import os
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -92,7 +95,38 @@ def test_model_catalogue_is_valid_and_only_lists_free_models():
 
 def test_catalogue_rejects_a_default_that_is_not_listed():
     with pytest.raises(ValidationError, match="not in last_known_good"):
-        OpenRouterCatalog(default="x:free", last_known_good=[{"id": "y:free", "name": "Y"}])
+        OpenRouterCatalog(
+            default="x:free", fallback_chain=[], last_known_good=[{"id": "y:free", "name": "Y"}]
+        )
+
+
+def test_the_catalogue_fallback_chain_is_valid():
+    catalogue = get_model_catalog().openrouter
+    assert catalogue.fallback_chain, "a fallback chain needs at least one model"
+    assert set(catalogue.fallback_chain) <= {m.id for m in catalogue.last_known_good}
+
+
+def test_catalogue_rejects_unknown_or_repeated_fallback_models():
+    listed = [{"id": "a:free", "name": "A"}, {"id": "b:free", "name": "B"}]
+    with pytest.raises(ValidationError, match="not in last_known_good"):
+        OpenRouterCatalog(default="a:free", fallback_chain=["zzz:free"], last_known_good=listed)
+    with pytest.raises(ValidationError, match="twice"):
+        OpenRouterCatalog(
+            default="a:free", fallback_chain=["b:free", "b:free"], last_known_good=listed
+        )
+
+
+def test_importing_the_gateway_leaves_litellm_in_the_safe_mode():
+    """A fresh interpreter: litellm must not load a .env file or fetch its price list."""
+    code = (
+        "import app.llm.gateway, litellm, os; "
+        "print(litellm.litellm_mode, os.environ['LITELLM_LOCAL_MODEL_COST_MAP'])"
+    )
+    env = {k: v for k, v in os.environ.items() if not k.startswith("LITELLM_")}
+    result = subprocess.run(
+        [sys.executable, "-c", code], capture_output=True, text=True, cwd=APP_DIR.parent, env=env
+    )
+    assert result.stdout.split() == ["PRODUCTION", "True"], result.stderr
 
 
 def test_child_processes_get_the_whole_environment(monkeypatch):

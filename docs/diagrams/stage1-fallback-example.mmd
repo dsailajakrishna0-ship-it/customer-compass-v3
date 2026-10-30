@@ -1,0 +1,19 @@
+sequenceDiagram
+    participant App
+    participant G as Gateway
+    participant A as Model A (first choice)
+    participant B as Model B (next in the chain)
+    Note over App,B: Request 1
+    App->>G: generate()
+    G->>A: ask
+    A-->>G: 429 rate limit
+    Note over G: bench A for 30 seconds
+    G->>B: ask (fallback)
+    B-->>G: answer
+    G-->>App: answer, flagged "fallback used: A to B"
+    Note over App,B: Request 2, ten seconds later
+    App->>G: generate()
+    Note over G: A is benched, so skip it
+    G->>B: ask
+    B-->>G: answer
+    G-->>App: answer

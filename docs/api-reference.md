@@ -371,9 +371,9 @@ and a rough cost estimate.
 | --- | --- |
 | `provider` / `model` | The provider/model that actually generated the answer. |
 | `tokensIn` / `tokensOut` | From the provider's own response (`prompt_eval_count`/`eval_count` for Ollama, `usage.prompt_tokens`/`usage.completion_tokens` for OpenRouter). Can be `null` if the provider didn't report them. |
-| `latencyMs` | Wall-clock time for the provider HTTP call only (not including retrieval/DB time). |
-| `estimatedCost` | `0.0` for all current models (every OpenRouter model offered in the UI is free-tier; Ollama is always local/free). A real per-token price can be added per-model in `cloud.py`'s `OPENROUTER_PRICE_PER_1K_TOKENS` map without touching call sites. |
-| `fallbackUsed` / `fallbackFrom` | `true`/the original provider's name if the requested provider failed and this answer came from the automatic retry with the other provider instead. |
+| `latencyMs` | Wall-clock time for the whole gateway call, including any retries and fallbacks (not retrieval or DB time). |
+| `estimatedCost` | `0.0` for every free-tier model (all the UI offers) and for Ollama. For a paid model the gateway reports the cost LiteLLM calculates, or `null`. |
+| `fallbackUsed` / `fallbackFrom` / `fallbackFromModel` | `true`, the provider that was asked first, and the model that was tried first and failed, when a later model in the chain answered instead (a rate limit, timeout or outage). All `null`/`false` when the first choice answered. The chain is the requested model, then `fallback_chain` in `models.yaml`, then the other provider. |
 
 ---
 

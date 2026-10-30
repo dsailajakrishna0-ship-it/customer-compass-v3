@@ -35,8 +35,8 @@ For the per-stage build history, see [tech-stack.md](tech-stack.md) and the
 │  app/rag/         — chunking, embeddings, Qdrant client        │
 │  app/chat/router.py — keyword-based RAG-vs-CRM query router   │
 │  app/crm/queries.py — structured CRM fact lookups              │
-│  app/llm/         — provider.py (dispatch+fallback), cloud.py,│
-│                      ollama.py, types.py (GenerationResult)    │
+│  app/llm/         — gateway.py (LiteLLM: chain, retries,       │
+│                      fallback), types.py (GenerationResult)    │
 │  app/guardrails/  — prompt_guard.py, audit.py, llm_guard.py (Stage 8)  │
 │  app/mcp/         — server.py/tools.py/client.py (Stage 9)    │
 │  app/agent/       — workflow, agents, trace, policies (Stage 10)│
@@ -103,9 +103,9 @@ Postgres and 🟩Qdrant have different jobs and neither replaces the other here:
   the free tier, but subject to internet access, external rate limits, and
   the usual cloud-provider instability.
 
-Both are always wired up side by side (`app/llm/provider.py`); a request
-can choose either via `provider`, and since Stage 7, a failure in the
-requested provider triggers one automatic retry with the other before the
+Both are always wired up side by side (`app/llm/gateway.py`, since V3 sub-stage 1.2); a request
+can choose either via `provider`. A failing model hands over to the next one in an ordered chain
+(`models.yaml`, then the other provider) before the
 request fails outright (full design: [part-3-trust-safety/07-production-concerns.md](v2-baseline/part-3-trust-safety/07-production-concerns.md)).
 
 🟪Embeddings are separate from chat 🟪inference: they always come from Google's
@@ -125,10 +125,10 @@ request fails outright (full design: [part-3-trust-safety/07-production-concerns
 4. Otherwise, the 🟪retrieved chunks are formatted into a numbered context
    block (`build_context()`) and appended to the message history under a
    🟪system prompt that requires every claim to carry a `[n]` citation.
-5. `app/llm/provider.py::generate()` dispatches to the requested provider
-   (`cloud.py` or `ollama.py`), timing the call and extracting token usage
-   from the provider's response. On failure, it retries once with the other
-   provider (Stage 7) before giving up.
+5. `app/llm/gateway.py::generate()` builds an ordered chain of models, calls them through
+   🟦LiteLLM (retrying timeouts and server errors, moving straight on after a 429), times the
+   call and extracts token usage from the response. See
+   [the Stage 1 guide](stages/01-model-layer.md#concept-4--calling-models-safely-the-model-gateway).
 6. The route returns `{ message, citations, provider, usage }` — `usage`
    is the Stage 7 telemetry object (tokens, latency, cost, fallback flag).
 7. The frontend renders the answer, a citation list, a provider tag, and

@@ -22,6 +22,15 @@ import yaml
 from pydantic import BaseModel, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# Two LiteLLM behaviours we switch off before it is first imported (app/llm/__init__.py imports this
+# module first):
+# - it downloads its price list from GitHub on every import; use the copy bundled with the package
+#   instead, so there is no network call at start-up and the same prices on every machine;
+# - in its default "DEV" mode it loads the nearest .env file up the directory tree into the process
+#   environment, which would bypass this module and pull a developer's real secrets into tests.
+os.environ.setdefault("LITELLM_LOCAL_MODEL_COST_MAP", "True")
+os.environ.setdefault("LITELLM_MODE", "PRODUCTION")
+
 LlmProviderName = Literal["ollama", "cloud"]
 GuardModeName = Literal["rules", "llm", "both"]
 
@@ -54,6 +63,13 @@ class Settings(BaseSettings):
     openrouter_api_key: SecretStr = SecretStr("")
     openrouter_model: str | None = None  # None: use `default` from models.yaml
     models_file: Path = DEFAULT_MODELS_FILE
+    # How the gateway treats failures (see app/llm/gateway.py)
+    llm_timeout_seconds: float = 60.0  # one attempt
+    llm_max_retries: int = 2  # same-model retries for timeouts and server errors (never for a 429)
+    llm_retry_min_seconds: int = (
+        1  # shortest wait before a retry, in whole seconds; waits grow from here
+    )
+    llm_cooldown_seconds: float = 30.0  # a model that just failed is skipped for this long
 
     # Guardrails
     guard_mode: GuardModeName = "rules"
@@ -82,12 +98,19 @@ class ModelInfo(BaseModel):
 
 class OpenRouterCatalog(BaseModel):
     default: str
+    fallback_chain: list[str]
     last_known_good: list[ModelInfo]
 
     @model_validator(mode="after")
     def _default_is_listed(self) -> OpenRouterCatalog:
-        if self.default not in {m.id for m in self.last_known_good}:
+        known = {m.id for m in self.last_known_good}
+        if self.default not in known:
             raise ValueError(f"default model {self.default!r} is not in last_known_good")
+        unknown = [m for m in self.fallback_chain if m not in known]
+        if unknown:
+            raise ValueError(f"fallback_chain models not in last_known_good: {unknown}")
+        if len(set(self.fallback_chain)) != len(self.fallback_chain):
+            raise ValueError("fallback_chain lists a model twice")
         return self
 
 

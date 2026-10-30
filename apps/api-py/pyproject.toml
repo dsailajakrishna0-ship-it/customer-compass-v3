@@ -17,6 +17,7 @@ dependencies = [
     "pydantic-settings>=2.16.2",
     "structlog>=26.1.0",
     "pyyaml>=6.0.3",
+    "litellm>=1.106.6",
 ]
 
 [dependency-groups]
@@ -30,6 +31,10 @@ dev = [
 
 [tool.uv]
 package = false
+# litellm declares filelock<4.0, but every fix for the 13 filelock advisories is in 4.x (pip-audit).
+# We only reach filelock through huggingface-hub's download cache and litellm's proxy CLI, neither of
+# which we run, so the override is low risk. Remove it once litellm raises its cap (see ADR 0009).
+override-dependencies = ["filelock>=4.2.1"]
 
 [tool.ruff]
 line-length = 100
@@ -51,6 +56,9 @@ files = ["app"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# litellm's type definitions make Pydantic print this harmless warning; pytest resets the filter
+# set in app/llm/__init__.py, so repeat it here
+filterwarnings = ["ignore:.*ReadOnly.*qualifier:UserWarning"]
 
 [tool.coverage.run]
 source = ["app"]
