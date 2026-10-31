@@ -20,6 +20,13 @@ describe("McpServerPicker", () => {
     expect(screen.getByText("(not configured)")).toBeInTheDocument();
   });
 
+  it("disables a server that is configured but not answering", () => {
+    const down = { ...spring, configured: true, reachable: false };
+    render(<McpServerPicker servers={[fastmcp, down]} defaultId="fastmcp" value="" onChange={() => {}} />);
+    expect(screen.getByLabelText(/Spring Boot/)).toBeDisabled();
+    expect(screen.getByText("(not reachable)")).toBeInTheDocument();
+  });
+
   it("reports the chosen server's id", () => {
     const onChange = vi.fn();
     const running = { ...spring, configured: true, reachable: true };

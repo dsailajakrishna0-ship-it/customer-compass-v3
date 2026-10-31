@@ -66,6 +66,20 @@ jobs:
           args: --offline --include-fragments --no-progress --exclude-path node_modules '**/*.md'
           fail: true
 
+  mcp-java:
+    name: Java MCP server (build, tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+          cache-dependency-path: services/mcp-java/pom.xml
+      - name: Build and test (includes the contract check against contracts/mcp-tools.json)
+        run: cd services/mcp-java && mvn -B -ntp verify
+
   smoke:
     name: Compose smoke test
     runs-on: ubuntu-latest
@@ -81,6 +95,12 @@ jobs:
         run: |
           docker compose cp contracts api-py:/tmp/contracts
           docker compose exec -T api-py /app/.venv/bin/python /tmp/contracts/check_server.py http://mcp-fastmcp:8002/mcp
+      - name: Start the Java MCP server too
+        run: docker compose --profile java up -d --build --wait mcp-spring
+      - name: The Java MCP server keeps the same contract (tools and demo-data answers)
+        run: docker compose exec -T api-py /app/.venv/bin/python /tmp/contracts/check_server.py http://mcp-spring:8003/mcp
+      - name: Both servers are reachable from the API
+        run: curl --fail --silent http://localhost:8001/api/v1/mcp/servers | tee /dev/stderr | grep -q '"id":"springboot","label":"Spring Boot (Java)","configured":true,"reachable":true'
       - name: Build the web image (the release workflow publishes it)
         run: docker build -f apps/web/Dockerfile -t customer-compass-web:ci .
       - name: Logs on failure
@@ -119,6 +139,15 @@ jobs:
           exit-code: "1"
       - name: Build the API image
         run: docker build -t customer-compass-api:ci apps/api-py
+      - name: Build the Java MCP server image
+        run: docker build -t customer-compass-mcp-java:ci services/mcp-java
+      - name: Trivy (Java MCP server image)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: customer-compass-mcp-java:ci
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
       - name: Trivy (API image)
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:

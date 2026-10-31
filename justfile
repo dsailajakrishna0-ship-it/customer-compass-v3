@@ -13,6 +13,14 @@ default:
 up:
     docker compose up -d db qdrant api-py
 
+# also start the Java MCP server (Spring Boot, port 8003); the web app's radio buttons can then choose it
+up-java:
+    docker compose --profile java up -d --build mcp-spring
+
+# build and test the Java MCP server (needs Java 21 and Maven)
+java-test:
+    cd services/mcp-java && mvn -B -ntp verify
+
 # stop the stack (data volumes are kept)
 down:
     docker compose down

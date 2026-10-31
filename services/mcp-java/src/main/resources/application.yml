@@ -1,0 +1,34 @@
+server:
+  port: ${MCP_SERVER_PORT:8003}
+
+spring:
+  application:
+    name: mcp-java
+  datasource:
+    # the schema belongs to the Python API's Alembic migrations; this service only reads and writes rows
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/customer_compass}
+    username: ${SPRING_DATASOURCE_USERNAME:customer_compass}
+    password: ${SPRING_DATASOURCE_PASSWORD:customer_compass_dev}
+  ai:
+    mcp:
+      server:
+        name: customer-compass-tools-java
+        version: 0.1.0
+        type: SYNC
+        protocol: STREAMABLE
+        streamable-http:
+          mcp-endpoint: /mcp
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+compass:
+  # the Python API: document search (embeddings and the vector store) stays there
+  api-url: ${COMPASS_API_URL:http://localhost:8001}

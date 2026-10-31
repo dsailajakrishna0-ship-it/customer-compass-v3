@@ -30,6 +30,11 @@ def simple_type(schema: dict) -> str:
     return str(schema.get("type"))
 
 
+def strip_optional(kind: str, is_required: bool) -> str:
+    """'string?' and 'string' are the same for an argument that is not required."""
+    return kind if is_required else kind.removesuffix("?")
+
+
 def compare_tools(offered: dict[str, dict], contract: dict[str, dict]) -> list[str]:
     """Differences between the server's tools ({name: input schema}) and the contract's."""
     problems = []
@@ -40,8 +45,14 @@ def compare_tools(offered: dict[str, dict], contract: dict[str, dict]) -> list[s
             problems.append(f"does not offer {name!r}")
             continue
         schema = offered[name]
-        got_props = {k: simple_type(v) for k, v in schema.get("properties", {}).items()}
-        if got_props != want["properties"]:
+        required = set(want["required"])
+        # An optional argument may be spelled "string" or "string or null" by different frameworks.
+        got_props = {
+            k: strip_optional(simple_type(v), k in required)
+            for k, v in schema.get("properties", {}).items()
+        }
+        want_props = {k: strip_optional(v, k in required) for k, v in want["properties"].items()}
+        if got_props != want_props:
             problems.append(
                 f"{name}: arguments are {got_props}, contract says {want['properties']}"
             )

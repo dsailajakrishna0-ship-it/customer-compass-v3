@@ -1,8 +1,8 @@
 # Stage 2 — Tools and MCP: letting the model do things safely
 
 > **Level:** beginner friendly; read [Stage 1](01-model-layer.md) first (the gateway). **Reading time:** about 20 minutes for what is written so far.
-> **Status:** in progress. **2.1 and 2.2a (🟦MCP over HTTP, 🟦FastMCP) are written; 2.2b (Spring Boot) is added when it is built.**
-> **Roadmap:** [Stage 2](../roadmap.md#stage-2--tools-and-mcp) · **Decisions:** [ADR 0014](../adr/0014-native-tool-calling.md), [ADR 0015](../adr/0015-mcp-over-http-two-servers.md)
+> **Status:** in progress. **All of Stage 2 so far is written: 2.1 (native 🟪tool calling), 2.2a (🟦MCP over HTTP, 🟦FastMCP) and 2.2b (Spring Boot).**
+> **Roadmap:** [Stage 2](../roadmap.md#stage-2--tools-and-mcp) · **Decisions:** [ADR 0014](../adr/0014-native-tool-calling.md), [ADR 0015](../adr/0015-mcp-over-http-two-servers.md), [ADR 0016](../adr/0016-spring-boot-mcp-server.md)
 
 **AI colour code:** 🟪 concept · 🟦 framework or tool · 🟩 data store or service · 🟧 model. Unmarked technical terms are ordinary software. [A to Z list](../ai-terms.md)
 
@@ -145,46 +145,110 @@ The server accepts only requests whose `Host` header is in `MCP_ALLOWED_HOSTS` (
 
 ---
 
-## Code tour: what changed in 2.2a, and why
+## Concept 4 — The same tools in Java: Spring Boot and Spring AI (2.2b)
 
-Bright green is new in this sub-stage (2.2a), amber is an existing module that changed in it, grey is existing and untouched (Stages 0 to 2.1 are collapsed to one grey box). Markers in the tables: 🟢 new, 🟡 changed, ⚪ earlier.
+**The problem.** A contract is only convincing if something very different can meet it. The Java server is that something: another language, another framework, another way of talking to the database, and the same four tools.
 
-![Module map after sub-stage 2.2a: the web chat panel and a new server picker call the chat route and a new GET /mcp/servers route. Both use a new registry that reads the MCP settings in config.py. The client now makes an HTTP session to the FastMCP server instead of starting a subprocess. A new contracts folder and three new test files check the server. Earlier modules are collapsed into one grey box.](../img/diagrams/stage2-module-map.png)
+**The idea.** `services/mcp-java` is a small Spring Boot application. Each tool is a Java method marked `@McpTool`; 🟦Spring AI reads the method, builds the 🟦MCP tool list and its JSON Schema, and serves them over streamable HTTP at `/mcp`. The two servers side by side:
+
+| Job | Python (FastMCP) | Java (Spring Boot + Spring AI) |
+| --- | --- | --- |
+| Declare a tool | `@server.tool()` on an `async def` | `@McpTool(name=..., description=...)` on a method of a `@Component` |
+| Describe an argument | A type hint (`company_name: str`) | `@McpToolParam(description=..., required=...)`; the **parameter name** is the argument name |
+| Optional argument | `str \| None = None` | `required = false` (a `Boolean`, so "missing" is `null`) |
+| Database | `asyncpg` pool, raw SQL | `JdbcClient`, the same raw SQL |
+| Settings | `app/config.py` and environment variables | `application.yml` and environment variables |
+| Run as a service | `python -m app.mcp.server` (Uvicorn) | `java -jar` (embedded Tomcat) |
+| Tests | pytest, a real HTTP round trip | JUnit 5, `@SpringBootTest` and a real MCP client |
+
+![The 2.2b module map: inside services/mcp-java, CrmTools has four @McpTool methods and uses JdbcCrmRepository (SQL and audit rows), HttpRetrievalClient (HTTP/1.1 calls to the Python API) and CompanyRef (name matching). Java tests and the contract checker both test CrmTools. A new /search endpoint on the Python API receives the document search calls.](../img/diagrams/stage2-module-map.png)
 
 <sub>Diagram source: [stage2-module-map.mmd](../diagrams/stage2-module-map.mmd)</sub>
+
+### Who owns what
+
+The Java server reads and writes the same Postgres tables, but **the schema still belongs to the Python API's migrations**: the Java side is only a client of it (who should own the CRM schema is a Stage 6 question). Document search stays in Python too, because 🟪embeddings and the 🟪vector store are Python's; the Java `search_documents` 🟪tool calls a new `POST /api/v1/documents/search` on the API, which returns exactly what the FastMCP tool returns. The Java server therefore does not write an audit row for that tool; the API does.
+
+### Proof that they are interchangeable
+
+Three checks, all against the one contract:
+
+1. **A Java test** (`ContractTest`) starts the real server on a random port and runs the contract with a real MCP client; only the database and the API are fakes.
+2. **CI** runs `contracts/check_server.py` against the running container, as it does for FastMCP.
+3. **A side-by-side run**: nine calls (known and unknown companies, a partial name, a proposed task, a confirmed task) sent to both servers returned identical JSON, and both wrote the same kinds of audit rows.
+
+```text
+$ docker compose exec api-py python /tmp/contracts/check_server.py http://mcp-spring:8003/mcp
+http://mcp-spring:8003/mcp: OK (4 cases)
+```
+
+### Two traps we met
+
+> [!WARNING]
+> **1. The argument name is the parameter name.** Spring AI has no way to rename a tool argument, so the Java parameters are written `company_name`, not `companyName`, exactly as the contract says. A comment on the class explains it, so nobody "fixes" it.
+>
+> **2. A bug only the real stack showed.** The first live `search_documents` call through Java got `422 body: Field required` from the Python API, although the unit test of the HTTP client passed. Java's HTTP client first offers an upgrade to HTTP/2, and Uvicorn (the API's server) then loses the body of a POST. The client now speaks HTTP/1.1 only, and a test fails if it ever sends the upgrade header again. The lesson is the one from 2.2a: run the real thing.
+
+### Running it
+
+```bash
+just up-java                     # builds and starts mcp-spring on :8003 (profile "java")
+just mcp-contract http://localhost:8003/mcp
+just java-test                   # Maven build and the Java tests (Java 21 and Maven needed)
+```
+
+Until it runs, the web app shows the Spring Boot radio button as "not reachable" and greyed out.
+
+### Lessons
+
+> [!IMPORTANT]
+> 1. **Interchangeable means checked by something neither side owns.** The same file runs against Python and Java.
+> 2. **Keep one owner per thing.** Schema and 🟪retrieval stay in Python; Java asks for them instead of copying them.
+> 3. **Compare behaviour, not only schemas.** The side-by-side run is stricter than the four contract cases.
+> 4. **A service that works in a unit test can still fail on the wire.** Test across the real network boundary.
+
+> [!NOTE]
+> **What we have not seen.** No model has driven a tool call through the Java server (no 🟩OpenRouter key). The two servers' Host-header protection also differs: only the FastMCP server has the allowlist.
+
+---
+
+## Code tour: what changed in 2.2b, and why
+
+Bright green is new in this sub-stage (2.2b), amber is an existing module that changed in it, grey is existing and untouched (Stages 0 to 2.2a are collapsed to one grey box). Markers in the tables: 🟢 new, 🟡 changed, ⚪ earlier. The map is in Concept 4 above.
 
 ### New files
 
 | | Added in | File | What it is for | Names to look at | Used by |
 | --- | --- | --- | --- | --- | --- |
-| 🟢 | 2.2a | [`app/mcp/registry.py`](../../apps/api-py/app/mcp/registry.py) | Which backend, which URL; refuses unknown or unconfigured ones | `resolve()`, `backends()`, `UnknownBackendError` | `client.py`, `routes/chat.py`, `routes/mcp.py` |
-| 🟢 | 2.2a | [`app/routes/mcp.py`](../../apps/api-py/app/routes/mcp.py) | `GET /api/v1/mcp/servers`: configured and reachable | `servers()`, `_reachable()` | The web app |
-| 🟢 | 2.2a | [`contracts/mcp-tools.json`](../../contracts/mcp-tools.json), [`check_server.py`](../../contracts/check_server.py), [`README.md`](../../contracts/README.md) | The shared tool contract and the checker for any server | `compare_tools()`, `check_case()` | CI, `just mcp-contract`, both servers |
-| 🟢 | 2.2a | `apps/web/src/components/chat/McpServerPicker.tsx`, `mcpServerStatus.ts`, `hooks/useMcpServers.ts`, `api/mcp.ts` | The radio buttons and their data | `McpServerPicker`, `unavailableReason()` | `ChatModeSelector.tsx` |
-| 🟢 | 2.2a | `tests/test_mcp_http.py`, `test_mcp_registry.py`, `test_mcp_contract.py`; `McpServerPicker.test.tsx` | Real HTTP round trip, backend choice, contract, picker | `running_server` | CI |
-| 🟢 | 2.2a | [ADR 0015](../adr/0015-mcp-over-http-two-servers.md) | The decision and what is not verified | | Readers |
-| ⚪ | 2.1 | [`app/mcp/schemas.py`](../../apps/api-py/app/mcp/schemas.py), `tests/test_chat_tools.py`, `test_tool_schemas.py` | What the model may pass to each tool | `TOOL_ARGS` | Both |
+| 🟢 | 2.2b | [`services/mcp-java/pom.xml`](../../services/mcp-java/pom.xml) | The Maven build: Spring Boot 4.0.9, 🟦Spring AI 2.0.2, Java 21 | `spring-ai-starter-mcp-server-webmvc` | Maven, CI |
+| 🟢 | 2.2b | [`CrmTools.java`](../../services/mcp-java/src/main/java/com/customercompass/mcp/CrmTools.java) | The four tools | `@McpTool`, `getCompanySummary()`, `createFollowupTask()` | Spring AI |
+| 🟢 | 2.2b | [`JdbcCrmRepository.java`](../../services/mcp-java/src/main/java/com/customercompass/mcp/JdbcCrmRepository.java), [`CrmRepository.java`](../../services/mcp-java/src/main/java/com/customercompass/mcp/CrmRepository.java) | The SQL (same as the Python), and the interface the tests fake | `summary()`, `createTask()`, `audit()` | `CrmTools` |
+| 🟢 | 2.2b | [`CompanyRef.java`](../../services/mcp-java/src/main/java/com/customercompass/mcp/CompanyRef.java) | Company-name matching, the same rule as Python | `findMentioned()` | `CrmTools` |
+| 🟢 | 2.2b | [`HttpRetrievalClient.java`](../../services/mcp-java/src/main/java/com/customercompass/mcp/HttpRetrievalClient.java) | Calls the Python API for document search; HTTP/1.1 only | `search()` | `CrmTools` |
+| 🟢 | 2.2b | [`application.yml`](../../services/mcp-java/src/main/resources/application.yml), [`Dockerfile`](../../services/mcp-java/Dockerfile) | Settings (🟦MCP transport, datasource, API address); the image | `spring.ai.mcp.server.*` | Spring, Compose |
+| 🟢 | 2.2b | `services/mcp-java/src/test/` (4 test classes, `FakeCrm`) | Contract run in-process, tool rules, the HTTP client, name matching | `ContractTest` | CI |
+| 🟢 | 2.2b | [`tests/test_documents_search.py`](../../apps/api-py/tests/test_documents_search.py) | The new search endpoint | | CI |
+| 🟢 | 2.2b | [ADR 0016](../adr/0016-spring-boot-mcp-server.md) | The decision, differences and what is not verified | | Readers |
+| ⚪ | 2.2a | [`contracts/`](../../contracts/README.md), `app/mcp/registry.py`, `routes/mcp.py`, the web picker | The shared contract, backend choice, radio buttons | | Both servers |
 
 ### Existing files that changed, and what changed
 
 | | Changed in | File | Change |
 | --- | --- | --- | --- |
-| 🟡 | 2.2a | `app/mcp/server.py` | Runs over streamable HTTP as its own service; Host allowlist |
-| 🟡 | 2.2a | `app/mcp/client.py` | An HTTP session to the chosen server; the stdio subprocess is gone |
-| 🟡 | 2.2a | `app/config.py` | `MCP_*` settings; `subprocess_env()` removed (nothing needs it now) |
-| 🟡 | 2.2a | `app/routes/chat.py` | `mcpServer` request field, `400` for a bad choice, `mcpServer` in the answer, real error shown instead of the task-group message |
-| 🟡 | 2.2a | `docker-compose.yml`, `.github/workflows/ci.yml`, `.env.example`, `justfile` | The `mcp-fastmcp` service; CI checks the API reaches it and runs the contract; settings; `just mcp-contract` |
-| 🟡 | 2.2a | Web: `ChatModeSelector`, `ChatPanel`, `ChatSessionContext`, `useChat`, `MessageBubble`, types, CSS | The radio buttons, the stored choice, the request field, "via fastmcp" in the tool trail |
-| 🟡 | 2.2a | `docs/` | API reference, architecture, tech stack, roadmap |
-| ⚪ | 2.1 | `routes/chat.py` loop, `gateway.py`, `types.py` | Native 🟪tool calling (see above) |
+| 🟡 | 2.2b | `app/routes/documents.py` | `POST /documents/search` (503 with the reason when the 🟪embeddings key is missing) |
+| 🟡 | 2.2b | `contracts/check_server.py`, `tests/test_mcp_contract.py` | An optional argument may be spelled "string" or "string or null" |
+| 🟡 | 2.2b | `docker-compose.yml`, `.github/workflows/ci.yml`, `release.yml`, `dependabot.yml`, `justfile` | The `mcp-spring` service (profile `java`), a Java CI job, contract and reachability checks, image scan, release image, Maven updates, `just up-java` and `just java-test` |
+| 🟡 | 2.2b | Web: `McpServerPicker.tsx` | A server that is not reachable is disabled too |
+| 🟡 | 2.2b | `docs/` | API reference, architecture, tech stack, roadmap, this guide |
+| ⚪ | 2.2a | `server.py`, `client.py`, `config.py`, `routes/chat.py` | FastMCP over HTTP and the backend choice |
 
 ### A good reading order
 
-1. **`contracts/mcp-tools.json`**: the whole promise, in 60 lines of data.
-2. **`app/mcp/registry.py`**: how a name becomes an address, and how it refuses.
-3. **`app/mcp/client.py`**: compare it with the version before (stdio): the diff is the story of this sub-stage.
-4. **`tests/test_mcp_http.py`**: a real server and a real client in one test.
-5. **`McpServerPicker.tsx`**: the same idea, in the browser.
+1. **`CrmTools.java`**: put it next to `app/mcp/server.py` and `tools.py`; the table above is the map between them.
+2. **`JdbcCrmRepository.java`**: the same SQL, in Java.
+3. **`ContractTest.java`**: how a Java test talks real MCP.
+4. **`HttpRetrievalClient.java`**: the HTTP/1.1 comment is the story of the bug.
+5. **`application.yml`**: three lines turn the starter into a streamable HTTP MCP server.
 
 ## What this stage added to the tech stack (so far)
 
@@ -193,6 +257,8 @@ Bright green is new in this sub-stage (2.2a), amber is an existing module that c
 | **Pydantic** (already used) | Describes the shape of data, checks it, and produces JSON Schema | `apps/api-py/app/mcp/schemas.py` |
 | **🟪Tool calling** (provider feature, through 🟦LiteLLM) | The model asks for a function by name with JSON arguments | `app/llm/gateway.py` |
 | **🟦FastMCP** (the `MCPServer` of the official `mcp` SDK, 2.2a) | A long-running tool server that speaks MCP over HTTP | `apps/api-py/app/mcp/server.py` |
+| **Spring Boot + 🟦Spring AI 🟦MCP server** (2.2b) | The same four tools written in Java; Spring AI turns `@McpTool` methods into an MCP server | `services/mcp-java/` |
+| **Maven** (2.2b) | Java's build tool: downloads dependencies, compiles, tests, packages | `services/mcp-java/pom.xml` |
 | **Streamable HTTP** (MCP transport, 2.2a) | How the API and a tool server talk over the network | `apps/api-py/app/mcp/client.py` |
 
 ## V2 vs V3 in this area
@@ -211,9 +277,13 @@ Bright green is new in this sub-stage (2.2a), amber is an existing module that c
 - **Contract (here)**: a file that says what every implementation of a service must do, checked automatically against each one.
 - **DNS rebinding**: a trick that makes a browser send requests to a local server under another host name; a Host allowlist stops it.
 - **JSON Schema**: a standard way to describe the shape of JSON data (which fields, which types, which are required).
+- **JDBC / JdbcClient**: Java's standard way to talk to a SQL database; `JdbcClient` is Spring's small fluent wrapper.
+- **JUnit**: Java's standard unit-testing library.
 - **Long-lived service**: a program that keeps running and answers many requests, as opposed to one started for each request.
+- **Maven**: Java's build tool; `pom.xml` lists what the project depends on and how to build it.
 - **Pydantic**: a Python library that describes data shapes, validates them and can export JSON Schema.
 - **Streamable HTTP**: the 🟦MCP transport that carries requests and answers over ordinary HTTP, so a tool server can be a separate service.
+- **Spring Boot**: a Java framework that starts an application with sensible defaults (web server, configuration, database access).
 - **🟪Tool call**: the model's request to run a named function with given arguments; it has an id so the result can be matched to it.
 - **Tool message**: the reply we send back for one tool call, carrying that call's id.
 - **Validation**: checking that input has the shape and limits you expect before using it.
@@ -276,9 +346,36 @@ It belongs to neither implementation. Putting it under one would make the other 
 The MCP session runs in an async task group, which wraps any error that escapes in an exception group with that useless message. The route now unwraps it to the real error. Unit tests could not show it; running the real stack did.
 </details>
 
+<details><summary>12. In 🟦Spring AI, where does a tool's argument name come from, and what does that force on the Java code?</summary>
+
+From the Java parameter name, because `@McpToolParam` has no name attribute. The contract says `company_name`, so the Java parameters are snake_case on purpose.
+</details>
+
+<details><summary>13. Why does the Java <code>search_documents</code> tool call the Python API instead of searching itself?</summary>
+
+🟪Embeddings and the 🟪vector store belong to the Python API. A second implementation of 🟪retrieval would have to be kept equal to the first. Calling the API keeps one owner; the API also writes the audit row for that tool.
+</details>
+
+<details><summary>14. The HTTP client's unit test passed, yet the first live search got <code>422 body: Field required</code>. What was wrong, and what keeps it from coming back?</summary>
+
+Java's HTTP client offers an upgrade to HTTP/2 by default, and Uvicorn then loses the body of a POST. The client now speaks HTTP/1.1 only, and a test fails if the upgrade header is sent. The unit test missed it because the stand-in server did not behave like Uvicorn.
+</details>
+
+<details><summary>15. Name three ways the two servers are shown to be interchangeable.</summary>
+
+The Java in-process contract test, the CI check of the running container with `check_server.py`, and a side-by-side run of nine identical calls that returned identical JSON.
+</details>
+
+<details><summary>16. Who owns the database schema, and who owns document search, now that a Java server exists?</summary>
+
+The Python API in both cases: the schema through its Alembic migrations (the Java server is only a client of it, and the question comes back in Stage 6), and search through its retrieval code, which Java reaches over HTTP.
+</details>
+
 ## Further reading
 
 - OpenAI 🟪function calling guide (the format 🟦LiteLLM follows): <https://platform.openai.com/docs/guides/function-calling>
 - LiteLLM, function calling: <https://docs.litellm.ai/docs/completion/function_call>
 - Pydantic, JSON Schema: <https://docs.pydantic.dev/latest/concepts/json_schema/>
-- 🟦Model Context Protocol: <https://modelcontextprotocol.io/>
+- 🟦Spring AI, 🟦MCP server (streamable HTTP): <https://docs.spring.io/spring-ai/reference/api/mcp/mcp-streamable-http-server-boot-starter-docs.html>
+- Spring AI, MCP annotations (`@McpTool`): <https://docs.spring.io/spring-ai/reference/api/mcp/mcp-annotations-server.html>
+- Model Context Protocol: <https://modelcontextprotocol.io/>

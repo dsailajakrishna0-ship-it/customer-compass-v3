@@ -60,6 +60,10 @@ For the per-stage build history, see [tech-stack.md](tech-stack.md) and the
 └───────────────┘   └───────────────┘   └─────────────────────┘
 ```
 
+### Beside the API: the MCP tool servers
+
+Tool-calling chat reaches its tools through a separate service over 🟦MCP (streamable HTTP). Two servers offer the same four tools and must pass the same contract ([`contracts/mcp-tools.json`](../contracts/mcp-tools.json)): `mcp-fastmcp` (Python, port 8002, in the API's image) and `mcp-spring` (Java, Spring Boot, port 8003, in `services/mcp-java`, started with `just up-java`). The API picks one per request ([ADR 0015](adr/0015-mcp-over-http-two-servers.md), [ADR 0016](adr/0016-spring-boot-mcp-server.md)); both read and write the same Postgres tables, and the Java one asks the API for document search.
+
 ## Stage-by-stage: what's new at each layer
 
 A per-stage comparison, from Stage 1 through Stage 10. **Bold** = introduced at that stage; everything else in a row

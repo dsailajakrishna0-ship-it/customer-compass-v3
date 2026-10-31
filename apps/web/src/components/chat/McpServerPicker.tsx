@@ -25,7 +25,7 @@ export function McpServerPicker({ servers, defaultId, value, onChange }: McpServ
               name="mcp-server"
               value={server.id}
               checked={selected === server.id}
-              disabled={!server.configured}
+              disabled={reason !== null}
               onChange={() => onChange(server.id)}
             />
             {server.label}
