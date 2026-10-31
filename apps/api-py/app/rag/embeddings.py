@@ -14,14 +14,22 @@ good embedding quality, instead of the model's full 3072-dim output.
 """
 
 import httpx
+import structlog
 
 from app.config import get_settings
+
+log = structlog.get_logger(__name__)
 
 # The embedding model (default Google gemini-embedding-001, see Settings) turns text into
 # 768-number vectors for similarity search
 EMBEDDING_DIMENSIONS = 768
 
 _API_BASE = "https://generativelanguage.googleapis.com/v1beta"
+
+
+class EmbeddingsUnavailableError(RuntimeError):
+    """The embedding service cannot be used (no key, Google refused, or an unusable reply). The message
+    is safe to show to an API caller: it never contains the key or Google's reply body."""
 
 
 async def embed_texts(texts: list[str]) -> list[list[float]]:
@@ -33,7 +41,7 @@ async def embed_texts(texts: list[str]) -> list[list[float]]:
     api_key = settings.google_api_key.get_secret_value()
     model = settings.google_embedding_model
     if not api_key:
-        raise RuntimeError(
+        raise EmbeddingsUnavailableError(
             "GOOGLE_API_KEY is not set. Put it in the .env file in the project root (apps/api-py/.env "
             "if you run the API outside Docker), without a leading #, then restart the API."
         )
@@ -51,13 +59,19 @@ async def embed_texts(texts: list[str]) -> list[list[float]]:
                 },
             )
             if response.status_code != 200:
-                raise RuntimeError(
-                    f"Google embeddings request failed: {response.status_code} {response.text}"
+                log.warning(
+                    "embedding_request_failed",
+                    status=response.status_code,
+                    body=response.text[:200],
+                )
+                raise EmbeddingsUnavailableError(
+                    f"Google's embedding service answered {response.status_code}: "
+                    "check GOOGLE_API_KEY and try again (details are in the API log)."
                 )
             payload = response.json()
             values = payload.get("embedding", {}).get("values")
             if not isinstance(values, list):
-                raise RuntimeError(
+                raise EmbeddingsUnavailableError(
                     "Google did not return an embedding vector for one of the inputs."
                 )
             embeddings.append(values)

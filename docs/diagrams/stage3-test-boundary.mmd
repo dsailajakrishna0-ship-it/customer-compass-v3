@@ -1,0 +1,20 @@
+flowchart LR
+    T["Contract test<br/>(tests/contract)"] -->|"HTTP only"| API
+    subgraph real["Real: what the port may rewrite"]
+        direction TB
+        API["FastAPI app<br/>/agent/recommend, /agent/confirm"] --> W["Agent workflow<br/>today: hand-written code<br/>Stage 3.2: LangGraph graph"]
+        W --> G["Guardrails, limits, trace"]
+    end
+    W -->|"seam 1: make_llm"| M["Fake model<br/>answers by role"]
+    W -->|"seam 2: retrieve_relevant_chunks"| R["Canned document chunks"]
+    W --> D[("Postgres<br/>real demo data")]
+    T -.->|"reads task rows"| D
+    I["Internal tests<br/>(tests/agent_internals)"] -.->|"call functions inside"| W
+    classDef test fill:#a5d6a7,stroke:#1b5e20,stroke-width:2px,color:#0d3b12
+    classDef fake fill:#fff3cd,stroke:#f9a825,color:#5d4037
+    classDef real fill:#eceff1,stroke:#b0bec5,color:#455a64
+    classDef internal fill:#ffe0e0,stroke:#d32f2f,stroke-dasharray:4 3,color:#7f1d1d
+    class T test
+    class M,R fake
+    class API,W,G,D real
+    class I internal

@@ -24,6 +24,7 @@ One short file per decision, so the reason for a choice is not buried in a long 
 | [0014](0014-native-tool-calling.md) | Native tool calling with Pydantic schemas | Accepted |
 | [0015](0015-mcp-over-http-two-servers.md) | MCP over HTTP, with two interchangeable tool servers | Accepted |
 | [0016](0016-spring-boot-mcp-server.md) | The Spring Boot MCP server | Accepted |
+| [0017](0017-contract-and-internal-tests.md) | API-contract tests and internal tests | Accepted |
 
 ## Template
 

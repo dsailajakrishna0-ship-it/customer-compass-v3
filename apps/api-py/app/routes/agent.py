@@ -9,12 +9,15 @@ when the user explicitly sends confirm=true (declining writes nothing).
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from app.agent.agents import AgentRole, LlmCall
 from app.agent.policies import needs_agent
 from app.agent.workflow import run_account_review
 from app.guardrails.audit import record_events
 from app.guardrails.prompt_guard import build_report, scan_and_neutralize
-from app.llm.gateway import generate
+from app.llm.gateway import LlmUnavailableError, generate
+from app.llm.types import ChatMessage
 from app.mcp.tools import create_followup_task_tool
+from app.rag.embeddings import EmbeddingsUnavailableError
 
 router = APIRouter(prefix="/agent", tags=["agent"])
 
@@ -32,6 +35,18 @@ class ConfirmRequest(BaseModel):
     model_config = {"populate_by_name": True}
 
 
+def make_llm(model: str | None) -> LlmCall:
+    """The model call the agents use: `llm(role, system_prompt, messages)` through the gateway.
+
+    This is the one place the agent API meets the model, and one of the two documented seams of the
+    contract tests (tests/README.md): they replace it with a fake that answers by role."""
+
+    async def llm(_role: AgentRole, system_prompt: str, messages: list[ChatMessage]):
+        return await generate(system_prompt, messages, model)
+
+    return llm
+
+
 # Agent route: only analysis requests run the multi-step workflow; simple questions are sent back to the direct chat modes
 @router.post("/recommend")
 async def recommend(body: RecommendRequest):
@@ -41,10 +56,11 @@ async def recommend(body: RecommendRequest):
             "message": "This looks like a simple question. Use the CRM copilot or document chat mode instead of the agent.",
         }
 
-    async def llm(_role, system_prompt, messages):
-        return await generate(system_prompt, messages, body.model)
-
-    return await run_account_review(body.message, llm)
+    try:
+        return await run_account_review(body.message, make_llm(body.model))
+    except (LlmUnavailableError, EmbeddingsUnavailableError) as exc:
+        # no model or no embeddings key: say what to fix instead of an opaque 500
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
 # Human approval: the only step that can create a task

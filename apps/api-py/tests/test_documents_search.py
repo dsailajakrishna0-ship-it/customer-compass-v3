@@ -4,6 +4,7 @@ import pytest
 from fastapi import HTTPException
 from pydantic import ValidationError
 
+from app.rag.embeddings import EmbeddingsUnavailableError
 from app.routes import documents
 
 
@@ -32,7 +33,7 @@ def test_the_company_is_optional_and_the_query_is_required():
 @pytest.mark.asyncio
 async def test_a_missing_embeddings_key_is_a_503_with_the_reason(monkeypatch):
     async def no_key(*_a, **_k):
-        raise RuntimeError("GOOGLE_API_KEY is not set.")
+        raise EmbeddingsUnavailableError("GOOGLE_API_KEY is not set.")
 
     monkeypatch.setattr(documents, "search_documents_tool", no_key)
     with pytest.raises(HTTPException) as exc:
