@@ -85,6 +85,10 @@ measure-limits runs="3":
 mcp-contract url:
     uv run --project {{api}} python contracts/check_server.py {{url}}
 
+# call one tool on a running MCP server, e.g. `just mcp-call http://localhost:8003/mcp get_open_deals '{"company_name": "Acme"}'` (no tool name: list the tools)
+mcp-call url tool='' args='{}':
+    uv run --project {{api}} python contracts/call_tool.py "{{url}}" "{{tool}}" '{{args}}'
+
 # on a PR branch: report (or with --apply, resolve) merge conflicts that need no decision; see docs/adr/0013-conflict-bot.md
 resolve-conflicts *args:
     python3 scripts/resolve_conflicts.py {{args}}
