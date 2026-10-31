@@ -16,11 +16,13 @@ Models are hosted free-tier models reached through OpenRouter (V3 is cloud-only,
 route-building (`build_chain`) is separate from the calling (`generate`) so each can be tested alone.
 """
 
+import json
 import logging
 import time
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from functools import lru_cache
-from typing import Any
+from typing import Any, Literal
 
 import litellm
 import structlog
@@ -30,7 +32,7 @@ from litellm.router import RetryPolicy
 from litellm.types.router import AllowedFailsPolicy
 
 from app.config import get_model_catalog, get_settings
-from app.llm.types import ChatMessage, GenerationResult
+from app.llm.types import GenerationResult, ToolCall
 
 # Kept in step with what V2 sent: RAG/CRM answers quote several chunks plus a summary, and a
 # smaller limit cut them off mid-sentence.
@@ -163,11 +165,37 @@ def _friendly_failure(plan: Plan, error: Exception) -> str:
     )
 
 
+def _parse_tool_calls(message: Any) -> list[ToolCall]:
+    """Reads the tool calls a model asked for. Bad JSON becomes a ToolCall with `error` set."""
+    calls = []
+    for raw in getattr(message, "tool_calls", None) or []:
+        text = raw.function.arguments or "{}"
+        try:
+            arguments = json.loads(text)
+            error = None if isinstance(arguments, dict) else "arguments must be a JSON object"
+        except json.JSONDecodeError:
+            arguments, error = None, "arguments were not valid JSON"
+        calls.append(
+            ToolCall(
+                id=raw.id,
+                name=raw.function.name,
+                arguments=arguments if error is None else {},
+                error=error,
+            )
+        )
+    return calls
+
+
 async def generate(
     system_prompt: str,
-    messages: list[ChatMessage],
+    messages: Sequence[Mapping[str, object]],
     model: str | None = None,
+    *,
+    tools: list[dict] | None = None,
+    tool_choice: Literal["auto", "none"] = "auto",
 ) -> GenerationResult:
+    """One model call through the chain. With `tools` (OpenAI-style function definitions) the
+    model may answer with tool calls instead of text; `tool_choice="none"` forces text."""
     settings = get_settings()
     plan = build_chain(model)
     if not plan.chain:
@@ -182,8 +210,13 @@ async def generate(
     payload: list[Any] = [{"role": "system", "content": system_prompt}, *messages]
     started = time.perf_counter()
     try:
+        extra: dict[str, Any] = {"tools": tools, "tool_choice": tool_choice} if tools else {}
         response = await router.acompletion(
-            model="r0", messages=payload, temperature=TEMPERATURE, max_tokens=MAX_RESPONSE_TOKENS
+            model="r0",
+            messages=payload,
+            temperature=TEMPERATURE,
+            max_tokens=MAX_RESPONSE_TOKENS,
+            **extra,
         )
     except Exception as error:  # noqa: BLE001 - any failure of the whole chain becomes one clear error
         log.warning(
@@ -192,8 +225,10 @@ async def generate(
         raise LlmUnavailableError(_friendly_failure(plan, error)) from error
     latency_ms = round((time.perf_counter() - started) * 1000)
 
-    content = response.choices[0].message.content
-    if not content:
+    message = response.choices[0].message
+    content = message.content or ""
+    tool_calls = _parse_tool_calls(message)
+    if not content and not tool_calls:
         raise LlmUnavailableError(
             "The model returned an empty response. Try again or pick a different model."
         )
@@ -213,4 +248,5 @@ async def generate(
         estimated_cost=cost,
         fallback_used=fallback_used,
         fallback_from_model=plan.requested_model if fallback_used else None,
+        tool_calls=tool_calls,
     )

@@ -69,8 +69,8 @@ Optional comparisons (decided by an ADR, never adopted by default): 🟦Pydantic
 | Stage | Added | Replaced or removed | Stage guide |
 | --- | --- | --- | --- |
 | 0 Foundation | CI/CD, code-quality tools, migrations, releases, evaluation baseline | none (no behaviour change) | [Stage 0](stages/00-foundation.md) |
-| 1 Model layer | 1.1: pydantic-settings, structlog, `models.yaml`; 1.2: 🟦LiteLLM gateway | 1.3: 🟩Ollama and the local/cloud provider switch removed | [Stage 1](stages/01-model-layer.md) (in progress) |
-| 2 Tools and 🟦MCP | Native 🟪tool calling, FastMCP | stdio MCP, fenced `tool_call` text | planned |
+| 1 Model layer | 1.1: pydantic-settings, structlog, `models.yaml`; 1.2: 🟦LiteLLM gateway; 1.4: typed test fake | 1.3: 🟩Ollama and the local/cloud provider switch removed | [Stage 1](stages/01-model-layer.md) (done) |
+| 2 Tools and 🟦MCP | 2.1: native 🟪tool calling with Pydantic schemas; next: FastMCP | 2.1: fenced `tool_call` text removed; next: stdio MCP | [Stage 2](stages/02-tools-and-mcp.md) (in progress) |
 | 3 🟦LangGraph port | LangGraph, Postgres 🟪checkpointer | hand-written workflow code | planned |
 | 4 🟪Retrieval upgrade | 🟪Hybrid search, 🟪reranker, 🟦Docling, open 🟪embeddings (comparison) | Markdown-only ingestion | planned |
 | 5 Observability and 🟪evals | 🟦Langfuse, OpenTelemetry, 🟦Ragas or DeepEval, 🟪guardrail comparison | log-line tracing | planned |
@@ -205,17 +205,15 @@ information, organized the other way (by technology, not by stage).
   passes through the full parent environment since MCP's default stdio env
   is a minimal allowlist that would otherwise strip `GOOGLE_API_KEY`/
   `DATABASE_URL`/etc.
-- **Hand-rolled, provider-agnostic tool-call protocol** on top of MCP: a
-  fenced ` ```tool_call ``` ` JSON block the model emits mid-conversation,
-  looped up to 4 iterations, since not every provider (especially small
-  free local/OpenRouter models) has native function-calling — matches the
-  project's "hand-build it to understand it" philosophy rather than
-  branching per-provider.
+- **Native 🟪tool calling** (since 2.1, [ADR 0014](adr/0014-native-tool-calling.md)) on top of MCP: the
+  model receives the tools as function definitions built from Pydantic models
+  (`app/mcp/schemas.py`) and answers with structured tool calls, looped up to 4
+  iterations. This replaced V2's hand-rolled fenced ` ```tool_call ``` ` text protocol.
 - **User-side confirmation gate**: the chat route (not the model) decides
   whether `create_followup_task` actually writes to the DB, based on an
   affirmative-keyword check against the user's own latest message —
   verified against a real bug where the model initially *claimed* success
-  without a second 🟪tool call actually confirming it.
+  without a second tool call actually confirming it.
 - Every tool call (read and mutating) is recorded in a `tool_audit_log`
   table (it records every MCP tool call), readable via `GET /api/v1/tool-audit-log`; confirmed tasks land in
   a new `tasks` table, readable via `GET /api/v1/tasks`.
@@ -299,17 +297,17 @@ Free options worth exploring later:
 
 | | Technology | Status |
 | --- | --- | --- |
-| **Active (default)** | 🟦MCP (Model Context Protocol) server/client + a hand-rolled fenced-JSON tool-call text protocol on top | Stage 9 |
-| **Alternative worth knowing** | Native provider function-calling (OpenAI/Anthropic/Gemini function-calling schemas) | Not wired in — reference only |
+| **Active (default)** | 🟦MCP (Model Context Protocol) server/client + native 🟪tool calling (Pydantic-defined schemas, provider function-calling format through the gateway) | Stage 2.1 |
+| **Replaced** | V2's hand-rolled fenced-JSON tool-call text protocol | Removed in 2.1 |
 
 MCP is the standard used because it is provider-agnostic and matches how
 modern AI tools (including this CLI) expose tools today. It standardizes
-tool *schema, discovery, and execution* — but not how a given 🟪LLM signals a
-🟪tool call, which differs (or is absent) per provider/model. Since this
-project targets small free models (`qwen2.5:3b`, free 🟩OpenRouter models)
-that don't reliably support native function-calling, a hand-rolled fenced
-` ```tool_call ``` ` JSON block (parsed by the chat route, executed through
-the real MCP client) bridges that gap instead of branching per provider.
+tool *discovery and execution*; the model signals a call through the provider's
+native tool-calling format, which the 🟦LiteLLM gateway sends and reads in one
+common shape. V2 used a hand-rolled fenced text block because its small local
+model could not do this; the local model is gone (ADR 0010), so the workaround
+went too (ADR 0014). Free hosted models vary in how well they support tool
+calling: the gateway's fallback chain moves on from one that refuses.
 
 ## Guardrails / prompt-injection defense
 

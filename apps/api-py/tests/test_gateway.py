@@ -26,21 +26,29 @@ class Scripted(CustomLLM):
 
     script: dict[str, list] = {}
     calls: list[str] = []
+    kwargs_seen: list[dict] = []
 
     async def acompletion(self, model, messages, **kwargs):
         Scripted.calls.append(model)
+        Scripted.kwargs_seen.append(
+            kwargs.get("optional_params", {})
+        )  # what LiteLLM sends the provider
         outcome = Scripted.script[model].pop(0)
         if isinstance(outcome, Exception):
             raise outcome
+        message: dict = {"role": "assistant", "content": outcome}
+        if isinstance(outcome, list):  # a list of (name, arguments-text) means "call these tools"
+            message = {
+                "role": "assistant",
+                "content": None,
+                "tool_calls": [
+                    {"id": f"call_{i}", "type": "function", "function": {"name": n, "arguments": a}}
+                    for i, (n, a) in enumerate(outcome)
+                ],
+            }
         return ModelResponse(
             model=model,
-            choices=[
-                {
-                    "message": {"role": "assistant", "content": outcome},
-                    "index": 0,
-                    "finish_reason": "stop",
-                }
-            ],
+            choices=[{"message": message, "index": 0, "finish_reason": "stop"}],
             usage={"prompt_tokens": 11, "completion_tokens": 7, "total_tokens": 18},
         )
 
@@ -65,7 +73,7 @@ def scripted_provider(monkeypatch):
     monkeypatch.setenv("LLM_MAX_RETRIES", "2")
     monkeypatch.setenv("LLM_RETRY_MIN_SECONDS", "0")
     monkeypatch.setenv("LLM_COOLDOWN_SECONDS", "30")
-    Scripted.script, Scripted.calls = {}, []
+    Scripted.script, Scripted.calls, Scripted.kwargs_seen = {}, [], []
     gateway._router.cache_clear()
     yield
     gateway._router.cache_clear()
@@ -328,3 +336,53 @@ def test_gateway_settings_have_sensible_defaults(monkeypatch):
         s.llm_retry_min_seconds,
         s.llm_cooldown_seconds,
     ) == (60.0, 2, 1, 30.0)
+
+
+# ---------------------------------------------------------------- native tool calling
+
+TOOLS = [
+    {
+        "type": "function",
+        "function": {"name": "get_open_deals", "description": "d", "parameters": {}},
+    }
+]
+
+
+@pytest.mark.asyncio
+async def test_tool_calls_are_returned_parsed_when_the_model_asks_for_tools(monkeypatch):
+    use_models(monkeypatch, {"a": [[("get_open_deals", '{"company_name": "Acme"}')]]})
+    result = await gateway.generate("s", [{"role": "user", "content": "q"}], tools=TOOLS)
+    assert result.content == ""
+    assert [(c.id, c.name, c.arguments, c.error) for c in result.tool_calls] == [
+        ("call_0", "get_open_deals", {"company_name": "Acme"}, None)
+    ]
+    assert (
+        Scripted.kwargs_seen[0]["tools"] == TOOLS
+        and Scripted.kwargs_seen[0]["tool_choice"] == "auto"
+    )
+
+
+@pytest.mark.asyncio
+async def test_bad_tool_arguments_are_reported_not_raised(monkeypatch):
+    use_models(monkeypatch, {"a": [[("get_open_deals", "{not json"), ("get_open_deals", "[1]")]]})
+    result = await gateway.generate("s", [{"role": "user", "content": "q"}], tools=TOOLS)
+    assert [c.error for c in result.tool_calls] == [
+        "arguments were not valid JSON",
+        "arguments must be a JSON object",
+    ]
+    assert all(c.arguments == {} for c in result.tool_calls)
+
+
+@pytest.mark.asyncio
+async def test_no_tools_means_the_provider_is_not_sent_any(monkeypatch):
+    use_models(monkeypatch, {"a": ["hello"]})
+    result = await ask()
+    assert result.tool_calls == []
+    assert "tools" not in Scripted.kwargs_seen[0] and "tool_choice" not in Scripted.kwargs_seen[0]
+
+
+@pytest.mark.asyncio
+async def test_tool_choice_none_is_passed_through(monkeypatch):
+    use_models(monkeypatch, {"a": ["final answer"]})
+    await gateway.generate("s", [], tools=TOOLS, tool_choice="none")
+    assert Scripted.kwargs_seen[0]["tool_choice"] == "none"

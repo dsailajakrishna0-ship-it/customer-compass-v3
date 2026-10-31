@@ -186,8 +186,8 @@ that part of the context. If neither facts nor documents matched anything,
 
 Stage 9 tool-calling copilot: the model can call MCP tools
 (MCP is a protocol that exposes tools to the model: `get_company_summary`, `get_open_deals`, `search_documents`,
-`create_followup_task`) mid-conversation via a hand-rolled fenced
-` ```tool_call ``` ` text protocol, instead of context being stuffed into
+`create_followup_task`) mid-conversation using the provider's native tool calling
+([ADR 0014](adr/0014-native-tool-calling.md)), instead of context being stuffed into
 the prompt upfront like `/chat/rag`/`/chat/crm`. Additive — never replaces
 the other three chat routes.
 

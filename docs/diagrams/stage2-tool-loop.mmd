@@ -1,0 +1,25 @@
+sequenceDiagram
+    autonumber
+    participant U as User
+    participant R as routes/chat.py (the loop)
+    participant G as gateway.generate()
+    participant M as Model
+    participant S as schemas.py (Pydantic)
+    participant T as MCP tool server
+    U->>R: "What are Acme's open deals?"
+    R->>G: messages + tool definitions
+    G->>M: request with tools
+    M-->>G: tool call get_open_deals {company_name: Acme}
+    G-->>R: ToolCall (arguments parsed)
+    R->>S: validate arguments
+    alt valid
+        R->>T: run the tool
+        T-->>R: result (deals)
+    else invalid, unknown or failed
+        R-->>R: error text as the tool result
+    end
+    R->>G: messages + tool result (tool message, same call id)
+    G->>M: request
+    M-->>G: final answer text
+    G-->>R: GenerationResult (no tool calls)
+    R-->>U: answer + toolsUsed + guardrail
