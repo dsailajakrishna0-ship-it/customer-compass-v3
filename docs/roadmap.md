@@ -28,6 +28,7 @@ repo findings (R1–R12) and doc findings (D1–D9) are cited below. Decisions a
 - Each sub-stage has a checkable exit criterion; a stage is done only when all its sub-stages are.
 - Each tool choice gets a one-page decision record in `docs/adr/` with the pinned version.
 - Stage 0 changes no product behaviour. From Stage 1 on, a change is accepted only if 🟪eval scores stay within the agreed tolerance.
+- Merge conflicts that need no decision (stacked PRs after a squash-merge, the ADR index, generated docs) can be resolved with `just resolve-conflicts` ([ADR 0013](adr/0013-conflict-bot.md)); anything else is resolved by a person.
 - Verify tool versions, licences and free-tier limits on the project's own page before adopting a tool.
 - Every stage ships its **stage guide** in [`stages/`](stages/README.md) (concepts, diagrams, worked examples, glossary, questions) and updates the [tech-stack](tech-stack.md) tables. A stage is done only when its guide is. The [`concepts/`](concepts/README.md) section is assembled in Stage 9 ([ADR 0007](adr/0007-documentation-track.md)).
 
@@ -36,7 +37,7 @@ repo findings (R1–R12) and doc findings (D1–D9) are cited below. Decisions a
 | Stage | Name | Status |
 | --- | --- | --- |
 | 0 | Foundation | Done |
-| 1 | Model layer (cloud-only) | In progress (1.1 to 1.3 done; 1.4 in review) |
+| 1 | Model layer (cloud-only) | Done |
 | 2 | Tools and 🟦MCP | Planned |
 | 3 | 🟦LangGraph port | Planned |
 | 4 | 🟪Retrieval upgrade | Planned |

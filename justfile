@@ -73,6 +73,10 @@ eval-offline:
 measure-limits runs="3":
     uv run --project {{api}} python evals/measure_limits.py --runs {{runs}} --out evals/baseline/limits.json
 
+# on a PR branch: report (or with --apply, resolve) merge conflicts that need no decision; see docs/adr/0013-conflict-bot.md
+resolve-conflicts *args:
+    python3 scripts/resolve_conflicts.py {{args}}
+
 # the older promptfoo suite (needs the stack and OPENROUTER_API_KEY for the judge model); see evals/README.md
 eval-promptfoo:
     cd evals && npx promptfoo@latest eval -c promptfooconfig.yaml
