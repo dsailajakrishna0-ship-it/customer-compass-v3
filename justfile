@@ -53,6 +53,14 @@ migrate:
 test-api: db migrate
     cd {{api}} && uv run pytest -q --cov --cov-report=term-missing:skip-covered
 
+# only the API-contract tests: they must pass unchanged through the LangGraph port (see apps/api-py/tests/README.md)
+test-contract: db migrate
+    cd {{api}} && uv run pytest -q -m contract
+
+# everything except the contract tests (the ones that may change with the code behind the API)
+test-internal: db migrate
+    cd {{api}} && uv run pytest -q -m "not contract"
+
 # web tests
 test-web:
     npm test

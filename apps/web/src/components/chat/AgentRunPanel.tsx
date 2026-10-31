@@ -12,6 +12,7 @@ export function AgentRunPanel({ run }: { run: AgentRun }) {
   const [confirmState, setConfirmState] = useState<ConfirmState>("idle");
   const [detail, setDetail] = useState("");
 
+  if (run.error) return <p>{run.error}</p>;
   if (run.route === "direct") return <p>{run.message}</p>;
   if (run.status !== "completed") {
     return (

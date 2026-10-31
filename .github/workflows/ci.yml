@@ -39,6 +39,8 @@ jobs:
         run: cd apps/api-py && uv run mypy
       - name: Tests (starts Postgres through Compose)
         run: just test-api
+      - name: API-contract tests on their own (they must pass unchanged through the LangGraph port)
+        run: just test-contract
 
   web:
     name: Web (lint, types, tests, build)

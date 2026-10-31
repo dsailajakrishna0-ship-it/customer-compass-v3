@@ -1,0 +1,29 @@
+flowchart TB
+    subgraph tests["apps/api-py/tests"]
+        direction TB
+        C["contract/<br/>conftest.py (the two seams)<br/>test_agent_recommend, test_agent_confirm"]
+        B["test_contract_boundary.py<br/>the rules, enforced"]
+        RD["README.md<br/>kinds, seams, every file classified"]
+        AI["agent_internals/<br/>4 moved files"]
+    end
+    B -.->|checks| C
+    B -.->|checks| RD
+    C -->|HTTP| RT["routes/agent.py<br/>make_llm seam; 503 when unavailable"]
+    RT --> EM["rag/embeddings.py<br/>EmbeddingsUnavailableError"]
+    J["justfile + CI<br/>test-contract, test-internal"] --> C
+    WEB["Web: AgentRunPanel<br/>shows the API's error"]
+    E["Earlier: workflow, agents, policies,<br/>guardrails, MCP (Stages 0 to 2)"]
+    RT --> E
+    subgraph legend["Legend: state after sub-stage 3.1"]
+        direction LR
+        K1["new in this sub-stage"]
+        K2["changed in this sub-stage"]
+        K3["existing, untouched"]
+    end
+    E ~~~ legend
+    classDef new fill:#a5d6a7,stroke:#1b5e20,stroke-width:3px,color:#0d3b12
+    classDef changed fill:#fff3cd,stroke:#f9a825,stroke-width:2px,color:#5d4037
+    classDef existing fill:#eceff1,stroke:#b0bec5,color:#78909c
+    class C,B,RD,K1 new
+    class AI,RT,EM,J,WEB,K2 changed
+    class E,K3 existing

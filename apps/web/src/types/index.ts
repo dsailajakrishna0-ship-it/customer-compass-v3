@@ -89,6 +89,8 @@ export type AgentTraceStep = {
 
 /** Stage 10: response of POST /api/v1/agent/recommend. `route: "direct"` means a simple question that should use a normal chat mode. */
 export type AgentRun = {
+  /** set instead of everything else when the API could not run the agent (no model, no embeddings key) */
+  error?: string;
   route: "agent" | "direct";
   status?: "completed" | "company_not_found" | "timed_out" | "budget_exceeded";
   message?: string;

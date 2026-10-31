@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 from app.config import get_settings
 from app.db import get_pool
 from app.mcp.tools import search_documents_tool
+from app.rag.embeddings import EmbeddingsUnavailableError
 from app.rag.ingest import ingest_documents
 from app.rag.qdrant_store import collection_name, count_chunks
 from app.rag.retrieve import choose_search_strategy, get_point_count
@@ -112,5 +113,7 @@ class SearchRequest(BaseModel):
 async def search(body: SearchRequest):
     try:
         return await search_documents_tool(body.query, body.company_name)
-    except RuntimeError as exc:  # e.g. GOOGLE_API_KEY is not set: say so, instead of an opaque 500
+    except (
+        EmbeddingsUnavailableError
+    ) as exc:  # e.g. GOOGLE_API_KEY is not set: say so, not an opaque 500
         raise HTTPException(status_code=503, detail=str(exc)) from exc
