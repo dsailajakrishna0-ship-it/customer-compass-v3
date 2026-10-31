@@ -77,6 +77,16 @@ class Settings(BaseSettings):
     agent_timeout_seconds: float = 180.0
     agent_max_revisions: int = 1
 
+    # MCP tool servers (Stage 2.2). Two implementations of the same tools; `mcp_backend` picks the
+    # default and a chat request may choose another (see app/mcp/registry.py).
+    mcp_backend: Literal["fastmcp", "springboot"] = "fastmcp"
+    mcp_fastmcp_url: str = "http://localhost:8002/mcp"
+    mcp_springboot_url: str | None = None  # None: that backend is not configured
+    # Where the FastMCP server itself listens (python -m app.mcp.server) and which Host headers it accepts
+    mcp_server_host: str = "127.0.0.1"
+    mcp_server_port: int = 8002
+    mcp_allowed_hosts: str = "localhost:*,127.0.0.1:*,mcp-fastmcp:*"
+
     # Logging
     log_level: str = "INFO"
     log_format: Literal["json", "console"] = "json"
@@ -127,9 +137,3 @@ def reset_settings() -> None:
     """Forget the cached settings so the next call re-reads the environment (used by tests)."""
     get_settings.cache_clear()
     get_model_catalog.cache_clear()
-
-
-def subprocess_env() -> dict[str, str]:
-    """The full environment to hand to child processes (the MCP tool server needs the same
-    variables as the API). Kept here so this stays the only module touching os.environ."""
-    return dict(os.environ)

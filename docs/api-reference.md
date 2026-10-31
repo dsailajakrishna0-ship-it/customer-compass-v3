@@ -191,7 +191,7 @@ Stage 9 tool-calling copilot: the model can call MCP tools
 the prompt upfront like `/chat/rag`/`/chat/crm`. Additive — never replaces
 the other three chat routes.
 
-**Request body** — same shape as `/chat` above.
+**Request body** — same shape as `/chat` above, plus an optional `"mcpServer": "fastmcp" | "springboot"` that picks the MCP tool server for this request (default: `MCP_BACKEND`). An unknown or unconfigured server is a `400` that names the setting to change.
 
 **Response 200**
 ```json
@@ -200,12 +200,13 @@ the other three chat routes.
   "toolsUsed": [
     { "tool": "get_open_deals", "arguments": { "company_name": "Acme Fabrication" } }
   ],
+  "mcpServer": "fastmcp",
   "usage": { "...": "see Usage object" },
   "guardrail": { "...": "see Guardrail object" }
 }
 ```
 
-`toolsUsed` is `[]` if the model answered without calling any tool. For
+`mcpServer` says which tool server answered. `toolsUsed` is `[]` if the model answered without calling any tool. For
 `create_followup_task`, `arguments.confirm` reflects whether the *system*
 (not the model) determined the user's latest message was an explicit
 confirmation — `false` means the task was only proposed (see
@@ -213,6 +214,20 @@ confirmation — `false` means the task was only proposed (see
 to `tasks`. See
 [part-4-autonomy-protocols/09-tool-calling-mcp.md](v2-baseline/part-4-autonomy-protocols/09-tool-calling-mcp.md)
 for the full design and manual test steps.
+
+## `GET /api/v1/mcp/servers`
+
+Which MCP tool servers exist, whether each is configured, and whether it answers right now (a 2-second probe). The web app uses it for the tool-server radio buttons.
+
+```json
+{
+  "default": "fastmcp",
+  "servers": [
+    { "id": "fastmcp", "label": "FastMCP (Python)", "configured": true, "reachable": true },
+    { "id": "springboot", "label": "Spring Boot (Java)", "configured": false, "reachable": false }
+  ]
+}
+```
 
 ## `POST /api/v1/agent/recommend`
 

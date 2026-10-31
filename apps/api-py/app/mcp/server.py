@@ -1,9 +1,8 @@
-"""Stage 9 MCP server: exposes the 4 tool functions over MCP via stdio.
+"""The FastMCP tool server: the four CRM tools over streamable HTTP (MCP, Stage 2.2).
 
-Run standalone as `python -m app.mcp.server` -- the chat route's tool-call
-loop spawns exactly this as a subprocess (see client.py), per the Stage 9
-design decision to run the MCP server as a separate process rather than
-in-process.
+Run as its own long-lived service: `python -m app.mcp.server` (the `mcp-fastmcp` container). The tool
+bodies live in app/mcp/tools.py and call the same CRM and retrieval code as the API. A second server
+with the same tools, in Java, lives in services/mcp-java; contracts/mcp-tools.json says what both must do.
 """
 
 import asyncio
@@ -17,7 +16,7 @@ from app.mcp.tools import (
     search_documents_tool,
 )
 
-# MCP server: exposes CRM tools to the model over stdio
+# MCP server: exposes CRM tools to the model over streamable HTTP
 server = MCPServer(name="customer-compass-tools")
 
 
@@ -50,5 +49,28 @@ async def create_followup_task(company_name: str, note: str, confirm: bool = Fal
     return await create_followup_task_tool(company_name, note, confirm)
 
 
+def main() -> None:
+    from mcp.server.transport_security import TransportSecuritySettings
+
+    from app.config import get_settings
+    from app.logs import configure_logging
+
+    configure_logging()
+    settings = get_settings()
+    asyncio.run(
+        server.run_streamable_http_async(
+            host=settings.mcp_server_host,
+            port=settings.mcp_server_port,
+            # only these Host headers are accepted (protects a local server from DNS rebinding)
+            transport_security=TransportSecuritySettings(
+                enable_dns_rebinding_protection=True,
+                allowed_hosts=[
+                    h.strip() for h in settings.mcp_allowed_hosts.split(",") if h.strip()
+                ],
+            ),
+        )
+    )
+
+
 if __name__ == "__main__":
-    asyncio.run(server.run_stdio_async())
+    main()

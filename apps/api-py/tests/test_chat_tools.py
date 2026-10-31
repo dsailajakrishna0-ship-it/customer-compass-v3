@@ -43,7 +43,7 @@ def world(monkeypatch):
         return state.replies.pop(0)
 
     @asynccontextmanager
-    async def session():
+    async def session(_backend=None):
         yield object()
 
     async def specs(_session):
@@ -66,7 +66,7 @@ def world(monkeypatch):
 
 async def ask(text: str, history: list[dict] | None = None) -> dict:
     messages = [*(history or []), {"role": "user", "content": text}]
-    return await chat.tools_chat(chat.ChatRequest(messages=messages))
+    return await chat.tools_chat(chat.ToolsChatRequest(messages=messages))
 
 
 @pytest.mark.asyncio
@@ -185,3 +185,34 @@ async def test_a_model_failure_is_a_503(world):
     with pytest.raises(HTTPException) as exc:
         await ask("hi")
     assert exc.value.status_code == 503
+
+
+@pytest.mark.asyncio
+async def test_an_error_wrapped_by_the_mcp_task_group_is_reported_as_itself(world, monkeypatch):
+    """Without this, a missing OpenRouter key showed as "unhandled errors in a TaskGroup"."""
+    from fastapi import HTTPException
+
+    from app.llm.gateway import NO_MODEL_MESSAGE, LlmUnavailableError
+
+    @asynccontextmanager
+    async def wrapping_session(_backend=None):
+        try:
+            yield object()
+        except LlmUnavailableError as error:
+            raise ExceptionGroup("unhandled errors in a TaskGroup", [error]) from error
+
+    async def no_model(*_a, **_k):
+        raise LlmUnavailableError(NO_MODEL_MESSAGE)
+
+    monkeypatch.setattr(chat, "mcp_session", wrapping_session)
+    monkeypatch.setattr(chat, "generate", no_model)
+    with pytest.raises(HTTPException) as exc:
+        await ask("hi")
+    assert exc.value.status_code == 503 and exc.value.detail == NO_MODEL_MESSAGE
+
+
+@pytest.mark.asyncio
+async def test_the_answer_says_which_mcp_server_was_used(world):
+    world.replies = [reply("Hello!")]
+    out = await ask("hi")
+    assert out["mcpServer"] == "fastmcp"
