@@ -2,11 +2,13 @@
 
 [![CI](https://github.com/dsailajakrishna0-ship-it/customer-compass-v3/actions/workflows/ci.yml/badge.svg)](https://github.com/dsailajakrishna0-ship-it/customer-compass-v3/actions/workflows/ci.yml)
 
-A small-business CRM used as an **AI learning project**: chat over CRM facts and documents (RAG), tool calling over MCP, prompt-injection guardrails, evaluation, and a human-in-the-loop agent. All data is synthetic.
+A small-business CRM used as an **AI learning project**: chat over CRM facts and documents (🟪RAG), 🟪tool calling over 🟦MCP, 🟪prompt-injection 🟪guardrails, evaluation, and a 🟪human-in-the-loop 🟪agent. All data is synthetic.
 
-V3 starts fresh, seeded from [`customer-compass-v2`](https://github.com/dsailajakrishna0-ship-it/customer-compass-v2) (tag `v2-final`), where every piece was hand-built to learn the mechanics. V3 replaces that hand-written plumbing with open-source frameworks (LangGraph, LiteLLM, Qdrant, Langfuse and others) one stage at a time, measuring each change against a saved baseline. The plan is in [docs/roadmap.md](docs/roadmap.md).
+V3 starts fresh, seeded from [`customer-compass-v2`](https://github.com/dsailajakrishna0-ship-it/customer-compass-v2) (tag `v2-final`), where every piece was hand-built to learn the mechanics. V3 replaces that hand-written plumbing with open-source frameworks (🟦LangGraph, 🟦LiteLLM, 🟩Qdrant, 🟦Langfuse and others) one stage at a time, measuring each change against a saved baseline. The plan is in [docs/roadmap.md](docs/roadmap.md).
 
 > **Status:** Stage 0 (foundation) in progress. The code is still the V2 seed; the frameworks arrive from Stage 1 on.
+
+**AI colour code:** 🟪 concept · 🟦 framework or tool · 🟩 data store or service · 🟧 model. Unmarked technical terms are ordinary software. [A to Z list](docs/ai-terms.md)
 
 ## How it fits together
 
@@ -34,7 +36,7 @@ npm run dev                       # web app at http://localhost:5173
 
 The `migrate` service creates the database schema and demo CRM data automatically before the API starts.
 
-> Upgrading from a V2-style database volume? Recreate it once: `docker compose down -v` (this also removes the Qdrant and Ollama volumes), then `up` again. To keep the volumes, run `uv run alembic stamp 0002` then `uv run alembic upgrade head` in `apps/api-py` instead. Then open the app and click **Ingest documents** once. API docs are at <http://localhost:8001/docs>. Full run and test guide, with every chat mode and sample questions: [docs/testing-guide.md](docs/testing-guide.md). Problems starting up: [docs/troubleshooting.md](docs/troubleshooting.md).
+> Upgrading from a V2-style database volume? Recreate it once: `docker compose down -v` (this also removes the 🟩Qdrant and 🟩Ollama volumes), then `up` again. To keep the volumes, run `uv run alembic stamp 0002` then `uv run alembic upgrade head` in `apps/api-py` instead. Then open the app and click **Ingest documents** once. API docs are at <http://localhost:8001/docs>. Full run and test guide, with every chat mode and sample questions: [docs/testing-guide.md](docs/testing-guide.md). Problems starting up: [docs/troubleshooting.md](docs/troubleshooting.md).
 
 ## Developer commands
 
@@ -59,15 +61,15 @@ Pushing a tag such as `v3.0.0-alpha.1` publishes the API and web images to GitHu
 | Path | What is in it |
 | --- | --- |
 | `apps/web` | React + Vite + TypeScript UI |
-| `apps/api-py` | FastAPI service: chat, RAG, CRM queries, guardrails, MCP tools, agent |
+| `apps/api-py` | FastAPI service: chat, 🟪RAG, CRM queries, 🟪guardrails, 🟦MCP tools, 🟪agent |
 | `apps/api-py/migrations` | Alembic database migrations: schema and synthetic demo data |
 | `sample-data` | Synthetic CRM documents |
-| `evals` | promptfoo evaluation suites |
+| `evals` | 🟦promptfoo evaluation suites |
 | `docs` | Plan, architecture, decisions, guides, and the frozen V2 stage records |
 
 ## Documentation
 
-Start at [docs/README.md](docs/README.md). **Learn the concepts:** one guide per stage in [docs/stages/](docs/stages/README.md), starting with [Stage 0](docs/stages/00-foundation.md). Plan: [docs/roadmap.md](docs/roadmap.md). Decisions: [docs/adr/](docs/adr/README.md). The hand-built V2 learning record: [docs/v2-baseline/](docs/v2-baseline/README.md).
+Start at [docs/README.md](docs/README.md). New to AI words? Every AI term in the docs is marked with a coloured square and explained in the [A to Z list](docs/ai-terms.md). **Learn the concepts:** one guide per stage in [docs/stages/](docs/stages/README.md), starting with [Stage 0](docs/stages/00-foundation.md). Plan: [docs/roadmap.md](docs/roadmap.md). Decisions: [docs/adr/](docs/adr/README.md). The hand-built V2 learning record: [docs/v2-baseline/](docs/v2-baseline/README.md).
 
 ## Contributing
 

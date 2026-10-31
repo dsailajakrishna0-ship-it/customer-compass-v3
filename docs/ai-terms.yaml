@@ -1,0 +1,494 @@
+# Source of truth for the AI colour code. `scripts/ai_terms.py` reads this file to
+#   - put a coloured marker before the first use of each term in every section of the target docs,
+#   - generate docs/ai-terms.md (the A to Z list).
+# Run `just ai-terms` after editing. CI fails if a target doc or the glossary is out of date.
+#
+# match:       exact phrases (case-sensitive unless ignore_case is true); "re:" starts a regular expression
+# since:       where the term first matters: "Seed" (V2 baseline) or a V3 sub-stage such as "1.2"
+# learn:       a path relative to docs/ for the best place to read about it (optional)
+# Keep meanings in plain words, one or two sentences, correct and short.
+
+categories:
+  concept:
+    marker: "🟪"
+    name: "AI concept or technique"
+    blurb: "An idea or method used when building with language models."
+  tool:
+    marker: "🟦"
+    name: "AI framework, library or tool"
+    blurb: "Software you install or call to build, run or check AI features."
+  service:
+    marker: "🟩"
+    name: "AI data store or service"
+    blurb: "A database or hosted service that holds or serves AI data and models."
+  model:
+    marker: "🟧"
+    name: "AI model"
+    blurb: "A trained model that generates text, makes embeddings or classifies input."
+
+# Documents the marker is applied to. Frozen records (v2-baseline, recommendations-2) and the
+# decision records (adr/) are left alone on purpose.
+targets:
+  - README.md
+  - docs/roadmap.md
+  - docs/tech-stack.md
+  - docs/architecture.md
+  - docs/stages/README.md
+  - docs/stages/*.md
+  - docs/concepts/*.md
+  - evals/README.md
+
+# Ordinary software that surrounds the AI parts. These are deliberately NOT marked.
+not_ai:
+  - "Web and API: React, Vite, TypeScript, FastAPI, Uvicorn, Spring Boot"
+  - "Data: PostgreSQL, asyncpg, Alembic, SQLAlchemy"
+  - "Build and run: Docker, Docker Compose, uv, npm, just"
+  - "Quality and delivery: GitHub Actions, ruff, mypy, ESLint, pytest, Vitest, Dependabot, Trivy, gitleaks, GHCR"
+  - "Operations: logging, request IDs, settings, health checks, OpenTelemetry"
+
+terms:
+  # ------------------------------------------------------------------ concepts
+  - id: llm
+    name: LLM
+    category: concept
+    match: ["LLM", "LLMs", "large language model", "large language models", "language model", "language models"]
+    meaning: "Large language model: a program trained on huge amounts of text that predicts likely next words, which lets it answer questions and write text."
+    since: Seed
+    learn: v2-baseline/part-1-foundations/02-first-llm-chat.md
+  - id: prompt
+    name: Prompt
+    category: concept
+    match: ["prompt", "prompts"]
+    ignore_case: true
+    meaning: "The text sent to a model: instructions plus the question. What you put in it strongly shapes the answer."
+    since: Seed
+    learn: v2-baseline/part-1-foundations/02-first-llm-chat.md
+  - id: system-prompt
+    name: System prompt
+    category: concept
+    match: ["system prompt", "system prompts"]
+    ignore_case: true
+    meaning: "Hidden instructions that set the model's role and rules before the user's message."
+    since: Seed
+    learn: v2-baseline/part-3-trust-safety/08-prompt-injection-guardrails.md
+  - id: prompt-injection
+    name: Prompt injection
+    category: concept
+    match: ["prompt injection", "prompt injections", "prompt-injection"]
+    ignore_case: true
+    meaning: "Text that tries to trick a model into ignoring its rules, for example an instruction hidden in a document or a message."
+    since: Seed
+    learn: v2-baseline/part-3-trust-safety/08-prompt-injection-guardrails.md
+  - id: jailbreak
+    name: Jailbreak
+    category: concept
+    match: ["jailbreak", "jailbreaks"]
+    ignore_case: true
+    meaning: "A prompt written to push a model past its safety rules."
+    since: Seed
+    learn: v2-baseline/part-3-trust-safety/08-prompt-injection-guardrails.md
+  - id: guardrails
+    name: Guardrails
+    category: concept
+    match: ["guardrail", "guardrails"]
+    ignore_case: true
+    meaning: "Checks around a model that block unsafe input or unsafe output. Ours start as simple rules."
+    since: Seed
+    learn: v2-baseline/part-3-trust-safety/08-prompt-injection-guardrails.md
+  - id: hallucination
+    name: Hallucination
+    category: concept
+    match: ["hallucination", "hallucinations", "hallucinate", "hallucinates"]
+    ignore_case: true
+    meaning: "A confident answer that the facts or documents do not support."
+    since: Seed
+  - id: embedding
+    name: Embedding
+    category: concept
+    match: ["embedding", "embeddings"]
+    ignore_case: true
+    meaning: "A list of numbers that captures the meaning of a text, so texts with similar meaning get similar numbers."
+    since: Seed
+    learn: v2-baseline/part-1-foundations/03-basic-rag.md
+  - id: vector-search
+    name: Vector search
+    category: concept
+    match: ["vector search", "similarity search", "semantic search", "nearest-neighbour search", "nearest-neighbor search"]
+    ignore_case: true
+    meaning: "Finding the stored texts whose embeddings are closest to the question's embedding."
+    since: Seed
+    learn: v2-baseline/part-1-foundations/03-basic-rag.md
+  - id: cosine-similarity
+    name: Cosine similarity
+    category: concept
+    match: ["cosine similarity", "cosine"]
+    ignore_case: true
+    meaning: "A score for how closely two embeddings point in the same direction; higher means more similar in meaning."
+    since: Seed
+    learn: v2-baseline/part-1-foundations/03-basic-rag.md
+  - id: vector-database
+    name: Vector database
+    category: concept
+    match: ["vector database", "vector databases", "vector store", "vector stores", "vector DB"]
+    ignore_case: true
+    meaning: "A database built to store embeddings and quickly find the nearest ones. Qdrant is ours."
+    since: Seed
+    learn: v2-baseline/part-1-foundations/03-basic-rag.md
+  - id: hnsw
+    name: HNSW
+    category: concept
+    match: ["HNSW"]
+    meaning: "An index that makes nearest-neighbour search fast on large collections by giving up a little exactness."
+    since: Seed
+  - id: chunking
+    name: Chunking
+    category: concept
+    match: ["chunk", "chunks", "chunking", "chunked"]
+    ignore_case: true
+    meaning: "Cutting documents into small pieces so each piece can be embedded and retrieved on its own."
+    since: Seed
+    learn: v2-baseline/part-1-foundations/03-basic-rag.md
+  - id: retrieval
+    name: Retrieval
+    category: concept
+    match: ["retrieval", "retrieve", "retrieves", "retrieved"]
+    ignore_case: true
+    meaning: "Finding the pieces of text most relevant to a question before the model answers."
+    since: Seed
+    learn: v2-baseline/part-2-grounded-intelligence/05-realistic-crm-rag.md
+  - id: rag
+    name: RAG
+    category: concept
+    match: ["RAG", "retrieval-augmented generation", "Retrieval-Augmented Generation", "Retrieval-augmented generation"]
+    meaning: "Retrieval-augmented generation: fetch relevant documents first and give them to the model, so its answer is based on your data and can cite sources."
+    since: Seed
+    learn: v2-baseline/part-1-foundations/03-basic-rag.md
+  - id: hybrid-search
+    name: Hybrid search
+    category: concept
+    match: ["hybrid search"]
+    ignore_case: true
+    meaning: "Combining meaning-based search (embeddings) with keyword search, which often finds more of the right documents than either alone."
+    since: "4.1"
+  - id: bm25
+    name: BM25
+    category: concept
+    match: ["BM25"]
+    meaning: "A classic keyword-scoring method for search, the keyword half of hybrid search."
+    since: "4.1"
+  - id: reranker
+    name: Reranker
+    category: concept
+    match: ["reranker", "rerankers", "reranking", "cross-encoder"]
+    ignore_case: true
+    meaning: "A second, more careful model that re-orders the first search results so the best ones come first."
+    since: "4.1"
+  - id: tool-calling
+    name: Tool calling
+    category: concept
+    match: ["tool calling", "tool call", "tool calls", "function calling"]
+    ignore_case: true
+    meaning: "The model asks the app to run a function, for example looking up a company, then uses the result in its answer."
+    since: Seed
+    learn: v2-baseline/part-4-autonomy-protocols/09-tool-calling-mcp.md
+  - id: structured-output
+    name: Structured output
+    category: concept
+    match: ["structured output"]
+    ignore_case: true
+    meaning: "Making the model answer in a fixed shape (JSON that matches a schema) instead of free text, so code can use it safely."
+    since: "2.1"
+  - id: agent
+    name: Agent
+    category: concept
+    match: ["agent", "agents", "agentic", "multi-agent"]
+    ignore_case: true
+    meaning: "A program where a model chooses which steps or tools to use to reach a goal, in a loop with hard limits."
+    since: Seed
+    learn: v2-baseline/part-4-autonomy-protocols/10-agentic-assistant.md
+  - id: human-in-the-loop
+    name: Human in the loop
+    category: concept
+    match: ["human-in-the-loop", "human in the loop", "human approval"]
+    ignore_case: true
+    meaning: "A person must approve a risky step, such as creating a task, before it happens."
+    since: Seed
+    learn: v2-baseline/part-4-autonomy-protocols/10-agentic-assistant.md
+  - id: checkpointer
+    name: Checkpointer
+    category: concept
+    match: ["checkpointer", "checkpointers"]
+    ignore_case: true
+    meaning: "Saves an agent's state so a paused run can resume later, even after a restart."
+    since: "3.2"
+  - id: llm-gateway
+    name: LLM gateway
+    category: concept
+    match: ["LLM gateway", "model gateway", "model gateways"]
+    ignore_case: true
+    meaning: "One front door for calling many model providers the same way, with fallback and retries."
+    since: "1.2"
+  - id: open-weights
+    name: Open-weights model
+    category: concept
+    match: ["open-weights", "open weights"]
+    ignore_case: true
+    meaning: "A model whose trained numbers are published, so you can run it yourself."
+    since: Seed
+  - id: pii
+    name: PII
+    category: concept
+    match: ["PII"]
+    meaning: "Personally identifiable information: data that identifies a person, such as a name or email address."
+    since: "5.3"
+  - id: evals
+    name: Evals
+    category: concept
+    match: ["eval", "evals"]
+    meaning: "Repeatable tests for an AI system: fixed questions with known right answers, scored by code or by a judge model."
+    since: "0.7"
+    learn: stages/00-foundation.md
+  - id: golden-set
+    name: Golden set
+    category: concept
+    match: ["golden set", "golden sets"]
+    ignore_case: true
+    meaning: "The fixed test questions, each with a known right answer, used to measure the system."
+    since: "0.7"
+    learn: stages/00-foundation.md
+  - id: recall-at-k
+    name: recall@k
+    category: concept
+    match: ["recall@k", "recall@1", "recall@3", "recall@5"]
+    meaning: "Of the documents that should come back, the share found in the first k results."
+    since: "0.7"
+    learn: stages/00-foundation.md
+  - id: mrr
+    name: MRR
+    category: concept
+    match: ["MRR"]
+    meaning: "Mean reciprocal rank: how high the first correct result sits (rank 1 scores 1, rank 2 scores 0.5), averaged over all questions."
+    since: "0.7"
+    learn: stages/00-foundation.md
+  - id: inference
+    name: Inference
+    category: concept
+    match: ["inference"]
+    ignore_case: true
+    meaning: "Running a trained model to get an answer, as opposed to training it."
+    since: Seed
+  - id: streaming
+    name: Streaming
+    category: concept
+    match: ["streaming", "SSE"]
+    meaning: "Sending the model's answer word by word as it is produced, instead of waiting for the whole answer. Usually done with Server-Sent Events (SSE)."
+    since: "1.4"
+  - id: openai-compatible
+    name: OpenAI-compatible API
+    category: concept
+    match: ["OpenAI-compatible", "OpenAI compatible"]
+    meaning: "An API shaped like OpenAI's chat API, which many providers copy, so one client can talk to all of them."
+    since: Seed
+  - id: llm-as-judge
+    name: LLM as judge
+    category: concept
+    match: ["LLM-as-judge", "LLM as judge", "LLM-as-a-judge", "judge model"]
+    meaning: "Using a second model to grade another model's answers when code cannot score them."
+    since: Seed
+
+  # --------------------------------------------------------------------- tools
+  - id: langgraph
+    name: LangGraph
+    category: tool
+    match: ["LangGraph"]
+    meaning: "A framework that models an agent's steps as a graph, with saved state and pauses for human approval."
+    since: "3.2"
+  - id: langchain
+    name: LangChain
+    category: tool
+    match: ["LangChain"]
+    meaning: "A large toolkit of building blocks for model-based apps; LangGraph is built by the same team."
+    since: Seed
+  - id: llamaindex
+    name: LlamaIndex
+    category: tool
+    match: ["LlamaIndex"]
+    meaning: "A toolkit focused on connecting models to your documents (retrieval and indexing)."
+    since: "4.1"
+  - id: litellm
+    name: LiteLLM
+    category: tool
+    match: ["LiteLLM"]
+    meaning: "One interface to many model providers, with fallback, retries and rate-limit handling."
+    since: "1.2"
+  - id: docling
+    name: Docling
+    category: tool
+    match: ["Docling"]
+    meaning: "Reads PDFs, Word files and spreadsheets and turns them into clean text for chunking."
+    since: "4.2"
+  - id: fastembed
+    name: FastEmbed
+    category: tool
+    match: ["FastEmbed", "sentence-transformers"]
+    meaning: "Libraries that make embeddings on your own computer with open models, with no API key."
+    since: "4.3"
+  - id: ragas
+    name: Ragas / DeepEval
+    category: tool
+    match: ["Ragas", "DeepEval"]
+    meaning: "Libraries that score answer quality (is it grounded in the sources, does it address the question)."
+    since: "5.2"
+  - id: promptfoo
+    name: promptfoo
+    category: tool
+    match: ["promptfoo"]
+    meaning: "A tool that sends test questions to the running app and grades the answers."
+    since: Seed
+    learn: ../evals/README.md
+  - id: guardrails-ai
+    name: Guardrails AI
+    category: tool
+    match: ["Guardrails AI"]
+    meaning: "An open-source Python framework of validators that check a model's output."
+    since: "later"
+  - id: nemo-guardrails
+    name: NeMo Guardrails
+    category: tool
+    match: ["NeMo Guardrails"]
+    meaning: "NVIDIA's open-source framework for rules around what a model may say or do."
+    since: "5.3"
+  - id: presidio
+    name: Presidio
+    category: tool
+    match: ["Presidio"]
+    meaning: "Microsoft's open-source tool that finds and masks personal data in text."
+    since: "5.3"
+  - id: agent-sdks
+    name: Pydantic AI / OpenAI Agents SDK
+    category: tool
+    match: ["Pydantic AI", "OpenAI Agents SDK"]
+    meaning: "Agent and structured-output libraries we only compare against, not adopt by default."
+    since: "7"
+  - id: mcp
+    name: MCP
+    category: tool
+    match: ["MCP", "FastMCP", "Model Context Protocol"]
+    meaning: "Model Context Protocol: an open standard for exposing tools to models. FastMCP is the Python library for building such a tool server."
+    since: Seed
+    learn: v2-baseline/part-4-autonomy-protocols/09-tool-calling-mcp.md
+  - id: langfuse
+    name: Langfuse
+    category: tool
+    match: ["Langfuse"]
+    meaning: "Open-source tracing for model apps: it shows every model call and agent step with its cost and time."
+    since: "5.1"
+  - id: spring-ai
+    name: Spring AI
+    category: tool
+    match: ["Spring AI", "LangChain4j", "LangGraph4j"]
+    meaning: "Java-world counterparts of the Python AI frameworks, noted for the optional Spring Boot track."
+    since: "later"
+
+  # ------------------------------------------------------------------ services
+  - id: qdrant
+    name: Qdrant
+    category: service
+    match: ["Qdrant"]
+    meaning: "The vector database we run. It stores each chunk's embedding and finds the closest ones to a question."
+    since: Seed
+    learn: v2-baseline/part-1-foundations/03-basic-rag.md
+  - id: pgvector
+    name: pgvector
+    category: service
+    match: ["pgvector"]
+    meaning: "A Postgres extension that stores embeddings inside Postgres. V2 used it first, then moved to Qdrant."
+    since: Seed
+  - id: openrouter
+    name: OpenRouter
+    category: service
+    match: ["OpenRouter"]
+    meaning: "A hosted gateway to many models, including free ones, behind one API key."
+    since: Seed
+    learn: v2-baseline/part-2-grounded-intelligence/04-cloud-llm-provider.md
+  - id: ollama
+    name: Ollama
+    category: service
+    match: ["Ollama"]
+    meaning: "Runs a small open model on your own computer. V3 removes it in sub-stage 1.3 (cloud only)."
+    since: Seed
+    learn: v2-baseline/part-1-foundations/02-first-llm-chat.md
+  - id: google-ai-studio
+    name: Google AI Studio
+    category: service
+    match: ["Google AI Studio"]
+    meaning: "Google's service where you get a free key for Gemini models, including the embedding model we use."
+    since: Seed
+  - id: hugging-face
+    name: Hugging Face
+    category: service
+    match: ["Hugging Face"]
+    meaning: "The main hub for sharing open models and datasets."
+    since: "4.3"
+  - id: together-ai
+    name: Together.ai
+    category: service
+    match: ["Together.ai"]
+    meaning: "A hosted inference service that gives free starting credits."
+    since: "1.2"
+  - id: groq
+    name: Groq
+    category: service
+    match: ["Groq"]
+    meaning: "A hosted inference service with a free tier, one of the providers V3 may fall back to."
+    since: "1.2"
+
+  # -------------------------------------------------------------------- models
+  - id: qwen
+    name: Qwen
+    category: model
+    match: ["re:qwen2\\.5(?::\\d+b)?"]
+    meaning: "An open model family from Alibaba. We ran the small 3-billion-parameter size locally in V2."
+    since: Seed
+  - id: gemini-embedding
+    name: gemini-embedding-001
+    category: model
+    match: ["gemini-embedding-001"]
+    meaning: "Google's embedding model: turns text into 768 numbers. It makes every vector we store."
+    since: Seed
+  - id: gemini
+    name: Gemini
+    category: model
+    match: ["Gemini"]
+    meaning: "Google's family of models. We use its embedding model, gemini-embedding-001."
+    since: Seed
+  - id: gemma
+    name: Gemma
+    category: model
+    match: ["Gemma"]
+    meaning: "Google's family of open models, available on free tiers."
+    since: "1.1"
+  - id: llama-guard
+    name: Llama Guard
+    category: model
+    match: ["Llama Guard"]
+    meaning: "A model trained to classify whether a message is safe or unsafe."
+    since: "5.3"
+  - id: lfm
+    name: LFM
+    category: model
+    match: ["re:LFM[\\d.\\-]*", "LiquidAI"]
+    meaning: "Liquid AI's small language models; one is our default free cloud model."
+    since: Seed
+  - id: nemotron
+    name: Nemotron
+    category: model
+    match: ["Nemotron"]
+    meaning: "NVIDIA's family of open models."
+    since: "1.1"
+  - id: mxbai
+    name: mxbai-embed-large
+    category: model
+    match: ["mxbai-embed-large"]
+    meaning: "An open embedding model V2 used locally before switching to Google's."
+    since: Seed

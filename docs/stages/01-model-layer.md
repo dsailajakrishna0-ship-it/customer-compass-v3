@@ -4,6 +4,8 @@
 > **Status:** in progress. **1.1 is written; 1.2 to 1.4 are added as they are built.**
 > **Roadmap:** [Stage 1](../roadmap.md#stage-1--model-layer-cloud-only) · **Decisions:** [ADR 0008](../adr/0008-config-and-logging.md) (more to come)
 
+**AI colour code:** 🟪 concept · 🟦 framework or tool · 🟩 data store or service · 🟧 model. Unmarked technical terms are ordinary software. [A to Z list](../ai-terms.md)
+
 ## In one minute
 
 Stage 1 prepares the part of the app that talks to AI models. Before swapping in a better way to call them, we first make the app **easy to configure, safe with secrets, and easy to follow when something goes wrong**. Think of the control room of a factory:
@@ -14,7 +16,7 @@ Stage 1 prepares the part of the app that talks to AI models. Before swapping in
 | A list of approved suppliers, with a spare list if the usual one is closed | **Model catalogue** | `models.yaml`, with a fallback for the dropdown |
 | A numbered ticket attached to every order, so you can follow it through every station | **Request IDs and structured logs** | Every log line of a request carries the same id |
 
-Still to come in this stage: a gateway that calls many model providers through one interface with automatic fallback (1.2), removing the local Ollama model (1.3), and a fake model for tests plus streaming (1.4). Their sections are added when they are built.
+Still to come in this stage: a gateway that calls many model providers through one interface with automatic fallback (1.2), removing the local 🟩Ollama model (1.3), and a fake model for tests plus 🟪streaming (1.4). Their sections are added when they are built.
 
 ## The big picture (1.1)
 
@@ -64,7 +66,7 @@ Because settings are read once and cached, a test that changes an environment va
 
 ## Concept 2 — The model catalogue (`models.yaml`)
 
-**The problem.** The free AI models we use change all the time: they appear, disappear, and hit rate limits. In V2 the only list of them was OpenRouter's live catalogue. If OpenRouter could not be reached, the web app's model dropdown simply failed with an error.
+**The problem.** The free AI models we use change all the time: they appear, disappear, and hit rate limits. In V2 the only list of them was 🟩OpenRouter's live catalogue. If OpenRouter could not be reached, the web app's model dropdown simply failed with an error.
 
 **The idea.** Keep a small, reviewed file in the repo, [`apps/api-py/models.yaml`](../../apps/api-py/models.yaml):
 
@@ -119,11 +121,11 @@ Details worth knowing:
 - **Callers cannot inject text.** Only plain tokens (letters, digits, `.`, `_`, `-`, up to 64 characters) are accepted. A header such as `X-Request-ID: x"} {"level":"error"...` is replaced by a generated id, so nobody can forge log lines.
 - **Existing code needed no rewrite.** The older `logger.info("...")` calls are routed through the same pipeline, so they gain the id and the JSON format automatically.
 - **One line per request.** The server's own access line is switched off; the middleware logs a single summary (status, duration) that carries the id. The health check, which Docker calls every few seconds, is logged only at debug level so it does not flood the logs.
-- **Later this id becomes the trace id** when Langfuse tracing arrives in Stage 5.
+- **Later this id becomes the trace id** when 🟦Langfuse tracing arrives in Stage 5.
 
 ### A surprise we met: the logs could have leaked an API key
 
-While testing, a log line appeared that we did not write: the HTTP library (`httpx`) logs **every outgoing request URL** at INFO level. Our embeddings call sends the Google API key **in the URL** (`...embedContent?key=YOUR_KEY`). V2 never showed this only because its root logger stayed at the quieter WARNING level. Turning on proper logging would have printed the key into every log line.
+While testing, a log line appeared that we did not write: the HTTP library (`httpx`) logs **every outgoing request URL** at INFO level. Our 🟪embeddings call sends the Google API key **in the URL** (`...embedContent?key=YOUR_KEY`). V2 never showed this only because its root logger stayed at the quieter WARNING level. Turning on proper logging would have printed the key into every log line.
 
 The fix is two lines (keep `httpx` and `httpcore` at WARNING) and a regression test that sends a request with a fake key and asserts the key never reaches the output. We also confirmed the test **fails without the fix**, which is the proof that a test actually guards something.
 
@@ -144,7 +146,7 @@ Bright green is new in this sub-stage, amber is an existing module that changed,
 
 | | Added in | File | What it is for | Names to look at | Used by |
 | --- | --- | --- | --- | --- | --- |
-| 🟢 | 1.1 | [`app/config.py`](../../apps/api-py/app/config.py) | The single source of every setting and the model catalogue | `Settings` (24 typed fields), `get_settings()`, `get_model_catalog()`, `reset_settings()`, `subprocess_env()` | Every service module, the migrations, the eval runner |
+| 🟢 | 1.1 | [`app/config.py`](../../apps/api-py/app/config.py) | The single source of every setting and the model catalogue | `Settings` (24 typed fields), `get_settings()`, `get_model_catalog()`, `reset_settings()`, `subprocess_env()` | Every service module, the migrations, the 🟪eval runner |
 | 🟢 | 1.1 | [`models.yaml`](../../apps/api-py/models.yaml) | The default model and the last-known-good free-model list | `openrouter.default`, `openrouter.last_known_good` | `config.py`, which validates it; the `/llm/models` route |
 | 🟢 | 1.1 | [`app/logs.py`](../../apps/api-py/app/logs.py) | Sets up JSON logging for both new and existing log calls | `configure_logging()` | `main.py` at start-up |
 | 🟢 | 1.1 | [`app/middleware.py`](../../apps/api-py/app/middleware.py) | Gives each request an id, returns it in a header, logs one summary line | `RequestIdMiddleware`, `REQUEST_ID_HEADER` | `main.py` (added as the outermost layer) |
@@ -158,9 +160,9 @@ Bright green is new in this sub-stage, amber is an existing module that changed,
 | --- | --- | --- | --- |
 | 🟡 | 1.1 | `app/main.py` | Calls `configure_logging()`, adds the middleware, exposes the `X-Request-ID` header to browsers |
 | 🟡 | 1.1 | `app/routes/llm.py` | Falls back to `models.yaml` instead of returning 503; adds `"source"` to the response |
-| 🟡 | 1.1 | `app/db.py`, `app/rag/embeddings.py`, `app/rag/qdrant_store.py`, `app/rag/retrieve.py`, `app/rag/ingest.py` | Read the database URL, Qdrant settings, the embedding model and API key from settings. `qdrant_store.collection_name()` replaces the old `COLLECTION_NAME` constant |
+| 🟡 | 1.1 | `app/db.py`, `app/rag/embeddings.py`, `app/rag/qdrant_store.py`, `app/rag/retrieve.py`, `app/rag/ingest.py` | Read the database URL, 🟩Qdrant settings, the 🟪embedding model and API key from settings. `qdrant_store.collection_name()` replaces the old `COLLECTION_NAME` constant |
 | 🟡 | 1.1 | `app/llm/ollama.py`, `app/llm/cloud.py`, `app/llm/provider.py`, `app/routes/chat.py` | Model URLs, names and keys from settings. `provider.default_llm_provider()` replaces the old constant |
-| 🟡 | 1.1 | `app/guardrails/llm_guard.py`, `app/guardrails/audit.py`, `app/agent/policies.py` | Guard mode, retention days and the agent limits from settings |
+| 🟡 | 1.1 | `app/guardrails/llm_guard.py`, `app/guardrails/audit.py`, `app/agent/policies.py` | Guard mode, retention days and the 🟪agent limits from settings |
 | 🟡 | 1.1 | `app/mcp/client.py` | Passes the environment to the tool-server process through `subprocess_env()` |
 | 🟡 | 1.1 | `migrations/env.py`, `evals/run_eval.py` | Use the same settings as the API |
 | 🟡 | 1.1 | `Dockerfile`, `docker-compose.yml`, `.env.example` | Copy `models.yaml` into the image, turn off uvicorn's access log, new `LOG_LEVEL` and `LOG_FORMAT` |
@@ -198,7 +200,7 @@ The full list and the stage each tool joins are in [tech-stack.md](../tech-stack
 | Reading configuration | 22 `os.environ` reads in 12 files, each with its own default | One `Settings` class; a test forbids other files from reading the environment | One list of what is configurable, checked once |
 | A wrong value | Sometimes silently replaced by a default | Start-up stops with a message naming the setting | No silent misconfiguration |
 | Secrets | Plain strings | Wrapped, printed as `**********` | Cannot leak into logs by accident |
-| Model list | Only OpenRouter's live list; dropdown fails if unreachable | Live list, with `models.yaml` as fallback | Free models rotate; the UI should still work |
+| Model list | Only 🟩OpenRouter's live list; dropdown fails if unreachable | Live list, with `models.yaml` as fallback | Free models rotate; the UI should still work |
 | Logs | Plain text, no way to follow one request | JSON with a request id on every line | Searchable and traceable |
 
 ## Glossary (1.1)
@@ -244,10 +246,10 @@ Take its request id (from the response header or the summary line) and search th
 
 <details><summary>6. Why did turning on INFO-level logging risk leaking the Google API key?</summary>
 
-The embeddings call sends the key as a URL parameter, and the HTTP library logs each request URL at INFO level. The fix keeps that library's logger at WARNING, and a test proves the key stays out.
+The 🟪embeddings call sends the key as a URL parameter, and the HTTP library logs each request URL at INFO level. The fix keeps that library's logger at WARNING, and a test proves the key stays out.
 </details>
 
-<details><summary>7. The model dropdown now shows a saved list when OpenRouter is down. What is the trade-off?</summary>
+<details><summary>7. The model dropdown now shows a saved list when 🟩OpenRouter is down. What is the trade-off?</summary>
 
 The UI keeps working, but the saved list can be out of date: a model in it may no longer exist. That is why the response says <code>"source": "fallback"</code>, and why the list is re-checked from time to time.
 </details>

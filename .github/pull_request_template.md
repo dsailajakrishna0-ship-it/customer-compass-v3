@@ -17,4 +17,5 @@
 - [ ] ...and in the relevant stage doc
 - [ ] ...and in `docs/testing-guide.md`
 - [ ] New code has a one-line "here we use X / this does Y" note
+- [ ] If this introduces an AI term or tool: it is in [`docs/ai-terms.yaml`](../docs/ai-terms.yaml) and `just ai-terms` has been run
 - [ ] If this adds a tool or concept: the [stage guide](../docs/stages/README.md) and the [tech-stack](../docs/tech-stack.md) tables are updated

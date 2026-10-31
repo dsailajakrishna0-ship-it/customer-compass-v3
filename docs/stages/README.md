@@ -4,16 +4,18 @@ One guide per roadmap stage, written for someone who has not seen the code. Each
 
 The [tech-stack](../tech-stack.md#v3-tech-stack-at-a-glance) lists every tool, what it is for and the stage that adds it. When all stages are done, the guides are condensed into [concepts/](../concepts/README.md): a glossary, questions and answers, and reading paths.
 
+**AI colour code:** 🟪 concept · 🟦 framework or tool · 🟩 data store or service · 🟧 model. Unmarked technical terms are ordinary software. [A to Z list](../ai-terms.md)
+
 ## Guides
 
 | Stage | Guide | Concepts | Status |
 | --- | --- | --- | --- |
 | 0 | [Foundation](00-foundation.md) | CI/CD, linting and types, migrations, supply-chain security, releases, evaluation metrics | Written |
 | 1 | [Model layer](01-model-layer.md) | Settings, logging and request ids (1.1); gateways, fallback, rate limits (1.2 to 1.4) | In progress: 1.1 written |
-| 2 | Tools and MCP | Tool calling, structured output, MCP | Written in Stage 2 |
-| 3 | LangGraph port | Agent graphs, state, checkpoints, human-in-the-loop | Written in Stage 3 |
-| 4 | Retrieval upgrade | Hybrid search, reranking, document parsing, embeddings | Written in Stage 4 |
-| 5 | Observability and evals | Tracing, metrics beyond recall, guardrail comparison | Written in Stage 5 |
+| 2 | Tools and 🟦MCP | 🟪Tool calling, 🟪structured output, MCP | Written in Stage 2 |
+| 3 | 🟦LangGraph port | 🟪Agent graphs, state, checkpoints, 🟪human-in-the-loop | Written in Stage 3 |
+| 4 | 🟪Retrieval upgrade | 🟪Hybrid search, 🟪reranking, document parsing, 🟪embeddings | Written in Stage 4 |
+| 5 | Observability and 🟪evals | Tracing, metrics beyond recall, 🟪guardrail comparison | Written in Stage 5 |
 | 6 | CRM modules and auth | Authentication, authorization, schema growth | Written in Stage 6 |
 | 7 | Agents and supervisor | Multi-agent routing, when an agent is worth it | Written in Stage 7 |
 | 8 | Product features | Forms, uploads, end-to-end tests | Written in Stage 8 |
@@ -101,6 +103,16 @@ Table of "you want to see" and the file (for stages where the code tour is not n
 ## Further reading
 Official documentation only.
 ````
+
+### The AI colour code
+
+The docs mark AI terms with a coloured square before their first use in each section: 🟪 concept, 🟦 framework or tool, 🟩 data store or service, 🟧 model. Everything unmarked is ordinary software. You do **not** add the squares by hand:
+
+1. Add or edit the term in [`ai-terms.yaml`](../ai-terms.yaml) with a plain-words meaning.
+2. Run `just ai-terms`. It re-marks the target docs and regenerates the [A to Z list](../ai-terms.md).
+3. Commit the result. CI fails if the docs are out of date.
+
+A new stage guide is picked up automatically (`docs/stages/*.md` is a target). Frozen records (`v2-baseline/`, `recommendations-2.md`) and decision records (`adr/`) are not marked.
 
 ### Writing rules
 
