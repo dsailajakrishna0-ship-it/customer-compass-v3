@@ -15,3 +15,4 @@
 .model-picker-list button.paid-option, .model-picker-list button:disabled { color: #a3a3a3; cursor: not-allowed; }
 .usage-tag { font-size: .7rem; color: #9b93ab; margin: 2px 0 0; font-family: ui-monospace, monospace; }
 .usage-fallback-tag { font-size: .72rem; color: #9a5b00; background: #fff4e0; border-radius: 4px; padding: 2px 6px; margin: 4px 0 0; display: inline-block; }
+.mcp-picker { display: flex; align-items: center; gap: 12px; border: 1px solid #bdc7d8; border-radius: 6px; padding: 2px 10px 4px; margin: 0; font-size: .9rem; } .mcp-picker legend { font-size: .8rem; color: #59657a; padding: 0 4px; } .mcp-option { display: flex; align-items: center; gap: 4px; cursor: pointer; } .mcp-option.unavailable { color: #a3a3a3; cursor: not-allowed; }

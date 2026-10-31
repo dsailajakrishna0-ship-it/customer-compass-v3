@@ -38,7 +38,7 @@ repo findings (R1–R12) and doc findings (D1–D9) are cited below. Decisions a
 | --- | --- | --- |
 | 0 | Foundation | Done |
 | 1 | Model layer (cloud-only) | Done |
-| 2 | Tools and 🟦MCP | In progress (2.1 in review) |
+| 2 | Tools and 🟦MCP | In progress (2.1 done; 2.2a in review; 2.2b next) |
 | 3 | 🟦LangGraph port | Planned |
 | 4 | 🟪Retrieval upgrade | Planned |
 | 5 | Observability and 🟪evals | Planned |
@@ -78,7 +78,8 @@ repo findings (R1–R12) and doc findings (D1–D9) are cited below. Decisions a
 | Sub-stage | Tasks | Exit criteria |
 | --- | --- | --- |
 | **2.1 Native 🟪tool calling** (T3) | Native tool calling with Pydantic schemas; remove the fenced-text protocol. | Stage 9 contract tests pass. |
-| **2.2 🟦FastMCP over HTTP** (T10) | One long-lived FastMCP server over streamable HTTP, replacing the subprocess per chat turn. | Tool-call 🟪eval accuracy is at least the baseline. |
+| **2.2a 🟦FastMCP over HTTP** (T10) | One long-lived FastMCP server over streamable HTTP (`mcp-fastmcp` service), replacing the subprocess per chat turn. A configurable choice of tool server (`MCP_BACKEND`, a per-request `mcpServer`, radio buttons in the web app), and `contracts/mcp-tools.json` with a checker both servers must pass ([ADR 0015](adr/0015-mcp-over-http-two-servers.md)). | The contract check passes on the running server in CI; tool-call 🟪eval accuracy is at least the baseline (needs an 🟩OpenRouter key). |
+| **2.2b Spring Boot 🟦MCP server** | A Java twin of the four tools in `services/mcp-java` (🟦Spring AI MCP server), as an independent service with its own build and CI job, selectable in the web app. | The same contract check passes on it, in CI. |
 
 ## Stage 3 — LangGraph port
 

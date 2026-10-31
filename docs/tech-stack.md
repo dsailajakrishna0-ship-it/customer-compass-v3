@@ -70,7 +70,7 @@ Optional comparisons (decided by an ADR, never adopted by default): 🟦Pydantic
 | --- | --- | --- | --- |
 | 0 Foundation | CI/CD, code-quality tools, migrations, releases, evaluation baseline | none (no behaviour change) | [Stage 0](stages/00-foundation.md) |
 | 1 Model layer | 1.1: pydantic-settings, structlog, `models.yaml`; 1.2: 🟦LiteLLM gateway; 1.4: typed test fake | 1.3: 🟩Ollama and the local/cloud provider switch removed | [Stage 1](stages/01-model-layer.md) (done) |
-| 2 Tools and 🟦MCP | 2.1: native 🟪tool calling with Pydantic schemas; next: FastMCP | 2.1: fenced `tool_call` text removed; next: stdio MCP | [Stage 2](stages/02-tools-and-mcp.md) (in progress) |
+| 2 Tools and 🟦MCP | 2.1: native 🟪tool calling with Pydantic schemas; 2.2a: FastMCP over HTTP with a selectable tool server; next: Spring Boot (2.2b) | 2.1: fenced `tool_call` text removed; 2.2a: the stdio subprocess per chat turn removed | [Stage 2](stages/02-tools-and-mcp.md) (in progress) |
 | 3 🟦LangGraph port | LangGraph, Postgres 🟪checkpointer | hand-written workflow code | planned |
 | 4 🟪Retrieval upgrade | 🟪Hybrid search, 🟪reranker, 🟦Docling, open 🟪embeddings (comparison) | Markdown-only ingestion | planned |
 | 5 Observability and 🟪evals | 🟦Langfuse, OpenTelemetry, 🟦Ragas or DeepEval, 🟪guardrail comparison | log-line tracing | planned |

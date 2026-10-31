@@ -1,16 +1,17 @@
-"""Stage 9 MCP client: spawns app/mcp/server.py as a stdio subprocess,
-discovers its tools, and invokes them. Used by the chat route's tool-calling
-loop (app/routes/chat.py).
+"""MCP client: connects to a tool server over streamable HTTP, discovers its tools, calls them.
+
+Used by the chat route's tool-calling loop (app/routes/chat.py). Which server is decided by
+app/mcp/registry.py; both implement the same tools. The server is a long-running service (Stage 2.2);
+before that this module started a new stdio subprocess for every chat turn.
 """
 
-import sys
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 
-from mcp import ClientSession, StdioServerParameters
-from mcp.client.stdio import stdio_client
+from mcp import ClientSession
+from mcp.client.streamable_http import streamable_http_client
 
-from app.config import subprocess_env
+from app.mcp.registry import resolve
 
 
 @dataclass
@@ -20,30 +21,13 @@ class ToolSpec:
     input_schema: dict
 
 
-# MCP client: launches the tool server as a subprocess and talks to it over stdio
-def _server_params() -> StdioServerParameters:
-    # Use sys.executable (the exact interpreter running this process, inside
-    # the uv-managed venv) rather than a bare "python3" -- guarantees the
-    # subprocess has the `mcp` package installed regardless of PATH.
-    #
-    # MCP's StdioServerParameters defaults to a minimal env allowlist (PATH,
-    # HOME, etc.) for subprocess security -- it does NOT inherit secrets like
-    # GOOGLE_API_KEY/DATABASE_URL/OPENROUTER_API_KEY. The tool
-    # server needs those (it calls the same crm/rag modules the API does),
-    # so we explicitly pass through the parent process's full environment.
-    return StdioServerParameters(
-        command=sys.executable,
-        args=["-m", "app.mcp.server"],
-        env=subprocess_env(),
-    )
-
-
 @asynccontextmanager
-async def mcp_session():
-    """Async context manager yielding an initialized ClientSession connected
-    to a freshly spawned app.mcp.server subprocess."""
-    async with stdio_client(_server_params()) as (read, write):
-        async with ClientSession(read, write) as session:
+async def mcp_session(backend: str | None = None):
+    """An initialized ClientSession connected to the chosen MCP server (default: MCP_BACKEND)."""
+    url = resolve(backend).url
+    assert url is not None  # resolve() only returns configured backends
+    async with streamable_http_client(url) as streams:
+        async with ClientSession(streams[0], streams[1]) as session:
             await session.initialize()
             yield session
 

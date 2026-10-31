@@ -73,6 +73,10 @@ eval-offline:
 measure-limits runs="3":
     uv run --project {{api}} python evals/measure_limits.py --runs {{runs}} --out evals/baseline/limits.json
 
+# check a running MCP tool server against contracts/mcp-tools.json, e.g. `just mcp-contract http://localhost:8002/mcp`
+mcp-contract url:
+    uv run --project {{api}} python contracts/check_server.py {{url}}
+
 # on a PR branch: report (or with --apply, resolve) merge conflicts that need no decision; see docs/adr/0013-conflict-bot.md
 resolve-conflicts *args:
     python3 scripts/resolve_conflicts.py {{args}}

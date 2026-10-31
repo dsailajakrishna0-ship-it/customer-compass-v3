@@ -15,7 +15,6 @@ from app.config import (
     get_model_catalog,
     get_settings,
     reset_settings,
-    subprocess_env,
 )
 
 APP_DIR = Path(__file__).resolve().parent.parent / "app"
@@ -122,11 +121,6 @@ def test_importing_the_gateway_leaves_litellm_in_the_safe_mode():
         [sys.executable, "-c", code], capture_output=True, text=True, cwd=APP_DIR.parent, env=env
     )
     assert result.stdout.split() == ["PRODUCTION", "True"], result.stderr
-
-
-def test_child_processes_get_the_whole_environment(monkeypatch):
-    monkeypatch.setenv("SOME_CHILD_SETTING", "1")
-    assert subprocess_env()["SOME_CHILD_SETTING"] == "1"
 
 
 def test_only_config_py_reads_the_environment():

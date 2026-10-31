@@ -134,8 +134,13 @@ export type ChatMessage = {
   usage?: ChatUsage;
   guardrail?: ChatGuardrail;
   toolsUsed?: ToolCallSummary[];
+  mcpServer?: string;
   agentRun?: AgentRun;
 };
+
+/** Stage 2.2: one MCP tool server (FastMCP or Spring Boot) and whether it is set up and answering. */
+export type McpServerInfo = { id: string; label: string; configured: boolean; reachable: boolean };
+export type McpServers = { default: string; servers: McpServerInfo[] };
 
 export type ModelOption = { id: string; name: string };
 export type ModelCatalog = { free: ModelOption[]; paid: ModelOption[] };
@@ -164,4 +169,5 @@ export type ChatResponse = {
   usage?: ChatUsage;
   guardrail?: ChatGuardrail;
   toolsUsed?: ToolCallSummary[];
+  mcpServer?: string;
 };

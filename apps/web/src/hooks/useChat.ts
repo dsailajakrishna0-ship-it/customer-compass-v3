@@ -10,7 +10,7 @@ export function useChat(): {
   isAsking: boolean;
   askQuestion: (event: FormEvent<HTMLFormElement>) => void;
 } {
-  const { chatMode, cloudModel, messages, setMessages } = useChatSession();
+  const { chatMode, cloudModel, mcpServer, messages, setMessages } = useChatSession();
   const [question, setQuestion] = useState("");
   const [isAsking, setIsAsking] = useState(false);
 
@@ -23,9 +23,12 @@ export function useChat(): {
     setQuestion("");
     setIsAsking(true);
 
-    const requestBody: { messages: ChatMessage[]; model?: string } = { messages: history.slice(-12) };
+    const requestBody: { messages: ChatMessage[]; model?: string; mcpServer?: string } = { messages: history.slice(-12) };
     // Without a chosen model the server uses its default (models.yaml)
     if (cloudModel) requestBody.model = cloudModel;
+
+    // Stage 2.2: only tool-calling mode talks to an MCP server; empty means the server's default
+    if (chatMode === "tools" && mcpServer) requestBody.mcpServer = mcpServer;
 
     // Stage 10: agent mode runs the bounded workflow instead of a single chat call
     if (chatMode === "agent") {
@@ -59,6 +62,7 @@ export function useChat(): {
             usage: body.usage,
             guardrail: body.guardrail,
             toolsUsed: body.toolsUsed,
+            mcpServer: body.mcpServer,
           },
         ]);
       })

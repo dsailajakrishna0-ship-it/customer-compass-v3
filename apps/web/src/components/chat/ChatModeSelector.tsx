@@ -1,6 +1,7 @@
-import type { ChatMode, ModelCatalog } from "../../types";
+import type { ChatMode, McpServers, ModelCatalog } from "../../types";
 import { MODE_COPY } from "../../context/ChatSessionContext";
 import { ModelPicker } from "./ModelPicker";
+import { McpServerPicker } from "./McpServerPicker";
 
 type ChatModeSelectorProps = {
   chatMode: ChatMode;
@@ -8,6 +9,9 @@ type ChatModeSelectorProps = {
   cloudModel: string;
   onChangeCloudModel: (modelId: string) => void;
   cloudModels: ModelCatalog;
+  mcpServers: McpServers | null;
+  mcpServer: string;
+  onChangeMcpServer: (id: string) => void;
   isIngesting: boolean;
   onIngest: () => void;
 };
@@ -19,6 +23,9 @@ export function ChatModeSelector({
   cloudModel,
   onChangeCloudModel,
   cloudModels,
+  mcpServers,
+  mcpServer,
+  onChangeMcpServer,
   isIngesting,
   onIngest,
 }: ChatModeSelectorProps) {
@@ -46,6 +53,14 @@ export function ChatModeSelector({
           cloudModels={cloudModels}
         />
       </div>
+      {chatMode === "tools" && mcpServers && (
+        <McpServerPicker
+          servers={mcpServers.servers}
+          defaultId={mcpServers.default}
+          value={mcpServer}
+          onChange={onChangeMcpServer}
+        />
+      )}
     </div>
   );
 }

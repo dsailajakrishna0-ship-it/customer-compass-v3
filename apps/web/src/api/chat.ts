@@ -8,6 +8,8 @@ export function getCloudModels(): Promise<ModelCatalog> {
 type SendChatRequest = {
   messages: ChatMessage[];
   model?: string;
+  /** tools mode only: "fastmcp" or "springboot"; left out, the server uses its default */
+  mcpServer?: string;
 };
 
 // One backend endpoint per chat mode: plain LLM, RAG over documents, CRM facts + docs, MCP tool calling

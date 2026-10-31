@@ -24,6 +24,8 @@ from app.guardrails.prompt_guard import (
 from app.llm.gateway import generate
 from app.llm.types import ChatMessage, GenerationResult, ToolCall
 from app.mcp.client import call_tool, list_tool_specs, mcp_session
+from app.mcp.registry import UnknownBackendError
+from app.mcp.registry import resolve as resolve_backend
 from app.mcp.schemas import tool_definitions, validate_arguments
 from app.mcp.tools import looks_like_confirmation
 from app.rag.retrieve import build_context, retrieve_relevant_chunks
@@ -371,8 +373,13 @@ async def crm_chat(body: ChatRequest):
 
 
 # Mode 4 - tool calling: the model requests MCP tools (CRM lookups, follow-up tasks) in a loop
+class ToolsChatRequest(ChatRequest):
+    # which MCP tool server to use ("fastmcp" or "springboot"); None: the MCP_BACKEND default
+    mcp_server: str | None = Field(default=None, alias="mcpServer")
+
+
 @router.post("/tools")
-async def tools_chat(body: ChatRequest):
+async def tools_chat(body: ToolsChatRequest):
     """Tool-calling copilot: the model can call MCP tools (get_company_summary, get_open_deals,
     search_documents, create_followup_task) mid-conversation using the provider's native tool
     calling (ADR 0014). MCP still owns tool discovery and execution (a separate stdio subprocess);
@@ -385,7 +392,12 @@ async def tools_chat(body: ChatRequest):
     user_confirmed = looks_like_confirmation(question)
 
     try:
-        async with mcp_session() as session:
+        backend = resolve_backend(body.mcp_server)
+    except UnknownBackendError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+
+    try:
+        async with mcp_session(backend.id) as session:
             tools = tool_definitions(await list_tool_specs(session))
 
             conversation: list[dict] = [
@@ -434,13 +446,23 @@ async def tools_chat(body: ChatRequest):
             return {
                 "message": answer,
                 "toolsUsed": tools_used,
+                "mcpServer": backend.id,
                 "usage": _usage_json(result),
                 "guardrail": guardrail,
             }
     except Exception as exc:  # noqa: BLE001
+        cause = _root_cause(exc)
         raise HTTPException(
-            status_code=503, detail=str(exc) or "Could not answer using tools."
+            status_code=503, detail=str(cause) or "Could not answer using tools."
         ) from exc
+
+
+def _root_cause(error: BaseException) -> BaseException:
+    """The MCP session runs in an anyio task group, which wraps any error in an ExceptionGroup whose
+    message is useless ("unhandled errors in a TaskGroup"). Unwrap it to the real error."""
+    while isinstance(error, BaseExceptionGroup) and error.exceptions:
+        error = error.exceptions[0]
+    return error
 
 
 def _assistant_tool_message(content: str, calls: list[ToolCall]) -> dict:

@@ -47,6 +47,41 @@ services:
     volumes:
       - qdrant-data:/qdrant/storage
 
+  # mcp-fastmcp: the MCP tool server (Python, FastMCP) as its own long-lived service on port 8002.
+  # Same image as the API, different command; its tools call the same CRM and retrieval code.
+  # A Java twin with the same tools is planned in services/mcp-java (Stage 2.2b).
+  mcp-fastmcp:
+    build:
+      context: ./apps/api-py
+    image: customer-compass-v3-api-py
+    container_name: customer-compass-v3-mcp-fastmcp
+    command: ["/app/.venv/bin/python", "-m", "app.mcp.server"]
+    environment:
+      DATABASE_URL: postgresql://customer_compass:customer_compass_dev@db:5432/customer_compass
+      QDRANT_URL: http://qdrant:6333
+      QDRANT_COLLECTION: ${QDRANT_COLLECTION:-document_chunks}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}  # search_documents embeds the query
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      LOG_FORMAT: ${LOG_FORMAT:-json}
+      MCP_SERVER_HOST: 0.0.0.0  # inside the container; the published port below is the way in
+      MCP_SERVER_PORT: 8002
+    ports:
+      - "8002:8002"
+    healthcheck:
+      # the MCP endpoint only answers POSTs, so check that the port accepts connections
+      test: ["CMD", "python", "-c", "import socket; socket.create_connection(('localhost', 8002), timeout=3)"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 5s
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+      qdrant:
+        condition: service_started
+
   # FastAPI service for the v2 stack (PR 5 of N: company routes added, and
   # the frontend cut over to this service under /api/v1 — the old Express
   # API, apps/api, has been removed). sample-data is mounted read-only since
@@ -79,6 +114,9 @@ services:
       AGENT_MAX_STEPS: ${AGENT_MAX_STEPS:-8}  # Stage 10: step limit per agent run
       AGENT_TIMEOUT_SECONDS: ${AGENT_TIMEOUT_SECONDS:-180}
       AGENT_MAX_REVISIONS: ${AGENT_MAX_REVISIONS:-1}
+      MCP_BACKEND: ${MCP_BACKEND:-fastmcp}  # default tool server: fastmcp | springboot (a chat request may choose)
+      MCP_FASTMCP_URL: http://mcp-fastmcp:8002/mcp
+      MCP_SPRINGBOOT_URL: ${MCP_SPRINGBOOT_URL:-}  # empty: not configured
     volumes:
       - ./sample-data:/sample-data:ro
     ports:
@@ -97,6 +135,8 @@ services:
         condition: service_completed_successfully
       qdrant:
         condition: service_started
+      mcp-fastmcp:
+        condition: service_healthy
 
 volumes:
   postgres-data:

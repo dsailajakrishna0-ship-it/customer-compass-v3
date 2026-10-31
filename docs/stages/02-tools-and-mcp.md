@@ -1,8 +1,8 @@
 # Stage 2 — Tools and MCP: letting the model do things safely
 
 > **Level:** beginner friendly; read [Stage 1](01-model-layer.md) first (the gateway). **Reading time:** about 20 minutes for what is written so far.
-> **Status:** in progress. **2.1 is written; 2.2 (🟦MCP over HTTP) is added when it is built.**
-> **Roadmap:** [Stage 2](../roadmap.md#stage-2--tools-and-mcp) · **Decisions:** [ADR 0014](../adr/0014-native-tool-calling.md) (more to come)
+> **Status:** in progress. **2.1 and 2.2a (🟦MCP over HTTP, 🟦FastMCP) are written; 2.2b (Spring Boot) is added when it is built.**
+> **Roadmap:** [Stage 2](../roadmap.md#stage-2--tools-and-mcp) · **Decisions:** [ADR 0014](../adr/0014-native-tool-calling.md), [ADR 0015](../adr/0015-mcp-over-http-two-servers.md)
 
 **AI colour code:** 🟪 concept · 🟦 framework or tool · 🟩 data store or service · 🟧 model. Unmarked technical terms are ordinary software. [A to Z list](../ai-terms.md)
 
@@ -17,6 +17,7 @@ A 🟪language model only produces text. To look up a company's open deals or pr
 | The waiter checks the slip before it goes to the kitchen | **Validation** | Wrong, extra or unknown fields come back to the model as an error message |
 | "Only the manager can approve a refund" | **Confirmation decided by the user's message, not the model** | The model is not even offered a `confirm` field |
 | The waiter stops after a few trips | **A bounded loop** | At most 4 rounds, at most 4 tools per reply |
+| Two kitchens that cook the same menu; the customer picks one | **Two tool servers, one contract** (2.2a, 2.2b) | 🟦FastMCP (Python) and Spring Boot (Java), radio buttons in the web app, one checked contract |
 
 ## The big picture (2.1)
 
@@ -91,11 +92,64 @@ The tool server (`app/mcp/server.py`) and the models in `schemas.py` must agree.
 
 ---
 
-## Code tour: what changed in 2.1, and why
+## Concept 3 — A tool server as a service, and two interchangeable ones (2.2a)
 
-Bright green is new in this sub-stage, amber is an existing module that changed, grey is existing and untouched (Stage 0 and 1 are collapsed to one grey box). Markers in the tables: 🟢 new, 🟡 changed, ⚪ earlier.
+**The problem.** In V2 and in 2.1, every tool-calling question started a new Python process, talked to it over standard input and output (🟦MCP "stdio"), and threw it away. That costs a process start per question and keeps the tools locked inside the API.
 
-![Module map after sub-stage 2.1: the chat route's tool loop was rewritten and now calls the gateway, which gained tools and tool_choice and parses tool calls into a ToolCall type, and a new schemas module with one Pydantic model per tool. The MCP client, server and tools are untouched. Two new test files cover the loop and the match between schemas and the server. Stages 0 and 1 are collapsed into one grey box.](../img/diagrams/stage2-module-map.png)
+**The idea.** MCP also has an HTTP transport (**streamable HTTP**). The tool server becomes a normal, long-running service with an address; the API connects to it, asks for its tools, calls them and disconnects. Because it is "just an address", a second implementation can listen at another address and the API can talk to either.
+
+![The web app's radio buttons send mcpServer with the chat request; the API's registry picks the URL; the FastMCP server in Python on port 8002 reads Postgres and Qdrant. A Spring Boot server on port 8003 (Stage 2.2b) is drawn as a later, dashed box. A shared contract file is checked against both.](../img/diagrams/stage2-mcp-topology.png)
+
+<sub>Diagram source: [stage2-mcp-topology.mmd](../diagrams/stage2-mcp-topology.mmd)</sub>
+
+### Choosing a server: one setting, one request field, two radio buttons
+
+| Where | What | Example |
+| --- | --- | --- |
+| Environment | The default server | `MCP_BACKEND=fastmcp` |
+| Environment | Each server's address; empty means "not configured" | `MCP_SPRINGBOOT_URL=http://mcp-spring:8003/mcp` |
+| One chat request | Overrides the default | `{"messages": [...], "mcpServer": "springboot"}` |
+| Web app | Radio buttons under the chat mode, shown in tool-calling mode | An unconfigured server is greyed out with "(not configured)" |
+
+A request for a server that does not exist or is not configured is a clear `400` that names the setting to change, not a failure halfway through a conversation. `GET /api/v1/mcp/servers` lists each server with whether it is configured and whether it answers right now.
+
+### One contract, so "interchangeable" is checked
+
+Two servers can quietly drift apart. The file `contracts/mcp-tools.json` says what *every* server must offer: the four tools with their argument names, types and required fields, plus a few read-only calls with the answers expected on the demo data, for example `get_open_deals("Acme")` must return `Premium Operations Plan renewal`. `contracts/check_server.py` runs that check against any running server:
+
+```text
+$ just mcp-contract http://localhost:8002/mcp
+http://localhost:8002/mcp: OK (4 cases)
+```
+
+CI runs it on the real FastMCP container. The Spring Boot server (2.2b) has to pass the same check. The file sits at the repository root because it belongs to neither server.
+
+### A trap we met: the error that said nothing
+
+With no 🟩OpenRouter key the tools route answered *"unhandled errors in a TaskGroup (1 sub-exception)"*. The MCP session runs inside an async task group, which wraps any error that escapes it in an exception group with that unhelpful message. The route now unwraps it, so the user sees the real "set `OPENROUTER_API_KEY`" message again. We found this by running the real stack, not by the unit tests, which is why the stack was run.
+
+### The Host check
+
+The server accepts only requests whose `Host` header is in `MCP_ALLOWED_HOSTS` (`localhost`, `127.0.0.1`, `mcp-fastmcp`). This stops a web page from tricking a browser into talking to a local server under another name ("DNS rebinding"). A request with an unknown host gets `421`.
+
+### Lessons
+
+> [!IMPORTANT]
+> 1. **A service has an address.** Moving from "start a process" to "call an address" is what makes a second implementation possible.
+> 2. **Interchangeable needs a checker.** Say what both must do in one file, and test both against it.
+> 3. **Make "not available" a visible state.** A greyed-out option with a reason beats a failure later.
+> 4. **Run the real thing.** The most useful bug of this sub-stage appeared only in the running stack.
+
+> [!NOTE]
+> **What we have not seen.** A real chat turn through the tool servers needs an OpenRouter key and none was available. The server, the HTTP client, the contract check, the Compose wiring and the error cases were run for real; the model's side was not.
+
+---
+
+## Code tour: what changed in 2.2a, and why
+
+Bright green is new in this sub-stage (2.2a), amber is an existing module that changed in it, grey is existing and untouched (Stages 0 to 2.1 are collapsed to one grey box). Markers in the tables: 🟢 new, 🟡 changed, ⚪ earlier.
+
+![Module map after sub-stage 2.2a: the web chat panel and a new server picker call the chat route and a new GET /mcp/servers route. Both use a new registry that reads the MCP settings in config.py. The client now makes an HTTP session to the FastMCP server instead of starting a subprocess. A new contracts folder and three new test files check the server. Earlier modules are collapsed into one grey box.](../img/diagrams/stage2-module-map.png)
 
 <sub>Diagram source: [stage2-module-map.mmd](../diagrams/stage2-module-map.mmd)</sub>
 
@@ -103,30 +157,34 @@ Bright green is new in this sub-stage, amber is an existing module that changed,
 
 | | Added in | File | What it is for | Names to look at | Used by |
 | --- | --- | --- | --- | --- | --- |
-| 🟢 | 2.1 | [`app/mcp/schemas.py`](../../apps/api-py/app/mcp/schemas.py) | What the model may pass to each tool; builds the tool definitions and validates calls | `TOOL_ARGS`, `tool_definitions()`, `validate_arguments()` | `routes/chat.py` |
-| 🟢 | 2.1 | [`tests/test_chat_tools.py`](../../apps/api-py/tests/test_chat_tools.py) | The loop's rules with a scripted model and a fake tool server | `World`, `reply()`, `call()` | CI |
-| 🟢 | 2.1 | [`tests/test_tool_schemas.py`](../../apps/api-py/tests/test_tool_schemas.py) | Schemas match the server; `confirm` is never offered; bad arguments refused | | CI |
-| 🟢 | 2.1 | [ADR 0014](../adr/0014-native-tool-calling.md) | The decision and what is not verified | | Readers |
-| ⚪ | 1.2 | [`app/llm/gateway.py`](../../apps/api-py/app/llm/gateway.py) | The one door for every model call | `generate()` | Routes, guard |
+| 🟢 | 2.2a | [`app/mcp/registry.py`](../../apps/api-py/app/mcp/registry.py) | Which backend, which URL; refuses unknown or unconfigured ones | `resolve()`, `backends()`, `UnknownBackendError` | `client.py`, `routes/chat.py`, `routes/mcp.py` |
+| 🟢 | 2.2a | [`app/routes/mcp.py`](../../apps/api-py/app/routes/mcp.py) | `GET /api/v1/mcp/servers`: configured and reachable | `servers()`, `_reachable()` | The web app |
+| 🟢 | 2.2a | [`contracts/mcp-tools.json`](../../contracts/mcp-tools.json), [`check_server.py`](../../contracts/check_server.py), [`README.md`](../../contracts/README.md) | The shared tool contract and the checker for any server | `compare_tools()`, `check_case()` | CI, `just mcp-contract`, both servers |
+| 🟢 | 2.2a | `apps/web/src/components/chat/McpServerPicker.tsx`, `mcpServerStatus.ts`, `hooks/useMcpServers.ts`, `api/mcp.ts` | The radio buttons and their data | `McpServerPicker`, `unavailableReason()` | `ChatModeSelector.tsx` |
+| 🟢 | 2.2a | `tests/test_mcp_http.py`, `test_mcp_registry.py`, `test_mcp_contract.py`; `McpServerPicker.test.tsx` | Real HTTP round trip, backend choice, contract, picker | `running_server` | CI |
+| 🟢 | 2.2a | [ADR 0015](../adr/0015-mcp-over-http-two-servers.md) | The decision and what is not verified | | Readers |
+| ⚪ | 2.1 | [`app/mcp/schemas.py`](../../apps/api-py/app/mcp/schemas.py), `tests/test_chat_tools.py`, `test_tool_schemas.py` | What the model may pass to each tool | `TOOL_ARGS` | Both |
 
 ### Existing files that changed, and what changed
 
 | | Changed in | File | Change |
 | --- | --- | --- | --- |
-| 🟡 | 2.1 | `app/routes/chat.py` | `/chat/tools` rewritten: native 🟪tool calls, validation, error results, bounded loop; the fenced-text 🟪prompt and regular expression are gone |
-| 🟡 | 2.1 | `app/llm/gateway.py` | `generate(..., tools=, tool_choice=)`; reads tool calls; an answer may be tool calls with no text |
-| 🟡 | 2.1 | `app/llm/types.py` | `ToolCall`; `GenerationResult.tool_calls` |
-| 🟡 | 2.1 | `tests/test_gateway.py`, `tests/test_mcp_tools.py` | Tool-call cases added; the old regular-expression tests removed |
-| 🟡 | 2.1 | `docs/` (api reference, architecture, tech stack, frontend flow) | The fenced protocol is described as replaced |
-| ⚪ | 1.x | settings, logs, gateway, cloud-only models, test fakes | See [Stage 1](01-model-layer.md) |
+| 🟡 | 2.2a | `app/mcp/server.py` | Runs over streamable HTTP as its own service; Host allowlist |
+| 🟡 | 2.2a | `app/mcp/client.py` | An HTTP session to the chosen server; the stdio subprocess is gone |
+| 🟡 | 2.2a | `app/config.py` | `MCP_*` settings; `subprocess_env()` removed (nothing needs it now) |
+| 🟡 | 2.2a | `app/routes/chat.py` | `mcpServer` request field, `400` for a bad choice, `mcpServer` in the answer, real error shown instead of the task-group message |
+| 🟡 | 2.2a | `docker-compose.yml`, `.github/workflows/ci.yml`, `.env.example`, `justfile` | The `mcp-fastmcp` service; CI checks the API reaches it and runs the contract; settings; `just mcp-contract` |
+| 🟡 | 2.2a | Web: `ChatModeSelector`, `ChatPanel`, `ChatSessionContext`, `useChat`, `MessageBubble`, types, CSS | The radio buttons, the stored choice, the request field, "via fastmcp" in the tool trail |
+| 🟡 | 2.2a | `docs/` | API reference, architecture, tech stack, roadmap |
+| ⚪ | 2.1 | `routes/chat.py` loop, `gateway.py`, `types.py` | Native 🟪tool calling (see above) |
 
 ### A good reading order
 
-1. **`app/mcp/schemas.py`**: under 80 lines; the whole contract between model and tools.
-2. **`routes/chat.py`, `_run_tool_call()`**: every way a call can go wrong, and what the model is told.
-3. **`routes/chat.py`, `tools_chat()`**: the bounded loop.
-4. **`tests/test_chat_tools.py`**: read the test names; they are the rules.
-5. **`gateway.py`, `_parse_tool_calls()`**: bad JSON becomes a value, not a crash.
+1. **`contracts/mcp-tools.json`**: the whole promise, in 60 lines of data.
+2. **`app/mcp/registry.py`**: how a name becomes an address, and how it refuses.
+3. **`app/mcp/client.py`**: compare it with the version before (stdio): the diff is the story of this sub-stage.
+4. **`tests/test_mcp_http.py`**: a real server and a real client in one test.
+5. **`McpServerPicker.tsx`**: the same idea, in the browser.
 
 ## What this stage added to the tech stack (so far)
 
@@ -134,6 +192,8 @@ Bright green is new in this sub-stage, amber is an existing module that changed,
 | --- | --- | --- |
 | **Pydantic** (already used) | Describes the shape of data, checks it, and produces JSON Schema | `apps/api-py/app/mcp/schemas.py` |
 | **🟪Tool calling** (provider feature, through 🟦LiteLLM) | The model asks for a function by name with JSON arguments | `app/llm/gateway.py` |
+| **🟦FastMCP** (the `MCPServer` of the official `mcp` SDK, 2.2a) | A long-running tool server that speaks MCP over HTTP | `apps/api-py/app/mcp/server.py` |
+| **Streamable HTTP** (MCP transport, 2.2a) | How the API and a tool server talk over the network | `apps/api-py/app/mcp/client.py` |
 
 ## V2 vs V3 in this area
 
@@ -143,12 +203,17 @@ Bright green is new in this sub-stage, amber is an existing module that changed,
 | Arguments | Whatever JSON the model wrote | Validated against a Pydantic model | Model output is untrusted input |
 | `confirm` | Overwritten after the model sent it | Not in the schema; rejected if sent | A control the model must not use should not be offered |
 | Bad calls | Cost a turn | An error result the model can correct | Models recover from clear errors |
+| Tool server | A new subprocess (stdio) for every chat turn | A long-running service over HTTP (2.2a) | Shareable, observable, and a second implementation can be swapped in |
 
 ## Glossary
 
 - **Function definition**: the description of a tool given to the model: name, purpose and a JSON Schema for the arguments.
+- **Contract (here)**: a file that says what every implementation of a service must do, checked automatically against each one.
+- **DNS rebinding**: a trick that makes a browser send requests to a local server under another host name; a Host allowlist stops it.
 - **JSON Schema**: a standard way to describe the shape of JSON data (which fields, which types, which are required).
+- **Long-lived service**: a program that keeps running and answers many requests, as opposed to one started for each request.
 - **Pydantic**: a Python library that describes data shapes, validates them and can export JSON Schema.
+- **Streamable HTTP**: the 🟦MCP transport that carries requests and answers over ordinary HTTP, so a tool server can be a separate service.
 - **🟪Tool call**: the model's request to run a named function with given arguments; it has an id so the result can be matched to it.
 - **Tool message**: the reply we send back for one tool call, carrying that call's id.
 - **Validation**: checking that input has the shape and limits you expect before using it.
@@ -184,6 +249,31 @@ At most 4 rounds and at most 4 tool calls per reply. After the last round, one m
 <details><summary>6. What could not be verified in this sub-stage?</summary>
 
 No free model has been seen making a tool call through this code, because no 🟩OpenRouter key was available. The loop is tested with a scripted model and a fake tool server; the `tools` evaluation must be re-taken with a key to measure real behaviour.
+</details>
+
+<details><summary>7. What does a long-lived tool server give you that a subprocess per question did not?</summary>
+
+No process start per question, an address other programs can use, and the freedom to run, watch and replace it on its own. It is also what makes a second implementation possible: the API only needs a different address.
+</details>
+
+<details><summary>8. A request names <code>mcpServer: "springboot"</code> but that server is not configured. What happens?</summary>
+
+A `400` that names the setting to change (`MCP_SPRINGBOOT_URL`), before any model call. The web app also greys that radio button out with "(not configured)".
+</details>
+
+<details><summary>9. How do we know two tool servers are really interchangeable?</summary>
+
+`contracts/mcp-tools.json` says what both must offer and answer, and `check_server.py` runs it against a running server. CI runs it on the 🟦FastMCP container; the Java server must pass the same check.
+</details>
+
+<details><summary>10. Why does the contract live at the repository root instead of inside the Python or Java folder?</summary>
+
+It belongs to neither implementation. Putting it under one would make the other look like a copy, and it would be easy to change one side without the other noticing.
+</details>
+
+<details><summary>11. With no OpenRouter key, the tools route once answered "unhandled errors in a TaskGroup". What was wrong?</summary>
+
+The MCP session runs in an async task group, which wraps any error that escapes in an exception group with that useless message. The route now unwraps it to the real error. Unit tests could not show it; running the real stack did.
 </details>
 
 ## Further reading

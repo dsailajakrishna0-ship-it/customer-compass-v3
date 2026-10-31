@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "about": "What every MCP tool server for Customer Compass must offer. Both the FastMCP server (apps/api-py/app/mcp) and the Spring Boot server (services/mcp-java) are checked against this file: `just mcp-contract <url>` (see contracts/README.md). Types: 'string?' means a string or null. The cases run on the demo data (migration 0002).",
+  "tools": {
+    "get_company_summary": {"required": ["company_name"], "properties": {"company_name": "string"}},
+    "get_open_deals": {"required": ["company_name"], "properties": {"company_name": "string"}},
+    "search_documents": {"required": ["query"], "properties": {"query": "string", "company_name": "string?"}},
+    "create_followup_task": {
+      "required": ["company_name", "note"],
+      "properties": {"company_name": "string", "note": "string", "confirm": "boolean"}
+    }
+  },
+  "cases": [
+    {
+      "id": "summary-known-company",
+      "tool": "get_company_summary",
+      "arguments": {"company_name": "Acme Fabrication"},
+      "expect": {
+        "status": "executed",
+        "company.name": "Acme Fabrication",
+        "company.industry": "Manufacturing",
+        "company.relationshipStatus": "customer",
+        "company.openDeals.0.name": "Premium Operations Plan renewal",
+        "company.openDeals.0.amount": "48000.00",
+        "company.openDeals.0.expectedCloseDate": "2026-10-15",
+        "company.wonDealsCount": 1,
+        "company.lostDealsCount": 0
+      }
+    },
+    {
+      "id": "open-deals-by-partial-name",
+      "tool": "get_open_deals",
+      "arguments": {"company_name": "Acme"},
+      "expect": {
+        "status": "executed",
+        "companyName": "Acme Fabrication",
+        "openDeals.0.name": "Premium Operations Plan renewal"
+      }
+    },
+    {
+      "id": "summary-unknown-company",
+      "tool": "get_company_summary",
+      "arguments": {"company_name": "Globex"},
+      "expect": {"status": "not_found", "message": "No company matching \"Globex\" was found."}
+    },
+    {
+      "id": "task-is-only-proposed-without-confirm",
+      "tool": "create_followup_task",
+      "arguments": {"company_name": "Acme Fabrication", "note": "Call them", "confirm": false},
+      "expect": {
+        "status": "proposed",
+        "proposedTask.companyName": "Acme Fabrication",
+        "proposedTask.note": "Call them"
+      }
+    }
+  ]
+}

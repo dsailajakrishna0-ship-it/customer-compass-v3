@@ -28,6 +28,7 @@ from app.routes.chat import router as chat_router
 from app.routes.companies import router as companies_router
 from app.routes.documents import router as documents_router
 from app.routes.llm import router as llm_router
+from app.routes.mcp import router as mcp_router
 from app.routes.security import router as security_router
 from app.routes.tasks import router as tasks_router
 
@@ -79,6 +80,7 @@ app.include_router(companies_router, prefix="/api/v1")
 app.include_router(tasks_router, prefix="/api/v1")
 app.include_router(security_router, prefix="/api/v1")
 app.include_router(agent_router, prefix="/api/v1")
+app.include_router(mcp_router, prefix="/api/v1")
 
 
 @app.get("/health")

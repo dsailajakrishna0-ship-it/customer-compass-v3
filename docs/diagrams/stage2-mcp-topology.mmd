@@ -1,0 +1,15 @@
+flowchart LR
+    W["Web app<br/>radio buttons:<br/>FastMCP | Spring Boot"] -->|"POST /chat/tools<br/>mcpServer"| A
+    A["API (api-py)<br/>registry: which server?"] -->|"MCP over HTTP<br/>MCP_FASTMCP_URL"| F["mcp-fastmcp :8002<br/>Python, FastMCP"]
+    A -.->|"MCP over HTTP<br/>MCP_SPRINGBOOT_URL<br/>(Stage 2.2b)"| J["mcp-spring :8003<br/>Java, Spring Boot"]
+    F --> P[("Postgres<br/>CRM tables")]
+    F --> Q[("Qdrant")]
+    J -.-> P
+    C["contracts/mcp-tools.json<br/>the shared contract"] -.->|"checked in CI"| F
+    C -.->|"same check"| J
+    classDef now fill:#a5d6a7,stroke:#1b5e20,stroke-width:2px,color:#0d3b12
+    classDef later fill:#eceff1,stroke:#b0bec5,stroke-dasharray:4 3,color:#78909c
+    classDef old fill:#fff3cd,stroke:#f9a825,color:#5d4037
+    class F,C now
+    class J later
+    class W,A old

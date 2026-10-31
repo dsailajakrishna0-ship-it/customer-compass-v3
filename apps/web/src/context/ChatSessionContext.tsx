@@ -4,6 +4,7 @@ import type { ChatMessage, ChatMode } from "../types";
 const STORAGE_KEYS = {
   chatMode: "customer-compass:chatMode",
   cloudModel: "customer-compass:cloudModel",
+  mcpServer: "customer-compass:mcpServer",
 } as const;
 
 function readStored<T extends string>(key: string, fallback: T): T {
@@ -57,6 +58,9 @@ type ChatSessionValue = {
   switchChatMode: (next: ChatMode) => void;
   cloudModel: string;
   setCloudModel: (next: string) => void;
+  /** tools mode: the chosen MCP server id; empty means the server's default */
+  mcpServer: string;
+  setMcpServer: (next: string) => void;
   messages: ChatMessage[];
   setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
 };
@@ -72,6 +76,7 @@ const INITIAL_MESSAGE: ChatMessage = {
 export function ChatSessionProvider({ children }: { children: ReactNode }) {
   const [chatMode, setChatMode] = useState<ChatMode>(() => readStored(STORAGE_KEYS.chatMode, "general"));
   const [cloudModel, setCloudModelState] = useState<string>(() => readStored(STORAGE_KEYS.cloudModel, ""));
+  const [mcpServer, setMcpServerState] = useState<string>(() => readStored(STORAGE_KEYS.mcpServer, ""));
   const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_MESSAGE]);
 
   function switchChatMode(nextMode: ChatMode) {
@@ -92,9 +97,14 @@ export function ChatSessionProvider({ children }: { children: ReactNode }) {
     writeStored(STORAGE_KEYS.cloudModel, next);
   }
 
+  function setMcpServer(next: string) {
+    setMcpServerState(next);
+    writeStored(STORAGE_KEYS.mcpServer, next);
+  }
+
   const value = useMemo<ChatSessionValue>(
-    () => ({ chatMode, switchChatMode, cloudModel, setCloudModel, messages, setMessages }),
-    [chatMode, cloudModel, messages],
+    () => ({ chatMode, switchChatMode, cloudModel, setCloudModel, mcpServer, setMcpServer, messages, setMessages }),
+    [chatMode, cloudModel, mcpServer, messages],
   );
 
   return <ChatSessionContext.Provider value={value}>{children}</ChatSessionContext.Provider>;

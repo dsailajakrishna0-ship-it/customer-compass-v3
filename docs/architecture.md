@@ -30,6 +30,7 @@ For the per-stage build history, see [tech-stack.md](tech-stack.md) and the
 │  /api/v1/llm/models  — OpenRouter free/paid model catalog     │
 │  /api/v1/tasks, /api/v1/tool-audit-log — Stage 9 tool output  │
 │  /api/v1/agent/recommend, /confirm — Stage 10 agent workflow  │
+│  /api/v1/mcp/servers — which MCP tool servers are available   │
 │                                                               │
 │  app/db.py        — Postgres connection pool (asyncpg)        │
 │  app/rag/         — chunking, embeddings, Qdrant client        │
@@ -38,7 +39,9 @@ For the per-stage build history, see [tech-stack.md](tech-stack.md) and the
 │  app/llm/         — gateway.py (LiteLLM: chain, retries,       │
 │                      fallback), types.py (GenerationResult)    │
 │  app/guardrails/  — prompt_guard.py, audit.py, llm_guard.py (Stage 8)  │
-│  app/mcp/         — server.py/tools.py/client.py (Stage 9)    │
+│  app/mcp/         — tools.py, schemas.py, registry.py, client.py │
+│                      (HTTP client) and server.py (FastMCP, runs as │
+│                      its own service on :8002, Stage 2.2)       │
 │  app/agent/       — workflow, agents, trace, policies (Stage 10)│
 └───────┬───────────────────┬───────────────────┬───────────────┘
         │                   │                   │
