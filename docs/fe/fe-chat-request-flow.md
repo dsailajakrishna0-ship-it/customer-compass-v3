@@ -80,7 +80,7 @@ scan_and_neutralize  scan_and_neutralize      scan_and_neutralize        scan_an
 (user message)       (user msg + chunks)      (user msg + chunks)        (user msg + tool results)
      │                    │                         │                          │
      │             retrieve_relevant_chunks()  classify the question          loop (max 4 iterations):
-     │                    │                     ├─ structured? → CRM facts      model emits ```tool_call```
+     │                    │                     ├─ structured? → CRM facts      model asks for tools natively
      │             build_context(chunks)        └─ documents?  → retrieval      → MCP client → MCP server
      │                    │                    builds combined prompt           (stdio subprocess)
      ▼                    ▼                         ▼                          ▼
@@ -179,7 +179,7 @@ any retrieved/tool-returned content) before building the prompt.
 - **`/api/v1/chat`** calls `generate(GENERAL_SYSTEM_PROMPT, messages, model)` directly.
 - **`/api/v1/chat/rag`** calls `retrieve_relevant_chunks(question)`, builds a numbered source context with `build_context()`, and asks the model to cite `[1]`, `[2]`, etc. If nothing clears the similarity threshold it returns a canned "nothing relevant" answer without calling the LLM.
 - **`/api/v1/chat/crm`** classifies the question first (`app/chat/router.py`) to decide whether it needs structured facts (`app/crm/queries.py`), document retrieval, or both, then combines a "Verified CRM facts" block (never needs a citation) with a "Source documents" block (always needs one).
-- **`/api/v1/chat/tools`** runs a bounded loop (max 4 iterations) in which the model may emit a fenced `tool_call` block that is executed through the MCP client; mutating tools only run after the user confirms in their next message.
+- **`/api/v1/chat/tools`** runs a bounded loop (max 4 iterations) in which the model may ask for tools (native tool calling, arguments validated against Pydantic schemas) that are executed through the MCP client; mutating tools only run after the user confirms in their next message.
 
 ## 4. `generate()` calls a model through the gateway
 

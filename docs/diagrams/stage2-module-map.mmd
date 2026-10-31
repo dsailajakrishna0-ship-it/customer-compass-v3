@@ -1,0 +1,24 @@
+flowchart TB
+    W["Web: chat panel<br/>(unchanged)"] --> C
+    C["routes/chat.py<br/>tool loop rewritten"] --> G["llm/gateway.py<br/>tools, tool_choice, ToolCall parsing"]
+    C --> S["mcp/schemas.py<br/>Pydantic model per tool"]
+    C --> K["mcp/client.py + server.py + tools.py<br/>(unchanged)"]
+    G --> Y["llm/types.py<br/>ToolCall, tool_calls"]
+    S --> K
+    T1["tests/test_chat_tools.py<br/>the loop, scripted model"] --> C
+    T2["tests/test_tool_schemas.py<br/>schemas match the server"] --> S
+    E["Earlier (Stage 0 and 1): settings, logs,<br/>LiteLLM gateway, cloud-only models"]
+    G --> E
+    subgraph legend["Legend: state after sub-stage 2.1"]
+        direction LR
+        K1["new in this sub-stage"]
+        K2["changed in this sub-stage"]
+        K3["existing, untouched"]
+    end
+    E ~~~ legend
+    classDef new fill:#a5d6a7,stroke:#1b5e20,stroke-width:3px,color:#0d3b12
+    classDef changed fill:#fff3cd,stroke:#f9a825,stroke-width:2px,color:#5d4037
+    classDef existing fill:#eceff1,stroke:#b0bec5,color:#78909c
+    class S,T1,T2,K1 new
+    class C,G,Y,K2 changed
+    class W,K,E,K3 existing

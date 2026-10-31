@@ -1,12 +1,23 @@
 """Shared chat message type (ported from apps/api/src/llm/types.ts)."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Literal, TypedDict
 
 
 class ChatMessage(TypedDict):
     role: Literal["user", "assistant"]
     content: str
+
+
+@dataclass(frozen=True)
+class ToolCall:
+    """One tool the model asked to call. `error` is set (and `arguments` empty) when the model's
+    arguments were not valid JSON, so the caller can tell the model instead of crashing."""
+
+    id: str
+    name: str
+    arguments: dict
+    error: str | None = None
 
 
 @dataclass
@@ -25,3 +36,5 @@ class GenerationResult:
     fallback_used: bool = False
     # the model that was tried first and failed, when a fallback answered (None otherwise)
     fallback_from_model: str | None = None
+    # tools the model asked to call instead of (or besides) answering; empty for a plain answer
+    tool_calls: list[ToolCall] = field(default_factory=list)
