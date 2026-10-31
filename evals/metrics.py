@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import math
+
 
 def recall_at_k(ranked: list[str], relevant: set[str], k: int) -> float:
     """Share of the relevant documents found in the first k results."""
@@ -39,3 +41,16 @@ def rate(flags: list[bool]) -> float:
 
 def within_tolerance(baseline: float, current: float, tolerance: float) -> bool:
     return abs(current - baseline) <= tolerance + 1e-9
+
+
+def percentile(values: list[float], q: float) -> float:
+    """Nearest-rank percentile (q from 0 to 100): the smallest value with at least q% of the data at or below it."""
+    if not values:
+        raise ValueError("percentile needs at least one value")
+    ordered = sorted(values)
+    rank = max(1, math.ceil(q / 100 * len(ordered)))
+    return ordered[rank - 1]
+
+
+def round_up_to(value: float, step: float) -> float:
+    return math.ceil(value / step) * step

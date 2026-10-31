@@ -9,12 +9,45 @@ loop is closed. This fixture resets both singletons after every test so each
 one starts clean on its own loop.
 """
 
+import socket
+
 import pytest
 import pytest_asyncio
 
 from app.config import reset_settings
 from app.db import close_pool
 from app.rag.qdrant_store import close_client
+
+# Addresses a test may talk to: this machine (the Postgres and Qdrant containers publish their ports here)
+LOCAL_HOSTS = {"localhost", "127.0.0.1", "::1", "0.0.0.0", ""}
+
+
+@pytest.fixture(autouse=True)
+def _no_outside_network(request, monkeypatch):
+    """Tests may reach this machine only. A test that really needs the internet must say so with
+    `@pytest.mark.network`; everything else fails loudly instead of silently depending on a service."""
+    if request.node.get_closest_marker("network"):
+        return
+    real_connect, real_getaddrinfo = socket.socket.connect, socket.getaddrinfo
+
+    def refuse(host):
+        raise RuntimeError(
+            f"this test tried to reach {host!r}. Tests may only use localhost; mark a test that "
+            "really needs the internet with @pytest.mark.network."
+        )
+
+    def guarded_connect(self, address):
+        if isinstance(address, tuple) and str(address[0]) not in LOCAL_HOSTS:
+            refuse(address[0])
+        return real_connect(self, address)
+
+    def guarded_getaddrinfo(host, *args, **kwargs):
+        if host is not None and str(host) not in LOCAL_HOSTS:
+            refuse(host)
+        return real_getaddrinfo(host, *args, **kwargs)
+
+    monkeypatch.setattr(socket.socket, "connect", guarded_connect)
+    monkeypatch.setattr(socket, "getaddrinfo", guarded_getaddrinfo)
 
 
 @pytest.fixture(autouse=True)

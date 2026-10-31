@@ -59,6 +59,7 @@ testpaths = ["tests"]
 # litellm's type definitions make Pydantic print this harmless warning; pytest resets the filter
 # set in app/llm/__init__.py, so repeat it here
 filterwarnings = ["ignore:.*ReadOnly.*qualifier:UserWarning"]
+markers = ["network: the test really needs the internet (every other test may only use localhost)"]
 
 [tool.coverage.run]
 source = ["app"]

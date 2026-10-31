@@ -41,7 +41,7 @@ async def recommend(body: RecommendRequest):
             "message": "This looks like a simple question. Use the CRM copilot or document chat mode instead of the agent.",
         }
 
-    async def llm(system_prompt, messages):
+    async def llm(_role, system_prompt, messages):
         return await generate(system_prompt, messages, body.model)
 
     return await run_account_review(body.message, llm)
