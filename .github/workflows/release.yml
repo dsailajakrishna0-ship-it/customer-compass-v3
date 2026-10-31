@@ -11,7 +11,7 @@ permissions:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_PREFIX: ghcr.io/${{ github.repository }} # image names are api and web under this prefix
+  IMAGE_PREFIX: ghcr.io/${{ github.repository }} # image names are api, web and mcp-java under this prefix
 
 jobs:
   release:
@@ -21,6 +21,7 @@ jobs:
         include:
           - { name: api, context: apps/api-py, file: apps/api-py/Dockerfile }
           - { name: web, context: ".", file: apps/web/Dockerfile }
+          - { name: mcp-java, context: services/mcp-java, file: services/mcp-java/Dockerfile }
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

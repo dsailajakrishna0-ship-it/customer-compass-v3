@@ -50,6 +50,26 @@ def test_drift_is_reported():
     assert any("arguments are" in p for p in problems) and any("required is" in p for p in problems)
 
 
+def test_an_optional_argument_may_be_spelled_with_or_without_null():
+    contract = {"t": {"required": ["a"], "properties": {"a": "string", "b": "string?"}}}
+    plain = {"properties": {"a": {"type": "string"}, "b": {"type": "string"}}, "required": ["a"]}
+    nullable = {
+        "properties": {
+            "a": {"type": "string"},
+            "b": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+        },
+        "required": ["a"],
+    }
+    assert check.compare_tools({"t": plain}, contract) == []
+    assert check.compare_tools({"t": nullable}, contract) == []
+    # but a *required* argument must not be nullable
+    required_nullable = {
+        "properties": {"a": nullable["properties"]["b"], "b": {"type": "string"}},
+        "required": ["a"],
+    }
+    assert check.compare_tools({"t": required_nullable}, contract) != []
+
+
 def test_nullable_and_plain_types():
     assert check.simple_type({"type": "string"}) == "string"
     assert check.simple_type({"anyOf": [{"type": "string"}, {"type": "null"}]}) == "string?"

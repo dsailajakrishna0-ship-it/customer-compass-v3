@@ -35,6 +35,8 @@ npm run dev                       # web app at http://localhost:5173
 
 The `migrate` service creates the database schema and demo CRM data automatically before the API starts.
 
+Tool-calling chat talks to an 🟦MCP tool server: the Python one (`mcp-fastmcp`) starts with the stack. To also run the Java twin, `just up-java` (Spring Boot, port 8003); the web app's **Tool server** radio buttons then let you choose. Both are checked against [`contracts/mcp-tools.json`](contracts/mcp-tools.json).
+
 > Upgrading from a V2-style database volume? Recreate it once: `docker compose down -v` (this also removes the 🟩Qdrant volume, so you will ingest the documents again), then `up` again. To keep the volumes, run `uv run alembic stamp 0002` then `uv run alembic upgrade head` in `apps/api-py` instead. Then open the app and click **Ingest documents** once. API docs are at <http://localhost:8001/docs>. Full run and test guide, with every chat mode and sample questions: [docs/testing-guide.md](docs/testing-guide.md). Problems starting up: [docs/troubleshooting.md](docs/troubleshooting.md).
 
 ## Developer commands

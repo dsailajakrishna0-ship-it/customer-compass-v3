@@ -12,7 +12,7 @@ The [tech-stack](../tech-stack.md#v3-tech-stack-at-a-glance) lists every tool, w
 | --- | --- | --- | --- |
 | 0 | [Foundation](00-foundation.md) | CI/CD, linting and types, migrations, supply-chain security, releases, evaluation metrics | Written |
 | 1 | [Model layer](01-model-layer.md) | Settings, logging and request ids (1.1); gateways, fallback, rate limits (1.2 to 1.4) | Written (1.1 to 1.4) |
-| 2 | [Tools and 🟦MCP](02-tools-and-mcp.md) | 🟪Tool calling and schemas (2.1); MCP over HTTP (2.2) | In progress: 2.1 and 2.2a written |
+| 2 | [Tools and 🟦MCP](02-tools-and-mcp.md) | 🟪Tool calling and schemas (2.1); MCP over HTTP (2.2) | Written (2.1, 2.2a, 2.2b) |
 | 3 | 🟦LangGraph port | 🟪Agent graphs, state, checkpoints, 🟪human-in-the-loop | Written in Stage 3 |
 | 4 | 🟪Retrieval upgrade | 🟪Hybrid search, 🟪reranking, document parsing, 🟪embeddings | Written in Stage 4 |
 | 5 | Observability and 🟪evals | Tracing, metrics beyond recall, 🟪guardrail comparison | Written in Stage 5 |

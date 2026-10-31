@@ -21,6 +21,14 @@ updates:
   - package-ecosystem: docker
     directory: /apps/web
     schedule: { interval: weekly }
+  - package-ecosystem: maven
+    directory: /services/mcp-java
+    schedule: { interval: weekly }
+    groups:
+      maven-minor-patch: { update-types: [minor, patch] }
+  - package-ecosystem: docker
+    directory: /services/mcp-java
+    schedule: { interval: weekly }
   - package-ecosystem: docker-compose
     directory: /
     schedule: { interval: weekly }

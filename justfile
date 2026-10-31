@@ -13,6 +13,14 @@ default:
 up:
     docker compose up -d db qdrant api-py
 
+# also start the Java MCP server (Spring Boot, port 8003); the web app's radio buttons can then choose it
+up-java:
+    docker compose --profile java up -d --build mcp-spring
+
+# build and test the Java MCP server (needs Java 21 and Maven)
+java-test:
+    cd services/mcp-java && mvn -B -ntp verify
+
 # stop the stack (data volumes are kept)
 down:
     docker compose down
@@ -76,6 +84,10 @@ measure-limits runs="3":
 # check a running MCP tool server against contracts/mcp-tools.json, e.g. `just mcp-contract http://localhost:8002/mcp`
 mcp-contract url:
     uv run --project {{api}} python contracts/check_server.py {{url}}
+
+# call one tool on a running MCP server, e.g. `just mcp-call http://localhost:8003/mcp get_open_deals '{"company_name": "Acme"}'` (no tool name: list the tools)
+mcp-call url tool='' args='{}':
+    uv run --project {{api}} python contracts/call_tool.py "{{url}}" "{{tool}}" '{{args}}'
 
 # on a PR branch: report (or with --apply, resolve) merge conflicts that need no decision; see docs/adr/0013-conflict-bot.md
 resolve-conflicts *args:

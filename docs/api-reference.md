@@ -305,6 +305,14 @@ in Postgres).
 **Response 502** (partial/failed run — `status` is `"failed"`, body includes `error`)
 **Response 500** (the ingestion call itself raised)
 
+## `POST /api/v1/documents/search`
+
+Document search for other services. The Spring Boot MCP server calls it, because embeddings and the vector store stay in this API. It returns the same object as the FastMCP `search_documents` tool and writes the same `tool_audit_log` row.
+
+**Request:** `{ "query": "pricing breakdown", "companyName": "Acme" }` (`companyName` optional).
+
+**Response 200:** `{ "status": "executed", "results": [ { "title": "...", "companyName": "...", "docType": "...", "similarity": 0.81, "content": "..." } ] }`
+
 ## `GET /api/v1/documents`
 
 Lists ingested documents with their chunk counts (debugging retrieval).
