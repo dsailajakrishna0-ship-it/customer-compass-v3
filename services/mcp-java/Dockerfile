@@ -1,5 +1,5 @@
 # Image: builds the Spring Boot MCP server with Maven, runs it on a slim Java 21 runtime on port 8003
-FROM maven:3.9.11-eclipse-temurin-21 AS build
+FROM maven:3.9-eclipse-temurin-26 AS build
 WORKDIR /build
 
 # Dependencies first (cached layer, unchanged unless pom.xml changes)
