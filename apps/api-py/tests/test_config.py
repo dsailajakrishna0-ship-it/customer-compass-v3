@@ -34,13 +34,8 @@ def test_defaults_match_the_values_the_code_used_before_settings_existed(monkeyp
         64,
         60.0,
     )
-    assert (s.llm_provider, s.ollama_url, s.ollama_model) == (
-        "ollama",
-        "http://localhost:11435",
-        "qwen2.5:3b",
-    )
     assert s.google_embedding_model == "gemini-embedding-001"
-    assert (s.guard_mode, s.guard_provider, s.guard_model) == ("rules", "ollama", None)
+    assert (s.guard_mode, s.guard_model) == ("rules", None)
     assert s.security_audit_retention_days == 90
     assert (s.agent_max_steps, s.agent_timeout_seconds, s.agent_max_revisions) == (8, 180.0, 1)
     assert (s.log_level, s.log_format) == ("INFO", "json")
@@ -49,23 +44,23 @@ def test_defaults_match_the_values_the_code_used_before_settings_existed(monkeyp
 def test_environment_variables_override_defaults(monkeypatch):
     monkeypatch.setenv("AGENT_MAX_STEPS", "3")
     monkeypatch.setenv("VECTOR_COUNT_CACHE_SECONDS", "2.5")
-    monkeypatch.setenv("LLM_PROVIDER", "cloud")
+    monkeypatch.setenv("GUARD_MODE", "llm")
     s = get_settings()
-    assert (s.agent_max_steps, s.vector_count_cache_seconds, s.llm_provider) == (3, 2.5, "cloud")
+    assert (s.agent_max_steps, s.vector_count_cache_seconds, s.guard_mode) == (3, 2.5, "llm")
 
 
 def test_an_empty_variable_counts_as_unset(monkeypatch):
     # docker-compose passes `VAR: ${VAR:-}` as an empty string when the variable is not set
     monkeypatch.setenv("GUARD_MODEL", "")
-    monkeypatch.setenv("OLLAMA_MODEL", "")
+    monkeypatch.setenv("AGENT_MAX_STEPS", "")
     s = get_settings()
     assert s.guard_model is None
-    assert s.ollama_model == "qwen2.5:3b"
+    assert s.agent_max_steps == 8
 
 
 def test_a_wrong_value_stops_start_up_with_a_clear_message(monkeypatch):
-    monkeypatch.setenv("LLM_PROVIDER", "openrouter")
-    with pytest.raises(ValidationError, match="llm_provider"):
+    monkeypatch.setenv("GUARD_MODE", "sometimes")
+    with pytest.raises(ValidationError, match="guard_mode"):
         Settings()
 
 

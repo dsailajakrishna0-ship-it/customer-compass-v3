@@ -1,23 +1,23 @@
 flowchart TB
-    C["Callers: routes/chat.py, routes/agent.py,<br/>guardrails/llm_guard.py"] --> G["llm/gateway.py<br/>generate(): chain, retries, fallback"]
-    G --> L["LiteLLM Router<br/>(library)"]
+    W["Web: chat panel and message bubble<br/>(provider dropdown removed)"] --> C
+    C["Callers: routes/chat.py, routes/agent.py,<br/>guardrails/llm_guard.py"] --> G["llm/gateway.py<br/>cloud-only: chain, retries, fallback"]
+    G --> L["LiteLLM Router<br/>(library, 1.2)"]
     L --> O["OpenRouter free models"]
-    L --> K["Ollama (removed in 1.3)"]
-    G --> CF["config.py + models.yaml<br/>settings, fallback_chain"]
-    G --> T["llm/types.py<br/>GenerationResult"]
-    E["Earlier: logs.py, middleware.py,<br/>request ids (1.1)"]
-    X["Removed: provider.py,<br/>cloud.py, ollama.py"]
-    E -.->|"every log line carries the request id"| G
-    subgraph legend["Legend: state after sub-stage 1.2"]
+    G --> CF["config.py + models.yaml<br/>(local-model settings removed)"]
+    T["tests/test_no_local_models.py<br/>keeps the local runner out"]
+    X["Removed in 1.3: the Ollama service and volume,<br/>the provider switch, the cache script"]
+    E["Earlier: logs, middleware (1.1)"]
+    X ~~~ T
+    subgraph legend["Legend: state after sub-stage 1.3"]
         direction LR
         K1["new in this sub-stage"]
         K2["changed in this sub-stage"]
         K3["existing, untouched"]
     end
-    X ~~~ legend
+    E ~~~ legend
     classDef new fill:#a5d6a7,stroke:#1b5e20,stroke-width:3px,color:#0d3b12
     classDef changed fill:#fff3cd,stroke:#f9a825,stroke-width:2px,color:#5d4037
     classDef existing fill:#eceff1,stroke:#b0bec5,color:#78909c
-    class G,L,K1 new
-    class C,CF,T,K2 changed
-    class O,K,E,X,K3 existing
+    class T,K1 new
+    class W,C,G,CF,K2 changed
+    class L,O,E,X,K3 existing

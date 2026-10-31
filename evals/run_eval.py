@@ -38,6 +38,8 @@ SUITES = ("adversarial", "retrieval", "tools", "agent")
 TOLERANCES = {"adversarial": 0.0, "retrieval": 0.02, "tools": 0.2, "agent": 0.2}
 # Metrics that describe cost or speed are reported but never compared
 INFORMATIONAL = {"mean_latency_s", "cases", "mean_steps"}
+# Suites whose scores come from the chat model; they are only comparable between runs of the same model
+MODEL_DEPENDENT = {"tools", "agent"}
 RETRIEVAL_FETCH = 10  # chunks fetched per question; documents are deduped from these
 
 
@@ -245,13 +247,37 @@ def _environment() -> dict:
 
     settings = get_settings()
     return {
-        "llm_provider": settings.llm_provider,
-        "ollama_model": settings.ollama_model,
-        "openrouter_model": settings.default_openrouter_model,
+        "chat_model": f"openrouter/{settings.default_openrouter_model}",
         "embedding_model": settings.google_embedding_model,
         "qdrant_collection": settings.qdrant_collection,
         "guard_mode": settings.guard_mode,
     }
+
+
+def chat_model_of(environment: dict) -> str:
+    """The chat model a report was taken with. Reports from before V3 sub-stage 1.3 recorded a local
+    model (`ollama_model`) instead of `chat_model`."""
+    if environment.get("chat_model"):
+        return environment["chat_model"]
+    return f"ollama/{environment.get('ollama_model', 'unknown')}"
+
+
+def comparable_suites(
+    baseline_env: dict, current_env: dict, suites: list[str]
+) -> tuple[list[str], str | None]:
+    """Drops the suites whose scores depend on the chat model when the model changed.
+    Returns the suites to run and a note explaining what was dropped (None if nothing was)."""
+    was, now = chat_model_of(baseline_env), chat_model_of(current_env)
+    if was == now:
+        return suites, None
+    kept = [s for s in suites if s not in MODEL_DEPENDENT]
+    if kept == suites:
+        return suites, None
+    dropped = ", ".join(s for s in suites if s in MODEL_DEPENDENT)
+    return (
+        kept,
+        f"skipped {dropped}: the baseline was taken with {was}, the chat model is now {now}",
+    )
 
 
 def compare(baseline: dict, current: dict) -> list[str]:
@@ -334,6 +360,10 @@ def main() -> int:
 
     baseline = json.loads(Path(args.check).read_text()) if args.check else None
     suites = args.suites or (list(baseline["suites"]) if baseline else list(SUITES))
+    if baseline:
+        suites, note = comparable_suites(baseline.get("environment", {}), _environment(), suites)
+        if note:
+            print(f"NOTE: {note}\n")
     report = asyncio.run(_run(suites, args.api_url))
     _print_table(report)
     if args.out:

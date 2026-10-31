@@ -1,7 +1,7 @@
 # Startup troubleshooting and user guide
 
 Notes from the first real local run of the V2 stack (`customer-compass-v2`, now seeded into V3), right after the
-infra migration PR (Qdrant, the vector DB + Ollama, the local model runner, cache reuse). Keep this updated as new
+infra migration PR (Qdrant, the vector DB, plus a local model runner that V3 sub-stage 1.3 later removed). Keep this updated as new
 startup quirks are found — especially while v1 (`customer-compass`) and v2
 coexist on the same machine.
 
@@ -30,14 +30,15 @@ each mode, and example questions to try.
 
 ### 3. Choose a Model
 
-- **Local (Ollama · qwen2.5:3b)** — runs fully offline on your machine, no
-  API key needed, consistent but slower on CPU.
-- **Cloud (OpenRouter, free tier)** — faster, needs `OPENROUTER_API_KEY` set
-  in `apps/api-py/.env` (and in root `.env` / `docker-compose.yml`'s
-  `api-py` environment if running the full containerized stack); a third
-  dropdown lets you pick the specific free model. Free models can
-  occasionally return an empty/rate-limited response (see issue #6 below)
-  — just retry or switch models.
+- **OpenRouter free models** — every chat mode needs `OPENROUTER_API_KEY`
+  (a free key from https://openrouter.ai/keys) in the root `.env`, which
+  `docker-compose.yml` passes to the `api-py` container (or in
+  `apps/api-py/.env` when you run the API outside Docker). The dropdown lets
+  you pick the specific free model. If a model is rate-limited or down, the
+  gateway automatically tries the next model in the chain (the answer shows
+  a "fallback used" note); an empty or rate-limited response can still
+  happen (see issue #6 below), so retry or switch models. Without a key the
+  chat routes return a clear 503 telling you to set it.
 
 There is **no separate company selector** in the UI — you simply name the
 company in your question text (e.g. "Acme Fabrication"), and the app scopes
@@ -66,14 +67,14 @@ already exists on the machine, `docker compose up` fails to (re)create v2's
 the whole `up` command partway (see #2 below).
 
 **Fix applied:** v2's `db` container is now named `customer-compass-v3-db`,
-matching the naming already used for `ollama`/`qdrant`. No action needed
+matching the naming already used for `qdrant`. No action needed
 going forward — just make sure you're on a version of this repo that
 includes that fix.
 
 ### 2. A failed service can silently abort the whole `docker compose up`
 
-**Symptom:** You ran `docker compose up -d db qdrant ollama`, but afterwards
-`ollama` (or another service) wasn't actually running — `docker ps` shows
+**Symptom:** You ran `docker compose up -d db qdrant api-py`, but afterwards
+`qdrant` (or another service) wasn't actually running — `docker ps` shows
 nothing, or `docker ps -a` shows it stuck in `Created` state (never
 `Started`).
 
@@ -90,22 +91,23 @@ docker ps --format "{{.Names}}\t{{.Status}}"
 If something is missing or stuck at `Created`, re-run `docker compose up -d
 <missing-service>` explicitly for just that service.
 
-### 3. Full startup needs three containers, not just `db`
+### 3. Full startup needs both data containers, not just `db`
 
-The API depends on **all three** infra containers — Postgres, Qdrant, and
-Ollama. Starting only `db` will let the API process boot, but any chat
-request will fail (500/503) because Ollama (generation) isn't reachable.
+The API depends on Postgres and Qdrant. Starting only `db` will let the API
+process boot, but document ingestion and retrieval will fail (500/503)
+because Qdrant isn't reachable. (Chat itself also needs an
+`OPENROUTER_API_KEY`; see "Choose a Model" above.)
 
-Always start all three together:
+Start them together:
 ```bash
-docker compose up -d db qdrant ollama
+docker compose up -d db qdrant api-py
 ```
 
-### 4. v1 and v2 can't run `db`/`ollama` at the same time
+### 4. v1 and v2 can't run `db` at the same time
 
-Both repos' Postgres and Ollama services bind the **same host ports** (5432,
-11435) regardless of container name. Only one stack (v1 or v2) can have
-these services running at once — stop one (`docker compose down`) before
+Both repos' Postgres services bind the **same host port** (5432)
+regardless of container name. Only one stack (v1 or v2) can have
+this service running at once — stop one (`docker compose down`) before
 starting the other.
 
 ### 5. `apps/api-py/.env` is per-repo, not shared

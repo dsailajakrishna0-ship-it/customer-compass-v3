@@ -17,6 +17,7 @@ One short file per decision, so the reason for a choice is not buried in a long 
 | [0007](0007-documentation-track.md) | Documentation track | Accepted |
 | [0008](0008-config-and-logging.md) | Settings, model catalogue and structured logging | Accepted |
 | [0009](0009-litellm-gateway.md) | The model gateway (LiteLLM) | Accepted |
+| [0010](0010-cloud-only-models.md) | Cloud-only chat models | Accepted |
 
 ## Template
 

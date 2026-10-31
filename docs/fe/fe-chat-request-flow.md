@@ -15,13 +15,13 @@ model-calling logic itself.
 | Responsibility | File |
 | --- | --- |
 | Chat input + submit handling | `apps/web/src/components/chat/ChatInput.tsx` |
-| Chat history, mode/provider/model state | `apps/web/src/context/ChatSessionContext.tsx` |
+| Chat history, mode/model state | `apps/web/src/context/ChatSessionContext.tsx` |
 | Building the request + calling the API | `apps/web/src/hooks/useChat.ts` |
 | Picking the right endpoint for the mode | `apps/web/src/api/chat.ts` |
 | Shared `fetch` wrapper (base URL `http://localhost:8001`) | `apps/web/src/api/client.ts` |
 | Mounting the routers under `/api/v1` | `apps/api-py/app/main.py` |
 | General / RAG / CRM / tools route handlers | `apps/api-py/app/routes/chat.py` |
-| Picking local (Ollama — runs the local generating model) vs. cloud (OpenRouter — hosted generating models) + fallback (one automatic retry on the other provider, Stage 7) | `apps/api-py/app/llm/provider.py` |
+| Calling a hosted model (OpenRouter) with an ordered fallback chain, retries and cool-down (sub-stage 1.2) | `apps/api-py/app/llm/gateway.py` |
 | Document retrieval for grounding | `apps/api-py/app/rag/retrieve.py` |
 | Structured CRM facts + mode classification (the query router that decides DB facts vs. documents) | `apps/api-py/app/crm/queries.py`, `apps/api-py/app/chat/router.py` |
 | Prompt-injection scan (Stage 8; the prompt guard, a rule-based text scan) | `apps/api-py/app/guardrails/prompt_guard.py` |
@@ -33,12 +33,12 @@ model-calling logic itself.
 ┌───────────────┐   submit    ┌──────────────────┐
 │  ChatInput.tsx │ ──────────▶ │  useChat() hook   │
 └───────────────┘             └─────────┬─────────┘
-                                         │ reads chatMode / provider / cloudModel
+                                         │ reads chatMode / cloudModel
                                          ▼
                               ┌────────────────────────┐
                               │ ChatSessionContext      │
-                              │  (chatMode, provider,   │
-                              │   cloudModel, messages)  │
+                              │  (chatMode, cloudModel, │
+                              │   messages)              │
                               └─────────┬──────────────┘
                                          │ sendChat(chatMode, body)
                                          ▼
@@ -61,7 +61,7 @@ model-calling logic itself.
                                          │
                                          ▼
                          useChat() appends the ChatMessage
-                         (content, provider, citations, facts,
+                         (content, citations, facts,
                           usage, guardrail, toolsUsed)
                          to ChatSessionContext → MessageList
                          → MessageBubble re-renders
@@ -84,16 +84,15 @@ scan_and_neutralize  scan_and_neutralize      scan_and_neutralize        scan_an
      │             build_context(chunks)        └─ documents?  → retrieval      → MCP client → MCP server
      │                    │                    builds combined prompt           (stdio subprocess)
      ▼                    ▼                         ▼                          ▼
-          generate(system_prompt, messages, provider, model)
+          generate(system_prompt, messages, model)
                     │
-         ┌──────────┴───────────┐
-         ▼                      ▼
-   Ollama (local)        OpenRouter (cloud)
-   qwen2.5:3b            user-picked free model
-         │                      │
-         └──────────┬───────────┘
-                     ▼
-     { message, provider, usage, guardrail,
+                    ▼
+        model gateway (LiteLLM)
+        user-picked free model, then the
+        fallback chain from models.yaml
+                    │
+                    ▼
+     { message, usage, guardrail,
        citations?, facts?, scopedCompany?, toolsUsed? }
 ```
 
@@ -115,11 +114,10 @@ function askQuestion(event: FormEvent<HTMLFormElement>) {
   setQuestion("");
   setIsAsking(true);
 
-  const requestBody: { messages: ChatMessage[]; provider: LlmProvider; model?: string } = {
+  const requestBody: { messages: ChatMessage[]; model?: string } = {
     messages: history.slice(-12),
-    provider,
   };
-  if (provider === "cloud" && cloudModel) requestBody.model = cloudModel;
+  if (cloudModel) requestBody.model = cloudModel;
 
   sendChat(chatMode, requestBody)
     .then((body) => setMessages((current) => [...current, {
@@ -128,7 +126,6 @@ function askQuestion(event: FormEvent<HTMLFormElement>) {
       citations: body.citations,
       facts: body.facts,
       scopedCompany: body.scopedCompany,
-      provider: body.provider,
       usage: body.usage,
       guardrail: body.guardrail,
       toolsUsed: body.toolsUsed,
@@ -141,7 +138,7 @@ function askQuestion(event: FormEvent<HTMLFormElement>) {
 }
 ```
 
-`chatMode`, `provider`, and `cloudModel` come from `useChatSession()`
+`chatMode` and `cloudModel` come from `useChatSession()`
 (`context/ChatSessionContext.tsx`) — the same values the user picked in
 `ChatModeSelector` and that are persisted to `localStorage`.
 
@@ -179,25 +176,23 @@ Invalid requests are rejected with a 4xx error before any LLM call. Each
 route then runs the Stage 8 prompt-injection scan on the user message (and on
 any retrieved/tool-returned content) before building the prompt.
 
-- **`/api/v1/chat`** calls `generate(GENERAL_SYSTEM_PROMPT, messages, provider, model)` directly.
+- **`/api/v1/chat`** calls `generate(GENERAL_SYSTEM_PROMPT, messages, model)` directly.
 - **`/api/v1/chat/rag`** calls `retrieve_relevant_chunks(question)`, builds a numbered source context with `build_context()`, and asks the model to cite `[1]`, `[2]`, etc. If nothing clears the similarity threshold it returns a canned "nothing relevant" answer without calling the LLM.
 - **`/api/v1/chat/crm`** classifies the question first (`app/chat/router.py`) to decide whether it needs structured facts (`app/crm/queries.py`), document retrieval, or both, then combines a "Verified CRM facts" block (never needs a citation) with a "Source documents" block (always needs one).
 - **`/api/v1/chat/tools`** runs a bounded loop (max 4 iterations) in which the model may emit a fenced `tool_call` block that is executed through the MCP client; mutating tools only run after the user confirms in their next message.
 
-## 4. `generate()` picks the LLM provider
+## 4. `generate()` calls a model through the gateway
 
 ```python
 # apps/api-py/app/llm/gateway.py (conceptually)
-generate(system_prompt, messages, provider, model)
-  # provider == "ollama" -> Ollama (qwen2.5:3b)
-  # provider == "cloud"  -> OpenRouter with the user-picked free model
-  # on failure: next model in an ordered chain (see models.yaml), then the other provider;
+generate(system_prompt, messages, model)
+  # model given -> that OpenRouter model first; otherwise the default from models.yaml
+  # on failure: the next model in the chain (see models.yaml), with retries and a cool-down;
   # flag usage.fallbackUsed / fallbackFromModel
 ```
 
-`provider` and `model` are optional per-request overrides sent from the UI's
-provider/model selectors; if omitted, the API falls back to the
-`LLM_PROVIDER` environment variable (default `ollama`).
+`model` is an optional per-request choice sent from the UI's model dropdown; if omitted, the API uses the
+default from `OPENROUTER_MODEL` or `models.yaml`.
 
 ## 5. The response flows back up
 
@@ -207,8 +202,7 @@ on mode:
 ```json
 {
   "message": "…",
-  "provider": "ollama",
-  "usage": { "…": "tokens, latency, cost, fallback flag (Stage 7)" },
+  "usage": { "…": "tokens, latency, cost, fallback info" },
   "guardrail": { "flagged": false, "reasons": [] },
   "citations": [{ "number": 1, "title": "…", "similarity": 0.83 }],
   "facts": { "name": "Acme Fabrication", "openDeals": [] },

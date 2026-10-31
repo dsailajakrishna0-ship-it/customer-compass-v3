@@ -1,9 +1,8 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
-import type { ChatMessage, ChatMode, LlmProvider } from "../types";
+import type { ChatMessage, ChatMode } from "../types";
 
 const STORAGE_KEYS = {
   chatMode: "customer-compass:chatMode",
-  provider: "customer-compass:provider",
   cloudModel: "customer-compass:cloudModel",
 } as const;
 
@@ -56,15 +55,13 @@ export const MODE_COPY: Record<ChatMode, { label: string; placeholder: string; s
 type ChatSessionValue = {
   chatMode: ChatMode;
   switchChatMode: (next: ChatMode) => void;
-  provider: LlmProvider;
-  setProvider: (next: LlmProvider) => void;
   cloudModel: string;
   setCloudModel: (next: string) => void;
   messages: ChatMessage[];
   setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
 };
 
-// Context: shares the chat mode, model provider (local Ollama vs cloud) and history across pages
+// Context: shares the chat mode, the chosen model and history across pages
 const ChatSessionContext = createContext<ChatSessionValue | null>(null);
 
 const INITIAL_MESSAGE: ChatMessage = {
@@ -74,7 +71,6 @@ const INITIAL_MESSAGE: ChatMessage = {
 
 export function ChatSessionProvider({ children }: { children: ReactNode }) {
   const [chatMode, setChatMode] = useState<ChatMode>(() => readStored(STORAGE_KEYS.chatMode, "general"));
-  const [provider, setProviderState] = useState<LlmProvider>(() => readStored(STORAGE_KEYS.provider, "ollama"));
   const [cloudModel, setCloudModelState] = useState<string>(() => readStored(STORAGE_KEYS.cloudModel, ""));
   const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_MESSAGE]);
 
@@ -91,19 +87,14 @@ export function ChatSessionProvider({ children }: { children: ReactNode }) {
     setMessages([{ role: "assistant", content: MODE_COPY[nextMode].switchNotice }]);
   }
 
-  function setProvider(next: LlmProvider) {
-    setProviderState(next);
-    writeStored(STORAGE_KEYS.provider, next);
-  }
-
   function setCloudModel(next: string) {
     setCloudModelState(next);
     writeStored(STORAGE_KEYS.cloudModel, next);
   }
 
   const value = useMemo<ChatSessionValue>(
-    () => ({ chatMode, switchChatMode, provider, setProvider, cloudModel, setCloudModel, messages, setMessages }),
-    [chatMode, provider, cloudModel, messages],
+    () => ({ chatMode, switchChatMode, cloudModel, setCloudModel, messages, setMessages }),
+    [chatMode, cloudModel, messages],
   );
 
   return <ChatSessionContext.Provider value={value}>{children}</ChatSessionContext.Provider>;

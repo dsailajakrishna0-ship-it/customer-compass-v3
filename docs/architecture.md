@@ -11,7 +11,7 @@ For the per-stage build history, see [tech-stack.md](tech-stack.md) and the
 
 ## System diagram
 
-> In short: **React + Vite** is the browser UI, **FastAPI** is the backend, **Postgres** holds the CRM tables (schema built by Alembic migrations), **🟩Qdrant** is the 🟪vector DB, **🟩Ollama** runs the local generating model (`qwen2.5:3b`), **🟩OpenRouter** gives access to hosted cloud generating models, and Google **`gemini-embedding-001`** is the 🟪embedding model (text → vectors, not a chat model).
+> In short: **React + Vite** is the browser UI, **FastAPI** is the backend, **Postgres** holds the CRM tables (schema built by Alembic migrations), **🟩Qdrant** is the 🟪vector DB, **🟩OpenRouter** gives access to hosted free generating models (through the 🟦LiteLLM gateway), and Google **`gemini-embedding-001`** is the 🟪embedding model (text → vectors, not a chat model).
 
 ```
 ┌─────────────────────────────┐
@@ -44,16 +44,16 @@ For the per-stage build history, see [tech-stack.md](tech-stack.md) and the
         │                   │                   │
         ▼                   ▼                   ▼
 ┌───────────────┐   ┌───────────────┐   ┌─────────────────────┐
-│   Postgres      │   │    Qdrant      │   │  Ollama (local)      │
-│ (postgres:17,   │   │ (vector store  │   │  or OpenRouter        │
-│  relational data│   │  for document  │   │  (cloud, OpenAI-     │
-│  only in v2:    │   │  chunk         │   │  compatible API)      │
-│  companies,     │   │  embeddings;   │   │                       │
-│  deals, contacts,│  │  vectors come  │   │  Chosen per-request   │
-│  interactions,  │   │  from Google   │   │  via `provider` field,│
-│  ingestion_runs,│   │  gemini-       │   │  with automatic       │
-│  tasks,         │   │  embedding-001)│   │  fallback (Stage 7)   │
-│  tool_audit_log)│   │                │   │                       │
+│   Postgres      │   │    Qdrant      │   │  OpenRouter (cloud) │
+│ (postgres:17,   │   │ (vector store  │   │  hosted free models,│
+│  relational data│   │  for document  │   │  called through     │
+│  only in v2:    │   │  chunk         │   │  LiteLLM (an OpenAI-│
+│  companies,     │   │  embeddings;   │   │  style API), with an│
+│  deals, contacts,│  │  vectors come  │   │  ordered fallback   │
+│  interactions,  │   │  from Google   │   │  chain of models    │
+│  ingestion_runs,│   │  gemini-       │   │  (sub-stage 1.2)    │
+│  tasks,         │   │  embedding-001)│   │                     │
+│  tool_audit_log)│   │                │   │                     │
 └───────────────┘   └───────────────┘   └─────────────────────┘
 ```
 
@@ -67,9 +67,9 @@ stage: [tech-stack.md](tech-stack.md).
 | Stage | New component(s) | New capability unlocked | Builds on |
 | --- | --- | --- | --- |
 | **1 — CRM Foundation** | **PostgreSQL** (companies, contacts, deals, interactions) | Structured CRM data exists at all; no 🟪LLM/AI yet | — |
-| **2 — First 🟪LLM Chat** | **🟩Ollama** (local, `qwen2.5:3b`), `/api/v1/chat` | First chat/completion endpoint; no CRM data access yet | Stage 1 DB (unused by chat so far) |
-| **3 — Basic 🟪RAG** | **🟪Embeddings** + 🟪vector search, `/api/v1/chat/rag` (originally Ollama `mxbai-embed-large` + **`pgvector`** in the same Postgres DB; in v2 now **Google `gemini-embedding-001`** + **🟩Qdrant**) | Answers grounded in 🟪retrieved, cited document 🟪chunks instead of the model's own knowledge | Stage 1 DB, Stage 2 chat model |
-| **4 — Cloud 🟪LLM Provider** | **🟩OpenRouter** (cloud, free tier), `GET /api/v1/llm/models`, Model/provider dropdowns in UI | Live, per-request choice between local and cloud 🟪inference — Ollama still works unchanged | Stage 2 chat plumbing |
+| **2 — First 🟪LLM Chat** | A small local model (`qwen2.5:3b`; removed in V3 sub-stage 1.3), `/api/v1/chat` | First chat/completion endpoint; no CRM data access yet | Stage 1 DB (unused by chat so far) |
+| **3 — Basic 🟪RAG** | **🟪Embeddings** + 🟪vector search, `/api/v1/chat/rag` (originally a local `mxbai-embed-large` embedding model + **`pgvector`** in the same Postgres DB; in v2 now **Google `gemini-embedding-001`** + **🟩Qdrant**) | Answers grounded in 🟪retrieved, cited document 🟪chunks instead of the model's own knowledge | Stage 1 DB, Stage 2 chat model |
+| **4 — Cloud 🟪LLM Provider** | **🟩OpenRouter** (cloud, free tier), `GET /api/v1/llm/models`, Model dropdown in UI | Live, per-request choice of hosted model (V2 also offered a local/cloud switch; V3 is cloud-only) | Stage 2 chat plumbing |
 | **5 — Realistic CRM 🟪RAG** | **Query router** (`chat/router.py`, a keyword classifier that picks DB facts vs. documents), **`crm/queries.py`**, `/api/v1/chat/crm`, 3-way chat-mode selector | Questions routed to structured SQL facts, document retrieval, or both — and the UI visibly separates "verified facts" from "cited claims" | Stage 1 DB, Stage 3 retrieval |
 | **6 — 🟪Retrieval Evaluation** | **🟦promptfoo** 🟪eval suite (`evals/`; a harness that sends test questions to the live API and grades the answers), 🟪LLM-as-judge rubric (a second model, `qwen2.5:7b`, grades the answers) | Retrieval/grounding correctness and refusal behavior are now measurable, not just manually eyeballed — used to empirically tune `MIN_SIMILARITY` | Stage 3 retrieval, Stage 5 CRM routing |
 | **7 — Production Concerns** | **Cross-provider auto-fallback** (retry once on the other provider), **per-request `usage` telemetry** | A failing provider no longer surfaces a hard error — it silently retries on the other provider and *tells you it did* (fallback flag + cost/latency footer in UI) | Stage 4 dual providers |
@@ -94,22 +94,21 @@ Postgres and 🟩Qdrant have different jobs and neither replaces the other here:
   `company_id` for CRM-mode scoping, 🟪similarity search) rather than treating
   vector search as "just another SQL column."
 
-## Why two LLM providers
+## Why chat models are cloud-only (V3)
 
-- **🟩Ollama** — local, free, private, but limited by local hardware (runs
-  `qwen2.5:3b`, a small model — hence terser/odd-citation-placement answers
-  observed during testing).
-- **🟩OpenRouter (cloud)** — swappable, can offer much larger models even on
-  the free tier, but subject to internet access, external rate limits, and
-  the usual cloud-provider instability.
+V2 offered two ways to generate answers: a small local model (private and free, but limited by local hardware,
+which showed in terse answers and odd citation placement) and hosted models through 🟩OpenRouter. V3 removed
+the local one (sub-stage 1.3, [ADR 0010](adr/0010-cloud-only-models.md)):
 
-Both are always wired up side by side (`app/llm/gateway.py`, since V3 sub-stage 1.2); a request
-can choose either via `provider`. A failing model hands over to the next one in an ordered chain
-(`models.yaml`, then the other provider) before the
-request fails outright (full design: [part-3-trust-safety/07-production-concerns.md](v2-baseline/part-3-trust-safety/07-production-concerns.md)).
+- **🟩OpenRouter free models** can be much larger than anything a laptop runs, and they are swappable. The price
+  is internet access, rate limits and the usual cloud instability, which the 🟪model gateway absorbs
+  (`app/llm/gateway.py`, sub-stage 1.2): a failing model hands over to the next one in an ordered chain
+  (`models.yaml`), with retries for timeouts and server errors (full design:
+  [Stage 1 guide](stages/01-model-layer.md#concept-4--calling-models-safely-the-model-gateway)).
+- **No local fallback:** without an `OPENROUTER_API_KEY` there is no chat model, and the API says so clearly.
 
 🟪Embeddings are separate from chat 🟪inference: they always come from Google's
-`gemini-embedding-001` (768-dim, needs `GOOGLE_API_KEY`), not from Ollama.
+`gemini-embedding-001` (768-dim, needs `GOOGLE_API_KEY`).
 
 ## Request flow: one chat question, start to finish (RAG mode example)
 
@@ -144,17 +143,12 @@ companies.
 
 ## Local dev vs. Docker networking
 
-Two different hostnames point at the same 🟩Ollama container depending on
-who's asking:
+Each service has two addresses, depending on who is asking:
 
-- From **your host machine** (e.g. a manual `curl` or browser): `localhost:11435`
-  (the port Docker Compose maps to the container).
-- From **inside the `api-py` container** (i.e. what `OLLAMA_URL` is actually
-  set to in `docker-compose.yml`): `http://ollama:11434` — the
-  compose-network-internal DNS name and the container's native port.
-
-The same pattern applies to `QDRANT_URL` (`http://qdrant:6333` from inside
-the network) and `DATABASE_URL` (`db:5432` from inside the network).
+- From **your host machine** (a manual `curl`, the browser, `uv run` tests): `localhost` and the port Docker
+  Compose maps, for example `localhost:6333` for 🟩Qdrant and `localhost:5432` for Postgres.
+- From **inside the `api-py` container** (what `docker-compose.yml` sets): the compose-network DNS name and the
+  service's native port: `QDRANT_URL=http://qdrant:6333` and `DATABASE_URL` pointing at `db:5432`.
 
 ## Where to look for more detail
 

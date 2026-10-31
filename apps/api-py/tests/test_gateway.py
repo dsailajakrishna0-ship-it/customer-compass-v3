@@ -88,83 +88,77 @@ def waits(monkeypatch):
 def use_models(monkeypatch, script: dict[str, list]) -> None:
     """Script the outcomes and make the chain be exactly these models, first to last."""
     Scripted.script = {name: list(outcomes) for name, outcomes in script.items()}
-    routes = tuple(
-        Route("cloud", name, f"scripted/{name}", api_key="SECRET-ROUTE-KEY") for name in script
-    )
+    routes = tuple(Route(name, f"scripted/{name}", api_key="SECRET-ROUTE-KEY") for name in script)
     first = next(iter(script))
-    monkeypatch.setattr(
-        gateway, "build_chain", lambda provider, model=None: Plan(routes, "cloud", first)
-    )
+    monkeypatch.setattr(gateway, "build_chain", lambda model=None: Plan(routes, first))
 
 
 async def ask() -> object:
-    return await gateway.generate("be brief", [{"role": "user", "content": "hi"}], "cloud")
+    return await gateway.generate("be brief", [{"role": "user", "content": "hi"}])
 
 
 # ---------------------------------------------------------------- chain building
 
 
-def test_the_default_cloud_chain_is_the_default_then_the_fallback_chain_then_local(monkeypatch):
+def test_the_default_chain_is_the_default_model_then_the_fallback_chain(monkeypatch):
     monkeypatch.setenv("OPENROUTER_API_KEY", "k")
-    plan = gateway.build_chain("cloud")
-    names = [r.model for r in plan.chain]
-    assert names[0] == "liquid/lfm-2.5-2.6b:free"
-    assert names[1:4] == [
+    plan = gateway.build_chain()
+    assert [r.model for r in plan.chain] == [
+        "liquid/lfm-2.5-2.6b:free",
         "google/gemma-4-31b-it:free",
         "google/gemma-4-26b-a4b-it:free",
         "poolside/laguna-xs-2.1:free",
     ]
-    assert plan.chain[-1].provider == "ollama"
     assert [r.litellm_model for r in plan.chain[:2]] == [
         "openrouter/liquid/lfm-2.5-2.6b:free",
         "openrouter/google/gemma-4-31b-it:free",
     ]
-    assert (plan.requested_provider, plan.requested_model) == ("cloud", "liquid/lfm-2.5-2.6b:free")
+    assert plan.requested_model == "liquid/lfm-2.5-2.6b:free"
 
 
 def test_a_chosen_model_goes_first_and_is_not_repeated(monkeypatch):
     monkeypatch.setenv("OPENROUTER_API_KEY", "k")
-    names = [r.model for r in gateway.build_chain("cloud", "google/gemma-4-26b-a4b-it:free").chain]
-    assert names[0] == "google/gemma-4-26b-a4b-it:free"
-    assert names.count("google/gemma-4-26b-a4b-it:free") == 1
-    assert (
-        "liquid/lfm-2.5-2.6b:free" not in names[1:3] or names.count("liquid/lfm-2.5-2.6b:free") == 1
-    )
+    plan = gateway.build_chain("google/gemma-4-26b-a4b-it:free")
+    names = [r.model for r in plan.chain]
+    assert names[0] == plan.requested_model == "google/gemma-4-26b-a4b-it:free"
+    assert len(names) == len(set(names)), "no model is tried twice"
+    assert "google/gemma-4-31b-it:free" in names, "the rest of the chain still follows"
 
 
-def test_local_first_then_cloud_when_a_key_exists(monkeypatch):
+def test_a_model_outside_the_chain_can_still_be_chosen(monkeypatch):
     monkeypatch.setenv("OPENROUTER_API_KEY", "k")
-    chain = gateway.build_chain("ollama").chain
-    assert chain[0].provider == "ollama" and chain[1].provider == "cloud"
+    names = [r.model for r in gateway.build_chain("someone/new-model:free").chain]
+    assert names[0] == "someone/new-model:free" and len(names) == 4
 
 
-def test_without_a_key_only_the_local_model_is_available(monkeypatch):
-    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
-    plan = gateway.build_chain("cloud")
-    assert [r.provider for r in plan.chain] == ["ollama"]
-    assert plan.requested_provider == "cloud"  # so the answer is flagged as a fallback
+def test_the_environment_default_model_wins_over_models_yaml(monkeypatch):
+    monkeypatch.setenv("OPENROUTER_API_KEY", "k")
+    monkeypatch.setenv("OPENROUTER_MODEL", "google/gemma-4-31b-it:free")
+    names = [r.model for r in gateway.build_chain().chain]
+    assert names[0] == "google/gemma-4-31b-it:free" and len(names) == len(set(names))
 
 
-def test_the_missing_key_warning_appears_only_when_the_cloud_was_requested(monkeypatch):
+def test_without_a_key_there_is_no_chain_and_a_warning_is_logged(monkeypatch):
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
     stream = io.StringIO()
     configure_logging("INFO", "json", stream)
     try:
-        gateway.build_chain("ollama")
-        assert stream.getvalue() == ""
-        gateway.build_chain("cloud")
+        plan = gateway.build_chain()
     finally:
         configure_logging("INFO", "json")
+    assert plan.chain == ()
     assert "openrouter_key_missing" in stream.getvalue()
 
 
-def test_an_unknown_provider_is_rejected():
-    with pytest.raises(ValueError, match="Unknown LLM provider"):
-        gateway.build_chain("openrouter")
+@pytest.mark.asyncio
+async def test_without_a_key_the_user_is_told_exactly_what_to_set(monkeypatch):
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    with pytest.raises(LlmUnavailableError, match="OPENROUTER_API_KEY"):
+        await gateway.generate("be brief", [{"role": "user", "content": "hi"}])
 
 
 def test_a_route_never_prints_its_key():
-    assert "SECRET" not in repr(Route("cloud", "m", "openrouter/m", api_key="SECRET-KEY"))
+    assert "SECRET" not in repr(Route("m", "openrouter/m", api_key="SECRET-KEY"))
 
 
 # ------------------------------------------------------------------- the calls
@@ -174,10 +168,10 @@ def test_a_route_never_prints_its_key():
 async def test_a_healthy_first_model_answers_with_no_fallback(monkeypatch):
     use_models(monkeypatch, {"a:free": ["hello"], "b:free": ["never used"]})
     result = await ask()
-    assert result.content == "hello" and result.model == "a:free" and result.provider == "cloud"
+    assert result.content == "hello" and result.model == "a:free"
     assert (result.tokens_in, result.tokens_out) == (11, 7)
     assert result.estimated_cost == 0.0 and result.latency_ms >= 0
-    assert result.fallback_used is False and result.fallback_from is None
+    assert result.fallback_used is False and result.fallback_from_model is None
     assert Scripted.calls == ["a:free"]
 
 
@@ -188,7 +182,7 @@ async def test_a_429_falls_back_to_the_next_model(monkeypatch, waits):
     result = await ask()
     assert result.content == "from b" and result.model == "b:free"
     assert result.fallback_used is True
-    assert (result.fallback_from, result.fallback_from_model) == ("cloud", "a:free")
+    assert result.fallback_from_model == "a:free"
     assert Scripted.calls == ["a:free", "b:free"]
 
 

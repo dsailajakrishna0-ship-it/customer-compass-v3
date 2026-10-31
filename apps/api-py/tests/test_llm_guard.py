@@ -36,7 +36,7 @@ async def test_guard_input_modes(monkeypatch: pytest.MonkeyPatch) -> None:
 @pytest.mark.asyncio
 async def test_guard_input_fails_open_when_classifier_down(monkeypatch: pytest.MonkeyPatch) -> None:
     async def broken(_text: str) -> bool:
-        raise RuntimeError("ollama down")
+        raise RuntimeError("model down")
 
     monkeypatch.setattr(llm_guard, "classify_prompt", broken)
     assert not (await llm_guard.guard_input("hello", "llm")).flagged

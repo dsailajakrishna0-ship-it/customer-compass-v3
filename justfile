@@ -9,9 +9,9 @@ api := "apps/api-py"
 default:
     @just --list
 
-# start the core stack (db, vector store, local model, api)
+# start the core stack (db, vector store, api); chat needs OPENROUTER_API_KEY in .env
 up:
-    docker compose up -d db qdrant ollama api-py
+    docker compose up -d db qdrant api-py
 
 # stop the stack (data volumes are kept)
 down:
@@ -69,9 +69,9 @@ eval-baseline:
 eval-offline:
     uv run --project {{api}} python evals/run_eval.py --suites adversarial
 
-# the older promptfoo suite (needs the stack and an Ollama judge model); see evals/README.md
+# the older promptfoo suite (needs the stack and OPENROUTER_API_KEY for the judge model); see evals/README.md
 eval-promptfoo:
-    cd evals && OLLAMA_BASE_URL=http://localhost:11435 npx promptfoo@latest eval -c promptfooconfig.yaml
+    cd evals && npx promptfoo@latest eval -c promptfooconfig.yaml
 
 # render docs/diagrams/*.mmd to docs/img/diagrams/*.png (needs Docker; the first run pulls a ~2.4 GB image)
 diagrams:

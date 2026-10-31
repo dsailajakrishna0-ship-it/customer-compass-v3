@@ -4,9 +4,8 @@ import { CitationList } from "./CitationList";
 import { AgentRunPanel } from "./AgentRunPanel";
 import { fallbackNote } from "./fallbackNote";
 
-/** Stage 7: renders the per-answer telemetry footer (provider/model, tokens,
- * latency, estimated cost) plus a visible note when automatic cross-provider
- * fallback kicked in, so a provider outage is obvious rather than silent. */
+/** Renders the per-answer telemetry footer (model, tokens, latency, estimated cost) plus a
+ * visible note when a fallback model answered, so a rate limit or outage is obvious rather than silent. */
 function UsageFootnote({ usage }: { usage: NonNullable<ChatMessage["usage"]> }) {
   const tokenPart =
     usage.tokensIn != null && usage.tokensOut != null ? `${usage.tokensIn}→${usage.tokensOut} tokens` : null;
@@ -48,14 +47,11 @@ function ToolsUsedTrail({ toolsUsed }: { toolsUsed: NonNullable<ChatMessage["too
   );
 }
 
-/** A single chat bubble: message text, optional provider tag, optional CRM facts panel, optional citations. */
+/** A single chat bubble: message text, optional tools trail and usage footnote, optional CRM facts panel, optional citations. */
 export function MessageBubble({ message }: { message: ChatMessage }) {
   return (
     <div className={`message ${message.role}`}>
       {message.agentRun ? <AgentRunPanel run={message.agentRun} /> : <p>{message.content}</p>}
-      {message.role === "assistant" && message.provider && (
-        <p className="provider-tag">via {message.provider === "cloud" ? "Cloud (OpenRouter)" : "Local (Ollama)"}</p>
-      )}
       {message.role === "assistant" && message.toolsUsed && <ToolsUsedTrail toolsUsed={message.toolsUsed} />}
       {message.role === "assistant" && message.usage && <UsageFootnote usage={message.usage} />}
       {message.role === "assistant" && message.guardrail && <GuardrailWarning guardrail={message.guardrail} />}

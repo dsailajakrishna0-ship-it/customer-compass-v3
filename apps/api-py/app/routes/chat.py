@@ -22,7 +22,7 @@ from app.guardrails.prompt_guard import (
     scan_output,
     wrap_untrusted_context,
 )
-from app.llm.gateway import LlmProvider, default_llm_provider, generate
+from app.llm.gateway import generate
 from app.llm.types import ChatMessage, GenerationResult
 from app.mcp.client import call_tool, list_tool_specs, mcp_session
 from app.mcp.tools import looks_like_confirmation
@@ -107,7 +107,6 @@ class ChatMessagePayload(BaseModel):
 
 class ChatRequest(BaseModel):
     messages: list[ChatMessagePayload] = Field(..., min_length=1, max_length=12)
-    provider: LlmProvider | None = None
     model: str | None = None
 
     @property
@@ -129,19 +128,17 @@ def _citation(i: int, chunk) -> dict:
 
 
 def _usage_json(result: GenerationResult) -> dict:
-    """Stage 7 "production concerns" telemetry: which provider/model actually
+    """Stage 7 "production concerns" telemetry: which model actually
     answered (may differ from the request if fallback kicked in), token
     counts, latency, and a rough cost estimate. Logged server-side and
     returned to the frontend so it can show a small per-answer footer."""
     usage = {
-        "provider": result.provider,
         "model": result.model,
         "tokensIn": result.tokens_in,
         "tokensOut": result.tokens_out,
         "latencyMs": result.latency_ms,
         "estimatedCost": result.estimated_cost,
         "fallbackUsed": result.fallback_used,
-        "fallbackFrom": result.fallback_from,
         "fallbackFromModel": result.fallback_from_model,
     }
     logger.info("llm_usage %s", usage)
@@ -198,25 +195,23 @@ def _facts_json(facts) -> dict | None:
 @router.post("")
 async def general_chat(body: ChatRequest):
     """General-purpose chat, no CRM/document grounding (Stage 2 behavior)."""
-    resolved_provider = body.provider or default_llm_provider()
     try:
         question_finding = await guard_input(body.messages[-1].content)
         messages = body.message_dicts
         messages[-1] = {**messages[-1], "content": question_finding.neutralized_text}
         report = build_report((question_finding, "user_input"))
 
-        result = await generate(GENERAL_SYSTEM_PROMPT, messages, resolved_provider, body.model)
+        result = await generate(GENERAL_SYSTEM_PROMPT, messages, body.model)
         answer, guardrail = await _finalize("chat", report, result.content)
         return {
             "message": answer,
-            "provider": result.provider,
             "usage": _usage_json(result),
             "guardrail": guardrail,
         }
     except Exception as exc:  # noqa: BLE001 - surfaced as a clear 503, mirrors the Express route
         raise HTTPException(
             status_code=503,
-            detail=str(exc) or "Could not reach the configured LLM provider.",
+            detail=str(exc) or "Could not reach the configured model.",
         ) from exc
 
 
@@ -224,7 +219,6 @@ async def general_chat(body: ChatRequest):
 @router.post("/rag")
 async def rag_chat(body: ChatRequest):
     """Retrieval-augmented chat: retrieves cited chunks and grounds the answer in them."""
-    resolved_provider = body.provider or default_llm_provider()
     question = body.messages[-1].content
     question_finding = await guard_input(question)
 
@@ -239,7 +233,6 @@ async def rag_chat(body: ChatRequest):
             return {
                 "message": "I could not find any ingested documents relevant to that question.",
                 "citations": [],
-                "provider": resolved_provider,
                 "guardrail": guardrail,
             }
 
@@ -264,9 +257,7 @@ async def rag_chat(body: ChatRequest):
             ],
         )
 
-        result = await generate(
-            GROUNDED_SYSTEM_PROMPT, augmented_messages, resolved_provider, body.model
-        )
+        result = await generate(GROUNDED_SYSTEM_PROMPT, augmented_messages, body.model)
         # Citations/snippets still show the ORIGINAL chunk content, so the
         # user can see exactly what was retrieved, including the flagged text.
         citations = [_citation(i, chunk) for i, chunk in enumerate(chunks)]
@@ -274,7 +265,6 @@ async def rag_chat(body: ChatRequest):
         return {
             "message": answer,
             "citations": citations,
-            "provider": result.provider,
             "usage": _usage_json(result),
             "guardrail": guardrail,
         }
@@ -290,7 +280,6 @@ async def crm_chat(body: ChatRequest):
     """CRM copilot chat: routes a question to structured DB facts, document RAG
     retrieval, or both, depending on keyword-based classification. Never replaces
     "" or "/rag" — additive, so their behavior is unchanged."""
-    resolved_provider = body.provider or default_llm_provider()
     question = body.messages[-1].content
     question_finding = await guard_input(question)
 
@@ -321,7 +310,6 @@ async def crm_chat(body: ChatRequest):
                 "facts": None,
                 "citations": [],
                 "scopedCompany": route.company.name if route.company else None,
-                "provider": resolved_provider,
                 "guardrail": guardrail,
             }
 
@@ -371,9 +359,7 @@ async def crm_chat(body: ChatRequest):
             ],
         )
 
-        result = await generate(
-            CRM_SYSTEM_PROMPT, augmented_messages, resolved_provider, body.model
-        )
+        result = await generate(CRM_SYSTEM_PROMPT, augmented_messages, body.model)
         # Citations/snippets still show the ORIGINAL chunk content.
         citations = [_citation(i, chunk) for i, chunk in enumerate(chunks)]
 
@@ -384,7 +370,6 @@ async def crm_chat(body: ChatRequest):
             "facts": _facts_json(facts),
             "citations": citations,
             "scopedCompany": route.company.name if route.company else None,
-            "provider": result.provider,
             "usage": _usage_json(result),
             "guardrail": guardrail,
         }
@@ -413,7 +398,6 @@ async def tools_chat(body: ChatRequest):
     schema/discovery/execution layer (a separate stdio subprocess); only the
     "how the model signals a call" bridge is custom, since not every
     provider/model this project targets has native function-calling."""
-    resolved_provider = body.provider or default_llm_provider()
     question = body.messages[-1].content
     question_finding = await guard_input(question)
     # The confirmation decision is made here, from the user's own raw latest
@@ -437,7 +421,7 @@ async def tools_chat(body: ChatRequest):
             result: GenerationResult | None = None
 
             for _ in range(MAX_TOOL_ITERATIONS):
-                result = await generate(system_prompt, conversation, resolved_provider, body.model)
+                result = await generate(system_prompt, conversation, body.model)
                 match = _TOOL_CALL_PATTERN.search(result.content)
                 if not match:
                     break
@@ -490,14 +474,13 @@ async def tools_chat(body: ChatRequest):
                         ),
                     }
                 )
-                result = await generate(system_prompt, conversation, resolved_provider, body.model)
+                result = await generate(system_prompt, conversation, body.model)
 
             report = build_report(*findings)
             answer, guardrail = await _finalize("chat/tools", report, result.content)
             return {
                 "message": answer,
                 "toolsUsed": tools_used,
-                "provider": result.provider,
                 "usage": _usage_json(result),
                 "guardrail": guardrail,
             }

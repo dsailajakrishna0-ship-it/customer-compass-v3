@@ -6,7 +6,7 @@ import { ChatModeSelector } from "./ChatModeSelector";
 import { MessageList } from "./MessageList";
 import { ChatInput } from "./ChatInput";
 import { useEffect } from "react";
-import type { ChatMode, LlmProvider } from "../../types";
+import type { ChatMode } from "../../types";
 
 type ChatPanelProps = {
   ingestStatus: string | null;
@@ -16,7 +16,7 @@ type ChatPanelProps = {
 
 /** Composes the chat-mode controls, message list, and input into the full "Ask Compass" panel. */
 export function ChatPanel({ ingestStatus, isIngesting, onIngest }: ChatPanelProps) {
-  const { chatMode, switchChatMode, provider, setProvider, cloudModel, setCloudModel, messages } = useChatSession();
+  const { chatMode, switchChatMode, cloudModel, setCloudModel, messages } = useChatSession();
   const { cloudModels } = useCloudModels();
   const { question, setQuestion, isAsking, askQuestion } = useChat();
 
@@ -35,8 +35,6 @@ export function ChatPanel({ ingestStatus, isIngesting, onIngest }: ChatPanelProp
         <ChatModeSelector
           chatMode={chatMode}
           onChangeMode={(mode: ChatMode) => switchChatMode(mode)}
-          provider={provider}
-          onChangeProvider={(next: LlmProvider) => setProvider(next)}
           cloudModel={cloudModel}
           onChangeCloudModel={setCloudModel}
           cloudModels={cloudModels}

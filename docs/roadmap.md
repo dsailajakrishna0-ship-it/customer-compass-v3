@@ -36,7 +36,7 @@ repo findings (R1–R12) and doc findings (D1–D9) are cited below. Decisions a
 | Stage | Name | Status |
 | --- | --- | --- |
 | 0 | Foundation | Done |
-| 1 | Model layer (cloud-only) | In progress (1.1 done; 1.2 in review) |
+| 1 | Model layer (cloud-only) | In progress (1.1 done; 1.2 and 1.3 in review) |
 | 2 | Tools and 🟦MCP | Planned |
 | 3 | 🟦LangGraph port | Planned |
 | 4 | 🟪Retrieval upgrade | Planned |
@@ -69,7 +69,7 @@ repo findings (R1–R12) and doc findings (D1–D9) are cited below. Decisions a
 | --- | --- | --- |
 | **1.1 Config** (R7, T13) | `pydantic-settings`; `models.yaml` for the free-model list; structured logging with request IDs. | No scattered `os.environ` reads. |
 | **1.2 🟦LiteLLM gateway** (T1, R9) | Replace `provider.py`, `cloud.py` and the two-provider fallback with an ordered fallback list, retries with backoff and 429 handling. | A forced 429 falls back to the next model, shown in a test. |
-| **1.3 Remove 🟩Ollama** (R2) | Full checklist (about 40 files): 🟦promptfoo judge, `compare_guards.py`, `setup-ollama-cache.sh`, `mcp/client.py`, `rag/embeddings.py`, web `types`/`useChat`/`ChatModeSelector`/`MessageBubble`, `GUARD_PROVIDER` default, docs. | `grep -ri ollama` finds nothing outside ADRs. |
+| **1.3 Remove 🟩Ollama** (R2) | Full checklist (about 40 files): 🟦promptfoo judge, `compare_guards.py`, `setup-ollama-cache.sh`, `mcp/client.py`, `rag/embeddings.py`, web `types`/`useChat`/`ChatModeSelector`/`MessageBubble`, `GUARD_PROVIDER` default, docs. The provider switch goes too ([ADR 0010](adr/0010-cloud-only-models.md)). | `grep -ri ollama` finds nothing outside ADRs and the places that exist to discuss the removal (the frozen V2 record, this plan, the stack record, the Stage 1 guide, the saved V2 baseline), enforced by `tests/test_no_local_models.py`. |
 | **1.4 Test seam and 🟪streaming** (R3, R4) | Typed fake model so tests stop depending on 🟪prompt text. Decide on streaming (SSE). Re-measure the 8-step and 180 s limits on cloud models. | CI uses no network; a limits ADR holds the new numbers. |
 
 ## Stage 2 — Tools and MCP

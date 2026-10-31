@@ -15,7 +15,7 @@ export function useCloudModels(): { cloudModels: ModelCatalog } {
         const catalog = await getCloudModels();
         if (!cancelled) setCloudModels(catalog);
       } catch {
-        /* Cloud model list is optional; the "cloud" provider still works with the server's default model. */
+        /* The model list is optional; chat still works with the server's default model. */
       }
     }
     void load();

@@ -31,7 +31,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 os.environ.setdefault("LITELLM_LOCAL_MODEL_COST_MAP", "True")
 os.environ.setdefault("LITELLM_MODE", "PRODUCTION")
 
-LlmProviderName = Literal["ollama", "cloud"]
 GuardModeName = Literal["rules", "llm", "both"]
 
 # apps/api-py/app/config.py -> apps/api-py/models.yaml (also /app/models.yaml in the image)
@@ -57,9 +56,6 @@ class Settings(BaseSettings):
     google_embedding_model: str = "gemini-embedding-001"
 
     # Chat models
-    llm_provider: LlmProviderName = "ollama"
-    ollama_url: str = "http://localhost:11435"
-    ollama_model: str = "qwen2.5:3b"
     openrouter_api_key: SecretStr = SecretStr("")
     openrouter_model: str | None = None  # None: use `default` from models.yaml
     models_file: Path = DEFAULT_MODELS_FILE
@@ -73,7 +69,6 @@ class Settings(BaseSettings):
 
     # Guardrails
     guard_mode: GuardModeName = "rules"
-    guard_provider: LlmProviderName = "ollama"
     guard_model: str | None = None
     security_audit_retention_days: int = 90
 

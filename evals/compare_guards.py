@@ -3,7 +3,7 @@
 Run from apps/api-py:  uv run python ../../evals/compare_guards.py [--llm]
 
 Always measures the regex rules (offline). With --llm it also runs the LLM
-classifier (needs Ollama, or GUARD_PROVIDER=cloud + OPENROUTER_API_KEY) and the
+classifier (needs OPENROUTER_API_KEY; GUARD_MODEL picks the model) and the
 combined rules+classifier mode. NeMo Guardrails and Guardrails AI are not
 measured here.
 """

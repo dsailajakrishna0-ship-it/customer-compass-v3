@@ -6,7 +6,7 @@ description: >
   does the LLM ground its answer in them (with correct company-scoping
   isolation), and does it correctly decline to answer when nothing relevant
   is in the corpus? Run against a running `docker compose up -d db qdrant
-  ollama api-py` stack (see README.md in this directory for usage).
+  api-py` stack (see README.md in this directory for usage).
 
 providers:
   # Providers here are our own live API endpoints (RAG and CRM modes), not model vendors
@@ -46,11 +46,9 @@ providers:
 
 defaultTest:
   options:
-    # Judge model: this local Ollama model grades answers for the llm-rubric assertions
-    # Use a free Ollama model as judge too, so the whole eval suite runs
-    # with zero cloud cost/API keys required — same local model the app
-    # itself defaults to.
-    provider: ollama:chat:qwen2.5:7b
+    # Judge model: a free OpenRouter model grades answers for the llm-rubric assertions.
+    # Needs OPENROUTER_API_KEY in the environment (the app itself needs the same key to chat).
+    provider: openrouter:google/gemma-4-31b-it:free
 
 tests:
   # Assertion types: icontains/icontains-any/javascript are deterministic checks; llm-rubric asks the judge model

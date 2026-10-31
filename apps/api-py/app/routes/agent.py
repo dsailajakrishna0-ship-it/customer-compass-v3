@@ -13,7 +13,7 @@ from app.agent.policies import needs_agent
 from app.agent.workflow import run_account_review
 from app.guardrails.audit import record_events
 from app.guardrails.prompt_guard import build_report, scan_and_neutralize
-from app.llm.gateway import LlmProvider, generate
+from app.llm.gateway import generate
 from app.mcp.tools import create_followup_task_tool
 
 router = APIRouter(prefix="/agent", tags=["agent"])
@@ -21,7 +21,6 @@ router = APIRouter(prefix="/agent", tags=["agent"])
 
 class RecommendRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=1000)
-    provider: LlmProvider | None = None
     model: str | None = None
 
 
@@ -43,7 +42,7 @@ async def recommend(body: RecommendRequest):
         }
 
     async def llm(system_prompt, messages):
-        return await generate(system_prompt, messages, body.provider, body.model)
+        return await generate(system_prompt, messages, body.model)
 
     return await run_account_review(body.message, llm)
 

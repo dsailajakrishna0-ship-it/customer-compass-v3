@@ -19,7 +19,7 @@ from typing import Literal
 
 from app.llm.types import ChatMessage, GenerationResult
 
-# One LLM call: (system prompt, messages) -> result. The workflow binds provider/model.
+# One LLM call: (system prompt, messages) -> result. The workflow binds the model.
 LlmCall = Callable[[str, list[ChatMessage]], Awaitable[GenerationResult]]
 
 TASK_NOTE_MAX_CHARS = 300

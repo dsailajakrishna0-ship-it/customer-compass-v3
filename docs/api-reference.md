@@ -18,6 +18,7 @@ FastAPI (the Python backend); interactive Swagger docs are also available live a
   the frontend's older contract (ported from the original Express API)
   reads `error`, while FastAPI's default `HTTPException` body is `detail`;
   a global exception handler in `app/main.py` adds both.
+- **V3 sub-stage 1.3 removed the local model, so there is no `provider` any more:** requests do not take it (an old one is ignored) and responses and `usage` no longer carry `provider` or `fallbackFrom`. Chat needs `OPENROUTER_API_KEY`; without it the chat routes return a 503 that says so.
 - Every response carries an `X-Request-ID` header. Send your own (letters, digits, `.`, `_`, `-`, up to 64 characters) to use it as the id, otherwise one is generated. The same id is on every log line of that request, so it is the handle for following a request through the logs.
 
 ---
@@ -87,21 +88,18 @@ tells the model it has no CRM access.
 ```json
 {
   "messages": [{ "role": "user", "content": "What can you help me with?" }],
-  "provider": "ollama",
   "model": null
 }
 ```
 | Field | Required | Notes |
 | --- | --- | --- |
 | `messages` | yes | 1–12 messages, `role` is `"user"` or `"assistant"`, `content` ≤ 4,000 chars and non-blank. |
-| `provider` | no | `"ollama"` (local `qwen2.5:3b` via Ollama) or `"cloud"` (hosted model via OpenRouter). Defaults to `LLM_PROVIDER` env (default `"ollama"`). |
-| `model` | no | Only used when `provider` resolves to `"cloud"` (or a fallback lands on `"cloud"`) — an OpenRouter model id from `GET /api/v1/llm/models`. Ignored for `"ollama"`. |
+| `model` | no | An OpenRouter model id from `GET /api/v1/llm/models`. Omit it to use the default (`OPENROUTER_MODEL`, else `default` in `models.yaml`). A request body may still carry an old `provider` field; it is ignored. |
 
 **Response 200**
 ```json
 {
   "message": "I can answer general questions, but I don't have access to your CRM data yet.",
-  "provider": "ollama",
   "usage": { "...": "see Usage object" },
   "guardrail": { "...": "see Guardrail object" }
 }
@@ -133,7 +131,6 @@ document chunks from Qdrant (the vector database), and grounds the answer in the
       "snippet": "Fleet Visibility is designed for logistics customers..."
     }
   ],
-  "provider": "cloud",
   "usage": { "...": "see Usage object" },
   "guardrail": { "...": "see Guardrail object" }
 }
@@ -144,7 +141,6 @@ document chunks from Qdrant (the vector database), and grounds the answer in the
 {
   "message": "I could not find any ingested documents relevant to that question.",
   "citations": [],
-  "provider": "cloud",
   "guardrail": { "...": "see Guardrail object" }
 }
 ```
@@ -175,7 +171,6 @@ leak across companies. Additive — never replaces `/chat` or `/chat/rag`.
   },
   "citations": [ "..." ],
   "scopedCompany": "Acme Fabrication",
-  "provider": "ollama",
   "usage": { "...": "see Usage object" },
   "guardrail": { "...": "see Guardrail object" }
 }
@@ -205,7 +200,6 @@ the other three chat routes.
   "toolsUsed": [
     { "tool": "get_open_deals", "arguments": { "company_name": "Acme Fabrication" } }
   ],
-  "provider": "ollama",
   "usage": { "...": "see Usage object" },
   "guardrail": { "...": "see Guardrail object" }
 }
@@ -223,10 +217,10 @@ for the full design and manual test steps.
 ## `POST /api/v1/agent/recommend`
 
 Stage 10: runs the Account Follow-up Recommender (Analyst, Reviewer and Task
-Drafter agents; plain-code orchestration). **Never writes.** Takes 1–2 minutes
-with the local model.
+Drafter agents; plain-code orchestration). **Never writes.** Takes up to a minute
+or two, depending on how busy the free models are.
 
-**Request:** `{ "message": "Analyze Acme Fabrication account and recommend a next action", "provider": "ollama", "model": null }` (`provider` and `model` optional).
+**Request:** `{ "message": "Analyze Acme Fabrication account and recommend a next action", "model": null }` (`model` optional).
 
 **Response 200** — simple questions return `{ "route": "direct", "message": "..." }`. Otherwise:
 ```json
@@ -350,30 +344,29 @@ found).
 ## Usage object (Stage 7)
 
 Every successful `/chat*` response includes a `usage` object — Stage 7's
-production telemetry: which provider/model actually answered (may differ
-from the request if automatic fallback kicked in), token counts, latency,
-and a rough cost estimate.
+production telemetry: which model actually answered (may differ from the
+request if a fallback model answered), token counts, latency, and a rough
+cost estimate.
 
 ```json
 {
-  "provider": "ollama",
-  "model": "qwen2.5:3b",
+  "model": "google/gemma-4-31b-it:free",
   "tokensIn": 521,
   "tokensOut": 37,
-  "latencyMs": 23841,
+  "latencyMs": 2384,
   "estimatedCost": 0.0,
   "fallbackUsed": true,
-  "fallbackFrom": "cloud"
+  "fallbackFromModel": "liquid/lfm-2.5-2.6b:free"
 }
 ```
 
 | Field | Notes |
 | --- | --- |
-| `provider` / `model` | The provider/model that actually generated the answer. |
-| `tokensIn` / `tokensOut` | From the provider's own response (`prompt_eval_count`/`eval_count` for Ollama, `usage.prompt_tokens`/`usage.completion_tokens` for OpenRouter). Can be `null` if the provider didn't report them. |
+| `model` | The model that actually generated the answer. |
+| `tokensIn` / `tokensOut` | From the provider's own response (`usage.prompt_tokens` / `usage.completion_tokens`). Can be `null` if the provider did not report them. |
 | `latencyMs` | Wall-clock time for the whole gateway call, including any retries and fallbacks (not retrieval or DB time). |
-| `estimatedCost` | `0.0` for every free-tier model (all the UI offers) and for Ollama. For a paid model the gateway reports the cost LiteLLM calculates, or `null`. |
-| `fallbackUsed` / `fallbackFrom` / `fallbackFromModel` | `true`, the provider that was asked first, and the model that was tried first and failed, when a later model in the chain answered instead (a rate limit, timeout or outage). All `null`/`false` when the first choice answered. The chain is the requested model, then `fallback_chain` in `models.yaml`, then the other provider. |
+| `estimatedCost` | `0.0` for every free-tier model (all the UI offers). For a paid model the gateway reports the cost LiteLLM calculates, or `null`. |
+| `fallbackUsed` / `fallbackFromModel` | `true`, and the model that was tried first and failed, when a later model in the chain answered instead (a rate limit, timeout or outage). `false`/`null` when the first choice answered. The chain is the requested model, then `fallback_chain` in `models.yaml`. |
 
 ---
 

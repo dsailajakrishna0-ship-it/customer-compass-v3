@@ -1,8 +1,8 @@
 # Stage 1 — Model layer: settings, logging, and calling models safely
 
-> **Level:** beginner friendly. **Reading time:** about 35 minutes for what is written so far.
-> **Status:** in progress. **1.1 and 1.2 are written; 1.3 and 1.4 are added as they are built.**
-> **Roadmap:** [Stage 1](../roadmap.md#stage-1--model-layer-cloud-only) · **Decisions:** [ADR 0008](../adr/0008-config-and-logging.md), [ADR 0009](../adr/0009-litellm-gateway.md) (more to come)
+> **Level:** beginner friendly. **Reading time:** about 45 minutes for what is written so far.
+> **Status:** in progress. **1.1 to 1.3 are written; 1.4 is added when it is built.**
+> **Roadmap:** [Stage 1](../roadmap.md#stage-1--model-layer-cloud-only) · **Decisions:** [ADR 0008](../adr/0008-config-and-logging.md), [ADR 0009](../adr/0009-litellm-gateway.md), [ADR 0010](../adr/0010-cloud-only-models.md) (more to come)
 
 **AI colour code:** 🟪 concept · 🟦 framework or tool · 🟩 data store or service · 🟧 model. Unmarked technical terms are ordinary software. [A to Z list](../ai-terms.md)
 
@@ -16,8 +16,9 @@ Stage 1 prepares the part of the app that talks to AI models. Before swapping in
 | A list of approved suppliers, with a spare list if the usual one is closed | **Model catalogue** | `models.yaml`, with a fallback for the dropdown |
 | A numbered ticket attached to every order, so you can follow it through every station | **Request IDs and structured logs** | Every log line of a request carries the same id |
 | A switchboard that tries the next line when one is busy, waits a moment if a line only glitches, and stops ringing a line that just failed | **🟪Model gateway** (1.2) | `gateway.py`: an ordered fallback chain, retries with growing waits, a cool-down, one result shape |
+| Switching off the building's own generator and drawing power from the grid, after fitting a backup battery | **Cloud-only models** (1.3) | The local model, its container and the provider switch are gone; the gateway is the safety net |
 
-Still to come in this stage: removing the local 🟩Ollama model (1.3), and a fake model for tests plus 🟪streaming (1.4). Their sections are added when they are built.
+Still to come in this stage: a fake model for tests plus a decision on 🟪streaming (1.4). Its section is added when it is built.
 
 ## The big picture (1.1)
 
@@ -141,7 +142,7 @@ The fix is two lines (keep `httpx` and `httpcore` at WARNING) and a regression t
 
 **The idea.** Put one door in front of every model call, a **🟪model gateway**, and give it the rules. Behind the door, the open-source library 🟦LiteLLM talks to many providers in one common way. We only decide the policy:
 
-1. **An ordered chain.** Try the model that was asked for, then the models listed under `fallback_chain` in `models.yaml`, then the other provider (kept from V2 until 🟩Ollama goes in 1.3).
+1. **An ordered chain.** Try the model that was asked for, then the models listed under `fallback_chain` in `models.yaml`.
 2. **Tell failures apart, because each deserves a different answer:**
 
    | What happened | What it usually means | What the gateway does |
@@ -198,7 +199,7 @@ From a trial run with a scripted fake provider (the tests use the same technique
 The 429 cases are fast because nothing waits; the timeout and server-error cases are slower because waiting is the point of a retry.
 
 > [!NOTE]
-> **What is and is not verified.** The retry, fallback and cool-down behaviour is proven by 24 tests against the scripted provider, and the local-model route was checked end to end on the live stack (tokens counted, no fallback, the baseline reproduced). The **cloud route has not been run against real 🟩OpenRouter**, because no OpenRouter key was available, and the **order of `fallback_chain` is provisional**: ranking it with the 🟪evals needs that key.
+> **What is and is not verified.** The retry, fallback and cool-down behaviour is proven by the gateway tests against the scripted provider. In 1.2 the local-model route was also checked end to end on the live stack; 1.3 then removed that route, so the **hosted route is now the only one, and it has not been run against real 🟩OpenRouter**, because no OpenRouter key was available. The **order of `fallback_chain` is provisional**: ranking it with the 🟪evals needs that key.
 
 ### Surprises we met
 
@@ -214,11 +215,70 @@ The 429 cases are fast because nothing waits; the timeout and server-error cases
 
 ---
 
-## Code tour: what was added in 1.1 and 1.2, and why
+## Concept 5 — Removing a dependency on purpose
 
-Bright green is new in this sub-stage, amber is an existing module that changed, grey is existing and untouched (the 1.1 modules are now collapsed to one grey box). In each later sub-stage the green boxes turn grey and the newly added modules turn bright. Markers in the tables: 🟢 new, 🟡 changed, ⚪ earlier.
+**The problem.** Taking something out is harder than adding it. The local model was not one container: it was a service, a volume, a script, four settings, a code path, a dropdown, a field in the API, and dozens of sentences in the docs. Remove only the container and you leave a dead concept behind that keeps suggesting a choice that no longer exists.
 
-![Module map after sub-stage 1.2: the callers (routes and the LLM guard) call the new llm/gateway.py, which uses the LiteLLM Router library to reach OpenRouter models and Ollama, and reads config.py and models.yaml and types.py. The earlier 1.1 work (logs, middleware, request ids) is collapsed to one grey box, and the removed provider.py, cloud.py and ollama.py are shown as removed.](../img/diagrams/stage1-module-map.png)
+**Why remove it at all?** Four reasons, none of them "local models are bad":
+
+1. The gateway (concept 4) now absorbs what made a local fallback attractive: rate limits and outages.
+2. Two ways to answer means two code paths to test, document and keep working.
+3. A model small enough to run on a laptop gave terse answers, odd citation placement and the occasional near-empty reply.
+4. It cost everyone a multi-gigabyte model download and an extra container.
+
+![Before and after: V2 offered a local model, hosted free models and a dropdown to switch between them; V3 after 1.3 has hosted free models only, with the gateway absorbing rate limits, and one code path to test and explain.](../img/diagrams/stage1-cloud-only-tradeoff.png)
+
+<sub>Diagram source: [stage1-cloud-only-tradeoff.mmd](../diagrams/stage1-cloud-only-tradeoff.mmd)</sub>
+
+### What it cost, honestly
+
+| We lose | We gain |
+| --- | --- |
+| **Offline development** of the chat path (tests and CI are unaffected: they use a scripted fake) | One path to test, explain and debug |
+| **Privacy of local 🟪inference**: 🟪prompts and 🟪retrieved text now go to 🟩OpenRouter and the model providers. Acceptable only because every record here is synthetic | Larger models than a laptop can run |
+| **Steady behaviour**: free models rotate, so the same question can be answered by different models over time | No model download, one container fewer |
+
+### Finding everything that depends on it
+
+A first `grep` for the word found **45 files**: 31 of code and configuration, 11 of current documents, and 17 that are history (the frozen V2 record, decision records, the saved V2 baseline). Searching for the word is not enough, though: the frontend docs described the *provider* state without ever saying "🟩Ollama", and they were just as wrong afterwards. So the work followed the **concept**, not the word:
+
+| Area | What changed |
+| --- | --- |
+| Infrastructure | The Compose service and volume, the cache script, four settings, the CI smoke test's dependency |
+| API | No `provider` in requests (an old one is ignored) or in responses and `usage` |
+| Web app | The provider dropdown, its state and its stored value |
+| Evals | The 🟦promptfoo judge and the baseline's comparability (below) |
+| Docs | Architecture, API reference, testing guide, troubleshooting, frontend docs, stack record |
+
+### Keeping it out
+
+Removal rots unless something holds it. `tests/test_no_local_models.py` fails if the word appears in any tracked file outside a short **allowlist** of places that exist to discuss it: decision records, the frozen V2 record, the plan, the stack record, this guide and the saved V2 baseline.
+
+### A subtle consequence: the old baseline no longer applies
+
+The saved baseline's *tool* and *🟪agent* scores were measured with the local model. A different model answers now, so comparing them would show a "regression" that is really a different model. Retrieval and the attack guard do not use the chat model, so they stay comparable. The 🟪eval runner now records the chat model, compares it with the baseline's, and **skips the two model-dependent suites with a clear note** instead of reporting a false failure:
+
+```text
+NOTE: skipped tools, agent: the baseline was taken with ollama/qwen2.5:3b, the chat model is now openrouter/liquid/lfm-2.5-2.6b:free
+```
+
+A new baseline for those two suites needs a hosted model, and therefore an OpenRouter key.
+
+### Lessons
+
+> [!IMPORTANT]
+> 1. **Follow the concept, not just the word.** Removing a setting changes an API contract, a UI, the docs and the tests, including places that never used the word.
+> 2. **A removal needs an enforcer.** A test with a visible allowlist is cheaper than relying on everyone remembering.
+> 3. **When a measurement changes meaning, say so.** The runner skips what it can no longer compare instead of printing a number that looks like a regression.
+> 4. **Say what you could not check.** With no OpenRouter key here, no real chat call was made after the removal. What was verified: the API starts without the model service and returns one clear "set the key" message; the web app, type checks and tests pass; retrieval and the guard still reproduce the baseline.
+
+---
+
+## Code tour: what changed in 1.1 to 1.3, and why
+
+Bright green is new in this sub-stage, amber is an existing module that changed, grey is existing and untouched (earlier sub-stages are collapsed to one grey box). In each later sub-stage the green boxes turn grey and the newly added modules turn bright. Markers in the tables: 🟢 new, 🟡 changed, ⚪ earlier.
+
+![Module map after sub-stage 1.3: the web chat panel and the callers (routes and the LLM guard) call llm/gateway.py, which is now cloud-only and uses the LiteLLM Router to reach OpenRouter free models, and reads config.py and models.yaml. A new test keeps the local runner out. The removed Ollama service, volume, provider switch and cache script are shown as removed, and the earlier 1.1 work is collapsed to one grey box.](../img/diagrams/stage1-module-map.png)
 
 <sub>Diagram source: [stage1-module-map.mmd](../diagrams/stage1-module-map.mmd)</sub>
 
@@ -226,51 +286,52 @@ Bright green is new in this sub-stage, amber is an existing module that changed,
 
 | | Added in | File | What it is for | Names to look at | Used by |
 | --- | --- | --- | --- | --- | --- |
-| 🟢 | 1.2 | [`app/llm/gateway.py`](../../apps/api-py/app/llm/gateway.py) | The one door for every model call: chain, retries, fallback, cool-down, one result shape | `generate()`, `build_chain()`, `Route`, `Plan`, `LlmUnavailableError` | `routes/chat.py`, `routes/agent.py`, `guardrails/llm_guard.py` |
-| 🟢 | 1.2 | [`tests/test_gateway.py`](../../apps/api-py/tests/test_gateway.py) | 24 tests with a scripted fake provider: the 429 fallback, retries, cool-down, error text, logging | `Scripted`, `use_models()` | CI |
-| 🟢 | 1.2 | [`apps/web/.../fallbackNote.ts`](../../apps/web/src/components/chat/fallbackNote.ts) and its test | The wording of the "a fallback answered" note | `fallbackNote()` | `MessageBubble.tsx` |
-| ⚪ | 1.1 | [`app/config.py`](../../apps/api-py/app/config.py) | Every setting and the model catalogue | `Settings`, `get_settings()`, `get_model_catalog()` | Everything |
-| ⚪ | 1.1 | [`models.yaml`](../../apps/api-py/models.yaml) | The default model and the free-model list | `default`, `last_known_good` | `config.py` |
+| 🟢 | 1.3 | [`tests/test_no_local_models.py`](../../apps/api-py/tests/test_no_local_models.py) | Fails if the removed local runner reappears outside a short allowlist | `ALLOWED`, `tracked_text_files()` | CI |
+| ⚪ | 1.2 | [`app/llm/gateway.py`](../../apps/api-py/app/llm/gateway.py) | The one door for every model call | `generate()`, `build_chain()`, `Route`, `Plan`, `LlmUnavailableError` | `routes/chat.py`, `routes/agent.py`, `guardrails/llm_guard.py` |
+| ⚪ | 1.2 | [`tests/test_gateway.py`](../../apps/api-py/tests/test_gateway.py) | Gateway tests with a scripted fake provider | `Scripted`, `use_models()` | CI |
+| ⚪ | 1.2 | [`apps/web/.../fallbackNote.ts`](../../apps/web/src/components/chat/fallbackNote.ts) | Wording of the "a fallback answered" note | `fallbackNote()` | `MessageBubble.tsx` |
+| ⚪ | 1.1 | [`app/config.py`](../../apps/api-py/app/config.py), [`models.yaml`](../../apps/api-py/models.yaml) | Every setting and the model catalogue | `Settings`, `get_settings()` | Everything |
 | ⚪ | 1.1 | [`app/logs.py`](../../apps/api-py/app/logs.py), [`app/middleware.py`](../../apps/api-py/app/middleware.py) | JSON logging and request ids | `configure_logging()`, `RequestIdMiddleware` | `main.py` |
-| ⚪ | 1.1 | `tests/test_config.py`, `test_logging.py`, `test_llm_models_route.py` | Tests for the 1.1 work | | CI |
 
 ### Existing files that changed, and what changed
 
 | | Changed in | File | Change |
 | --- | --- | --- | --- |
-| 🟡 | 1.2 | `app/config.py` | Four gateway settings, `fallback_chain` in the catalogue with validation, and the two 🟦LiteLLM safety defaults (no `.env` loading, no price-list download) |
-| 🟡 | 1.2 | `models.yaml` | New `fallback_chain` (provisional order) |
-| 🟡 | 1.2 | `app/llm/types.py`, `app/llm/__init__.py` | `GenerationResult.fallback_from_model`; the package loads `config` before LiteLLM and filters one harmless warning |
-| 🟡 | 1.2 | `app/routes/chat.py`, `app/routes/agent.py`, `app/guardrails/llm_guard.py` | Import `generate` from the gateway; the usage JSON gains `fallbackFromModel` |
-| 🟡 | 1.2 | `apps/web/src/types/index.ts`, `MessageBubble.tsx` | The fallback note names the models |
-| 🟡 | 1.2 | `pyproject.toml`, `uv.lock` | `litellm` added; `filelock` override; pytest warning filter |
-| 🟡 | 1.2 | `docker-compose.yml`, `.env.example` | The four `LLM_*` settings |
-| 🟡 | 1.2 | `tests/test_config.py` | Catalogue and LiteLLM-mode tests |
-| ⚪ | 1.1 | 20 modules | Read their settings from `config.py` (see the 1.1 list in the repo history) |
+| 🟡 | 1.3 | `app/llm/gateway.py` | Cloud-only: `generate(system_prompt, messages, model)`, no provider, no local route; no key means no chain and one clear error |
+| 🟡 | 1.3 | `app/config.py`, `app/llm/types.py` | Local-model and provider settings removed; `GenerationResult` loses `provider` and `fallback_from` |
+| 🟡 | 1.3 | `app/routes/chat.py`, `app/routes/agent.py`, `app/agent/workflow.py`, `app/guardrails/llm_guard.py` | No provider in requests, responses or the guard; the classifier uses the default model |
+| 🟡 | 1.3 | `apps/web/src/` (9 files) | Provider dropdown, state and types removed; the model dropdown is always shown; the fallback note names models only |
+| 🟡 | 1.3 | `evals/run_eval.py`, `evals/promptfooconfig.yaml`, `evals/compare_guards.py`, `evals/README.md` | The runner skips model-dependent suites when the chat model changed; the judge is a hosted model |
+| 🟡 | 1.3 | `docker-compose.yml`, `.github/workflows/ci.yml`, `justfile`, `.env.example`, `README.md` | The local model service, volume and script are gone; chat needs `OPENROUTER_API_KEY` |
+| 🟡 | 1.3 | `tests/` (6 files) | Gateway and config tests for the cloud-only contract; fixtures lose provider fields |
+| 🟡 | 1.3 | `docs/` (10 files) | Architecture, API reference, testing guide, troubleshooting, frontend docs, stack record |
+| ⚪ | 1.2 | `app/llm/types.py`, `routes/*`, `guardrails/llm_guard.py`, web `types` and `MessageBubble.tsx`, `pyproject.toml` | Result field, gateway import, fallback note, `litellm` dependency |
+| ⚪ | 1.1 | 20 modules | Read their settings from `config.py` |
 
-### Removed in 1.2
+### Removed
 
-| | File | Why |
-| --- | --- | --- |
-| ⚪ | `app/llm/provider.py`, `app/llm/cloud.py`, `app/llm/ollama.py` | Replaced by the gateway: hand-written HTTP calls and the two-provider fallback |
+| | In | What | Why |
+| --- | --- | --- | --- |
+| ⚪ | 1.2 | `app/llm/provider.py`, `cloud.py`, `ollama.py` | Replaced by the gateway |
+| ⚪ | 1.3 | The `ollama` Compose service and volume, `scripts/setup-ollama-cache.sh` | No local model |
+| ⚪ | 1.3 | `LLM_PROVIDER`, `GUARD_PROVIDER`, `OLLAMA_*`; the `provider` field and dropdown | No choice left to make |
 
 ### A good reading order
 
-1. **`gateway.py`, `build_chain()`**: how "which provider, which model" becomes an ordered list of models to try.
-2. **`gateway.py`, `_router()`**: the failure policy in a dozen lines.
-3. **`gateway.py`, `generate()`**: call, then turn the library's answer into our result.
-4. **`test_gateway.py`**: read the test names; they describe the behaviour in plain sentences.
-5. **`config.py`**: the new settings and the two safety defaults at the top.
+1. **`gateway.py`, `build_chain()`**: now just "the requested model, then the fallback chain".
+2. **`gateway.py`, `generate()`**: note the early, clear error when no key is set.
+3. **`test_no_local_models.py`**: the whole removal rule in 40 lines, with its allowlist.
+4. **`evals/run_eval.py`, `comparable_suites()`**: how a measurement admits it can no longer be compared.
+5. **The web `ChatModeSelector.tsx`**: shorter by one dropdown.
 
 ### What happens, in order, when a model call is made
 
-1. A route (chat, 🟪agent, guard) calls `generate(system_prompt, messages, provider, model)`.
-2. `build_chain()` makes the ordered list: the requested model, the `fallback_chain`, then the other provider.
-3. `_router()` returns the LiteLLM Router for that chain (cached, so the cool-down is remembered between requests).
-4. LiteLLM calls the first model. On failure it follows the policy: retry with growing waits, or bench the model and move to the next.
-5. Each failed attempt is logged (model, error type, status) with the request id, but never a 🟪prompt or key.
-6. The first answer comes back and is turned into a `GenerationResult`, flagged if a fallback produced it.
-7. If everything failed, `LlmUnavailableError` carries the one clear message, and the route turns it into a 503.
+1. A route (chat, 🟪agent, guard) calls `generate(system_prompt, messages, model)`.
+2. `build_chain()` returns the requested (or default) model followed by the `fallback_chain`; with no `OPENROUTER_API_KEY` it returns nothing and `generate()` raises the clear "set the key" error, which the route turns into a 503.
+3. `_router()` returns the cached 🟦LiteLLM Router for that chain.
+4. LiteLLM calls the first model and follows the failure policy (retry with growing waits, or bench the model and move on).
+5. Each failed attempt is logged with the request id, never a 🟪prompt or key.
+6. The first answer becomes a `GenerationResult`, flagged if a fallback produced it.
 
 ## What this stage added to the tech stack (so far)
 
@@ -279,7 +340,7 @@ Bright green is new in this sub-stage, amber is an existing module that changed,
 | **pydantic-settings** | Reads environment variables into a typed, validated settings object | `apps/api-py/app/config.py` |
 | **structlog** | Writes structured (JSON) log lines and attaches context such as the request id | `apps/api-py/app/logs.py`, `middleware.py` |
 | **PyYAML** | Reads `models.yaml` | `apps/api-py/models.yaml` |
-| **🟦LiteLLM** (1.2) | One common way to call many model providers, with retries and fallback | `apps/api-py/app/llm/gateway.py` |
+| **🟦LiteLLM** (1.2; the only way to reach a model since 1.3) | One common way to call many model providers, with retries and fallback | `apps/api-py/app/llm/gateway.py` |
 
 The full list and the stage each tool joins are in [tech-stack.md](../tech-stack.md#v3-tech-stack-at-a-glance).
 
@@ -297,11 +358,18 @@ The full list and the stage each tool joins are in [tech-stack.md](../tech-stack
 | Timeouts and 5xx | No retry | Retry with growing waits, then the next model | These often clear in seconds |
 | A model that just failed | Tried again on the next request | Skipped for 30 s | Do not hammer a struggling model |
 | The result | Provider and model, with a single fallback flag | Also names the model that failed first | The UI can say exactly what happened |
+| Ways to answer | A local model or hosted models, chosen with a dropdown | Hosted free models only | One path to test and explain (concept 5) |
+| The API | A `provider` field in requests, responses and `usage` | No provider anywhere | The choice no longer exists |
+| Containers to run | Postgres, 🟩Qdrant, the model service, the API | Postgres, Qdrant, the API | No model download |
+| Comparing 🟪evals to the baseline | Always possible | Tool and 🟪agent suites are skipped when the chat model changed | A different model is not a regression |
 
 ## Glossary
 
+- **Allowlist**: a short, explicit list of exceptions to a rule, so the rule can still be enforced everywhere else.
+- **API contract**: the request and response shapes other code relies on; changing it is a decision, not a side effect.
 - **Backoff**: waiting a little longer before each retry (for example 1 s, then 2 s, then 4 s) so a struggling service is not hit again at once.
 - **Cool-down**: skipping a model for a while after it fails.
+- **Hosted model**: a model that runs on someone else's servers and is called over the internet (as opposed to a local model on your own computer).
 - **Environment variable**: a named value the operating system hands to a program (`LLM_PROVIDER=cloud`).
 - **Fail fast**: stop immediately and loudly on a bad setting instead of continuing in a broken state.
 - **Fallback**: a prepared second choice used when the first one fails. A **fallback chain** is the ordered list of them.
@@ -371,7 +439,7 @@ Without it, every new request would first try the model that just failed, wait f
 If the service is overloaded, hitting it again at a steady pace keeps it overloaded. Growing waits give it room to recover and spread out many clients that failed together.
 </details>
 
-<details><summary>11. The local-model route was tested live, but the cloud route only against a scripted fake. What does that prove, and what not?</summary>
+<details><summary>11. The hosted route was only tested against a scripted fake. What does that prove, and what not?</summary>
 
 It proves our policy (order, retries, fallbacks, error text) is right, because those are the same code paths. It does not prove that real OpenRouter models answer well, that their error responses look the way the library expects, or that the fallback order is a good one. That needs a real key and the 🟪evals.
 </details>
@@ -379,6 +447,26 @@ It proves our policy (order, retries, fallbacks, error text) is right, because t
 <details><summary>12. Why was it a problem that importing 🟦LiteLLM loaded a <code>.env</code> file?</summary>
 
 It bypassed the rule that the settings module is the only reader of configuration, and it pulled real secrets into places that should not have them. It also made tests behave differently on different machines, which is how it was noticed.
+</details>
+
+<details><summary>13. Why was searching for the removed word not enough to find everything that depended on it?</summary>
+
+Some places depended on the *idea*, not the word: the frontend docs described a "provider" state and a dropdown without ever naming the tool. Removing a concept means following everything that used it, which is why the work was organised by area (infrastructure, API, web app, evals, docs) and not by search results.
+</details>
+
+<details><summary>14. The saved baseline's tool and 🟪agent scores are no longer compared. Why not just compare them anyway?</summary>
+
+They were measured with a different model. A drop (or a rise) would reflect the model, not a change in our code, so the number would look like a regression or an improvement it is not. The runner skips those suites and says why, and a new baseline taken with a hosted model restores the comparison.
+</details>
+
+<details><summary>15. What does removing the local model cost, and what does the project still do about it?</summary>
+
+It costs offline development of the chat path, the privacy of local 🟪inference (🟪prompts now go to the hosted providers, acceptable only because all data is synthetic) and steady behaviour (free models rotate). It still keeps tests and CI offline with a scripted fake provider, and a gateway that absorbs rate limits and outages.
+</details>
+
+<details><summary>16. What is the point of a test that fails when a word reappears?</summary>
+
+A removal only lasts if something enforces it. The test makes the rule visible and checkable, and its allowlist shows exactly which places are allowed to mention the removed thing and why.
 </details>
 
 ## Further reading
