@@ -13,7 +13,7 @@ from app.agent.policies import needs_agent
 from app.agent.workflow import run_account_review
 from app.guardrails.audit import record_events
 from app.guardrails.prompt_guard import build_report, scan_and_neutralize
-from app.llm.provider import LlmProvider, generate
+from app.llm.gateway import LlmProvider, generate
 from app.mcp.tools import create_followup_task_tool
 
 router = APIRouter(prefix="/agent", tags=["agent"])

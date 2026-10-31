@@ -1,12 +1,18 @@
 # Free-tier model catalogue, read at start-up by app/config.py (override the path with MODELS_FILE).
 #
 #   default          used when a request does not name a model (the OPENROUTER_MODEL variable wins if set)
+#   fallback_chain   tried, in this order, when the requested model fails (rate limit, outage, timeout)
 #   last_known_good  shown in the web UI's model dropdown when OpenRouter's live list cannot be fetched
 #
 # Free models come and go. Every id below was present in https://openrouter.ai/api/v1/models on
-# 2026-10-30. They are NOT ranked by quality yet: Stage 1.2 orders a fallback chain using the evals.
+# 2026-10-30. The fallback order below is PROVISIONAL: it has not been ranked with the evals yet
+# (that needs a live OpenRouter key), so treat it as "reasonable instruction-tuned models first".
 openrouter:
   default: liquid/lfm-2.5-2.6b:free
+  fallback_chain:
+    - google/gemma-4-31b-it:free
+    - google/gemma-4-26b-a4b-it:free
+    - poolside/laguna-xs-2.1:free
   last_known_good:
     - id: liquid/lfm-2.5-2.6b:free
       name: "LiquidAI: LFM2.5-2.6B (free)"

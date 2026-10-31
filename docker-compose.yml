@@ -84,6 +84,10 @@ services:
       OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:3b}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}  # key for hosted cloud models via OpenRouter
       OPENROUTER_MODEL: ${OPENROUTER_MODEL:-}  # empty: the default in apps/api-py/models.yaml
+      LLM_TIMEOUT_SECONDS: ${LLM_TIMEOUT_SECONDS:-}  # empty: the default in app/config.py
+      LLM_MAX_RETRIES: ${LLM_MAX_RETRIES:-}
+      LLM_RETRY_MIN_SECONDS: ${LLM_RETRY_MIN_SECONDS:-}
+      LLM_COOLDOWN_SECONDS: ${LLM_COOLDOWN_SECONDS:-}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       LOG_FORMAT: ${LOG_FORMAT:-json}  # json (one object per line) or console (readable)
       GUARD_MODE: ${GUARD_MODE:-rules}  # Stage 8.d: rules | llm | both

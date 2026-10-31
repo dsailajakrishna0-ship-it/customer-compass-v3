@@ -131,7 +131,7 @@ returned an empty response. Try again or pick a different model."* This is
 expected: free-tier models route through shared, rate-limited community
 infrastructure and can return a `200 OK` with no actual content. The app
 already distinguishes this case from a hard error (see
-`apps/api-py/app/llm/cloud.py`). If it happens, just retry or pick a
+`apps/api-py/app/llm/gateway.py`). If it happens, just retry or pick a
 different model from the dropdown — it isn't specific to v2.
 
 ### 7. Dropdown "selected value" can look wrong due to shared browser storage

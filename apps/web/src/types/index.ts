@@ -115,6 +115,8 @@ export type ChatUsage = {
   estimatedCost: number | null;
   fallbackUsed: boolean;
   fallbackFrom: LlmProvider | null;
+  /** The model that was tried first and failed, when a fallback answered. */
+  fallbackFromModel: string | null;
 };
 
 /** Stage 8: reports whether the rule-based prompt-injection guardrail

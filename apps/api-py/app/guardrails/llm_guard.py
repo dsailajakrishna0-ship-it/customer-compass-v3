@@ -13,7 +13,7 @@ import logging
 
 from app.config import get_settings
 from app.guardrails.prompt_guard import GuardFinding, scan_and_neutralize
-from app.llm.provider import generate
+from app.llm.gateway import generate
 
 logger = logging.getLogger("app.guardrails.llm_guard")
 

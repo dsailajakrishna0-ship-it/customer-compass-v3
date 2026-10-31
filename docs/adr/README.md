@@ -15,6 +15,8 @@ One short file per decision, so the reason for a choice is not buried in a long 
 | [0005](0005-database-migrations.md) | Database migrations | Accepted |
 | [0006](0006-evaluation-baseline.md) | Evaluation baseline | Accepted |
 | [0007](0007-documentation-track.md) | Documentation track | Accepted |
+| [0008](0008-config-and-logging.md) | Settings, model catalogue and structured logging | Accepted |
+| [0009](0009-litellm-gateway.md) | The model gateway (LiteLLM) | Accepted |
 
 ## Template
 

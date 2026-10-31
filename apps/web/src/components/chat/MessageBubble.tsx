@@ -2,6 +2,7 @@ import type { ChatMessage } from "../../types";
 import { CrmFactsPanel } from "./CrmFactsPanel";
 import { CitationList } from "./CitationList";
 import { AgentRunPanel } from "./AgentRunPanel";
+import { fallbackNote } from "./fallbackNote";
 
 /** Stage 7: renders the per-answer telemetry footer (provider/model, tokens,
  * latency, estimated cost) plus a visible note when automatic cross-provider
@@ -10,16 +11,12 @@ function UsageFootnote({ usage }: { usage: NonNullable<ChatMessage["usage"]> }) 
   const tokenPart =
     usage.tokensIn != null && usage.tokensOut != null ? `${usage.tokensIn}→${usage.tokensOut} tokens` : null;
   const costPart = usage.estimatedCost != null ? `$${usage.estimatedCost.toFixed(4)}` : null;
+  const note = fallbackNote(usage);
   const parts = [usage.model, `${usage.latencyMs}ms`, tokenPart, costPart].filter(Boolean);
   return (
     <>
       <p className="usage-tag">{parts.join(" · ")}</p>
-      {usage.fallbackUsed && (
-        <p className="usage-fallback-tag">
-          ⚠ {usage.fallbackFrom === "cloud" ? "Cloud (OpenRouter)" : "Local (Ollama)"} was unavailable — answered via{" "}
-          {usage.provider === "cloud" ? "Cloud (OpenRouter)" : "Local (Ollama)"} instead.
-        </p>
-      )}
+      {note && <p className="usage-fallback-tag">⚠ {note}</p>}
     </>
   );
 }

@@ -25,3 +25,5 @@ class GenerationResult:
     estimated_cost: float | None
     fallback_used: bool = False
     fallback_from: Literal["ollama", "cloud"] | None = None
+    # the model that was tried first and failed, when a fallback answered (None otherwise)
+    fallback_from_model: str | None = None

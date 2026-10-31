@@ -22,20 +22,20 @@ requires_google_key = pytest.mark.skipif(
 async def test_ingest_then_list_documents() -> None:
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
-        ingest_response = await client.post("/documents/ingest")
+        ingest_response = await client.post("/api/v1/documents/ingest")
         assert ingest_response.status_code == 200, ingest_response.text
         summary = ingest_response.json()
         assert summary["status"] == "completed"
         assert summary["documentsProcessed"] > 0
         assert summary["chunksCreated"] > 0
 
-        list_response = await client.get("/documents")
+        list_response = await client.get("/api/v1/documents")
         assert list_response.status_code == 200
         documents = list_response.json()
         assert len(documents) == summary["documentsProcessed"]
         assert all(doc["chunkCount"] > 0 for doc in documents)
 
-        runs_response = await client.get("/documents/ingestion-runs")
+        runs_response = await client.get("/api/v1/documents/ingestion-runs")
         assert runs_response.status_code == 200
         runs = runs_response.json()
         assert runs[0]["status"] == "completed"
