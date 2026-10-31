@@ -25,7 +25,7 @@ How to add a case: append to the matching JSON file with the next id, keep groun
 
 ### Baseline results (seed code, taken 2026-10-27)
 
-Measured on the V2 seed with `qwen2.5:3b` (🟩Ollama) for chat, `gemini-embedding-001` for embeddings, 16 documents / 28 🟪chunks.
+Measured on the V2 seed with a small local model (`qwen2.5:3b`; V3 sub-stage 1.3 removed local models) for chat, `gemini-embedding-001` for embeddings, 16 documents / 28 🟪chunks.
 
 | Suite | Result |
 | --- | --- |
@@ -65,7 +65,7 @@ Evaluates the live `apps/api-py` 🟪RAG/CRM chat endpoints against the
   company/deal and scope correctly?
 
 Each test uses **both** a deterministic check (keyword match / JS assertion
-on the structured response) and an **🟪LLM-as-judge** rubric (a second model, `qwen2.5:7b`, that grades each answer) for the more
+on the structured response) and an **🟪LLM-as-judge** rubric (a second, more capable free model that grades each answer) for the more
 nuanced "did the answer actually make sense" grading.
 
 ## MIN_SIMILARITY tuning (PR 4 follow-up)
@@ -93,25 +93,20 @@ checks for instead of expecting zero citations in that case.
 
 ## Running
 
-Requires the full stack up (`docker compose up -d db qdrant ollama api-py` — Postgres, 🟩Qdrant 🟪vector DB, 🟩Ollama local model runner, FastAPI backend;
-from the repo root) with sample data already ingested
+Requires the stack up (`docker compose up -d db qdrant api-py`: Postgres, 🟩Qdrant 🟪vector DB, FastAPI backend;
+from the repo root), sample data already ingested
 (`curl -X POST http://localhost:8001/api/v1/documents/ingest`, see the root
-README if you haven't run this before).
+README if you haven't run this before), and `OPENROUTER_API_KEY` in `.env`: the app needs it to chat, and the
+🟪judge model uses the same key.
 
 ```bash
 cd evals
-OLLAMA_BASE_URL=http://localhost:11435 npx promptfoo@latest eval -c promptfooconfig.yaml
+set -a; . ../.env; set +a        # makes OPENROUTER_API_KEY visible to promptfoo (the judge model uses it)
+npx promptfoo@latest eval -c promptfooconfig.yaml
 ```
 
-(`OLLAMA_BASE_URL` points 🟦promptfoo's 🟪LLM-as-judge at this project's Ollama
-container, which is mapped to host port 11435, not the default 11434.)
-
-The judge model (`ollama:chat:qwen2.5:7b` in `defaultTest.options.provider`)
-needs to be pulled once:
-
-```bash
-docker exec customer-compass-v3-ollama ollama pull qwen2.5:7b
-```
+The judge model is a free 🟩OpenRouter model (`openrouter:google/gemma-4-31b-it:free` in
+`defaultTest.options.provider`).
 
 View results in an interactive browser UI:
 
@@ -123,8 +118,8 @@ This is a separate viewer from the app's UI (port 5173); `npm run dev` does
 not start it. Keep the terminal open while browsing. It also works for the
 Stage 8.a suite: run it after `eval -c adversarial.promptfooconfig.yaml`.
 
-No API keys or cloud cost required — both the app under test and the judge
-model run on the local Ollama instance.
+Free-tier keys only, no cost. The app under test and the judge both use free OpenRouter models, so results
+vary with whichever model answers (a limit the V3 🟪evals above avoid by scoring with code).
 
 ## Known gaps / not covered yet
 
@@ -134,19 +129,12 @@ model run on the local Ollama instance.
   🟪prompt or retrieval change.
 - Only covers the 8 sample documents currently in `sample-data/documents`;
   expand `tests:` in `promptfooconfig.yaml` as more content is added.
-- **🟪LLM-as-judge needs a reasonably capable model.** `qwen2.5:3b` as judge
-  produced visibly unreliable grading (contradicted its own stated
-  reasoning, over-literal rubric matching). Switching the judge to
-  `qwen2.5:7b` fixed this. Keep the judge model separate from (and at
-  least as capable as) the model under test.
-- **Run with `-j 1` (sequential).** The default concurrency (4) overloads
-  the single local 🟩Ollama instance handling both 🟪embeddings/generation
-  for the app under test, causing real intermittent `503`s unrelated to
-  retrieval quality. Use `npx promptfoo@latest eval -j 1 ...` for
-  reliable, reproducible results.
-- Even sequentially, the small local generation model (`qwen2.5:3b`,
-  configured as the app's own `LLM_PROVIDER=ollama` default) occasionally
-  produces a degenerate near-empty answer (e.g. just `"[1]"`) despite
-  retrieving the correct 🟪chunks — a generation-quality flake, not a
-  retrieval bug. Expect occasional single-test flakiness from this; rerun
-  if a failure's citations/similarities look otherwise correct.
+- **🟪LLM-as-judge needs a reasonably capable model.** In V2, a 3B model as judge produced visibly
+  unreliable grading (contradicted its own stated reasoning, over-literal rubric matching), and a 7B model fixed
+  it. Keep the judge model separate from (and at least as capable as) the model under test.
+- **Run with `-j 1` (sequential).** The default concurrency (4) can hit the free-tier rate limits (HTTP 429)
+  and cause intermittent failures unrelated to retrieval quality. Use
+  `npx promptfoo@latest eval -j 1 ...` for more reproducible results.
+- Even sequentially, a small free model can produce a degenerate near-empty answer (e.g. just `"[1]"`)
+  despite retrieving the correct 🟪chunks: a generation-quality flake, not a retrieval bug. Expect occasional
+  single-test flakiness from this; rerun if a failure's citations/similarities look otherwise correct.

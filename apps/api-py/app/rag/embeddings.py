@@ -1,6 +1,6 @@
 """Thin client around Google's Generative Language embedding API.
 
-Replaces Ollama's mxbai-embed-large (used by the Express API) with Google's
+Replaces the local embedding model the Express API used with Google's
 cloud embedding model for the v2 stack migration (see docs/ for the locked-in
 stack decision). Kept separate from ingest/retrieve so both ingestion-time
 (document chunks) and query-time (the user's question) embedding calls share

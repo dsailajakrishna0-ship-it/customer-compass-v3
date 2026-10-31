@@ -187,7 +187,6 @@ async def _run(message: str, llm: agents.LlmCall, limits: AgentLimits, trace: Tr
         llm_calls.append(
             {
                 "agent": agent,
-                "provider": result.provider,
                 "model": result.model,
                 "latencyMs": result.latency_ms,
                 "fallbackUsed": result.fallback_used,

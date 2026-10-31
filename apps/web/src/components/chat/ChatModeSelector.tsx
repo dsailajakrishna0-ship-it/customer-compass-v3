@@ -1,12 +1,10 @@
-import type { ChatMode, LlmProvider, ModelCatalog } from "../../types";
+import type { ChatMode, ModelCatalog } from "../../types";
 import { MODE_COPY } from "../../context/ChatSessionContext";
 import { ModelPicker } from "./ModelPicker";
 
 type ChatModeSelectorProps = {
   chatMode: ChatMode;
   onChangeMode: (mode: ChatMode) => void;
-  provider: LlmProvider;
-  onChangeProvider: (provider: LlmProvider) => void;
   cloudModel: string;
   onChangeCloudModel: (modelId: string) => void;
   cloudModels: ModelCatalog;
@@ -14,12 +12,10 @@ type ChatModeSelectorProps = {
   onIngest: () => void;
 };
 
-/** Controls row: ingest button, chat-mode dropdown, LLM provider dropdown, and (when cloud is picked) the OpenRouter model dropdown. */
+/** Controls row: ingest button, chat-mode dropdown, and the OpenRouter model dropdown. */
 export function ChatModeSelector({
   chatMode,
   onChangeMode,
-  provider,
-  onChangeProvider,
   cloudModel,
   onChangeCloudModel,
   cloudModels,
@@ -42,23 +38,14 @@ export function ChatModeSelector({
         </select>
       </div>
       <div className="provider-select">
-        <label htmlFor="provider-select">Model:</label>
-        <select id="provider-select" value={provider} onChange={(event) => onChangeProvider(event.target.value as LlmProvider)}>
-          <option value="ollama">Local (Ollama · qwen2.5:3b)</option>
-          <option value="cloud">Cloud (OpenRouter, free tier)</option>
-        </select>
+        <label htmlFor="cloud-model-select">OpenRouter model:</label>
+        <ModelPicker
+          id="cloud-model-select"
+          cloudModel={cloudModel}
+          onChangeCloudModel={onChangeCloudModel}
+          cloudModels={cloudModels}
+        />
       </div>
-      {provider === "cloud" && (
-        <div className="provider-select">
-          <label htmlFor="cloud-model-select">OpenRouter model:</label>
-          <ModelPicker
-            id="cloud-model-select"
-            cloudModel={cloudModel}
-            onChangeCloudModel={onChangeCloudModel}
-            cloudModels={cloudModels}
-          />
-        </div>
-      )}
     </div>
   );
 }

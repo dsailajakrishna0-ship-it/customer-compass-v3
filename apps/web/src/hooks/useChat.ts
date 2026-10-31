@@ -1,16 +1,16 @@
 import { useState, type FormEvent } from "react";
 import { recommendForAccount, sendChat } from "../api/chat";
 import { useChatSession } from "../context/ChatSessionContext";
-import type { ChatMessage, LlmProvider } from "../types";
+import type { ChatMessage } from "../types";
 
-/** Chat input + send logic, wired to the active ChatSessionContext (mode/provider/model/history). */
+/** Chat input + send logic, wired to the active ChatSessionContext (mode/model/history). */
 export function useChat(): {
   question: string;
   setQuestion: (value: string) => void;
   isAsking: boolean;
   askQuestion: (event: FormEvent<HTMLFormElement>) => void;
 } {
-  const { chatMode, provider, cloudModel, messages, setMessages } = useChatSession();
+  const { chatMode, cloudModel, messages, setMessages } = useChatSession();
   const [question, setQuestion] = useState("");
   const [isAsking, setIsAsking] = useState(false);
 
@@ -23,16 +23,13 @@ export function useChat(): {
     setQuestion("");
     setIsAsking(true);
 
-    const requestBody: { messages: ChatMessage[]; provider: LlmProvider; model?: string } = {
-      messages: history.slice(-12),
-      provider,
-    };
-    // Only cloud requests carry a model id; the local provider uses the server's Ollama model
-    if (provider === "cloud" && cloudModel) requestBody.model = cloudModel;
+    const requestBody: { messages: ChatMessage[]; model?: string } = { messages: history.slice(-12) };
+    // Without a chosen model the server uses its default (models.yaml)
+    if (cloudModel) requestBody.model = cloudModel;
 
     // Stage 10: agent mode runs the bounded workflow instead of a single chat call
     if (chatMode === "agent") {
-      recommendForAccount({ message: text, provider, model: requestBody.model })
+      recommendForAccount({ message: text, model: requestBody.model })
         .then((run) => {
           setMessages((current) => [
             ...current,
@@ -59,7 +56,6 @@ export function useChat(): {
             citations: body.citations,
             facts: body.facts,
             scopedCompany: body.scopedCompany,
-            provider: body.provider,
             usage: body.usage,
             guardrail: body.guardrail,
             toolsUsed: body.toolsUsed,

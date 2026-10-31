@@ -85,7 +85,7 @@ A database or hosted service that holds or serves AI data and models.
 | 🟩 **Google AI Studio** | Google's service where you get a free key for Gemini models, including the embedding model we use. | V2 seed |  |
 | 🟩 **Groq** | A hosted inference service with a free tier, one of the providers V3 may fall back to. | sub-stage 1.2 |  |
 | 🟩 **Hugging Face** | The main hub for sharing open models and datasets. | sub-stage 4.3 |  |
-| 🟩 **Ollama** | Runs a small open model on your own computer. V3 removes it in sub-stage 1.3 (cloud only). | V2 seed | [V2 record](v2-baseline/part-1-foundations/02-first-llm-chat.md) |
+| 🟩 **Ollama** | Ran a small open model on your own computer. V3 removed it in sub-stage 1.3 (cloud only). | V2 seed | [V2 record](v2-baseline/part-1-foundations/02-first-llm-chat.md) |
 | 🟩 **OpenRouter** | A hosted gateway to many models, including free ones, behind one API key. | V2 seed | [V2 record](v2-baseline/part-2-grounded-intelligence/04-cloud-llm-provider.md) |
 | 🟩 **pgvector** | A Postgres extension that stores embeddings inside Postgres. V2 used it first, then moved to Qdrant. | V2 seed |  |
 | 🟩 **Qdrant** | The vector database we run. It stores each chunk's embedding and finds the closest ones to a question. | V2 seed | [V2 record](v2-baseline/part-1-foundations/03-basic-rag.md) |

@@ -6,7 +6,7 @@ does not rewrite text) and fails open: if the classifier model is
 unreachable the request proceeds on the rules alone.
 
 GUARD_MODE: rules (default, no LLM call) | llm (classifier only) | both.
-GUARD_PROVIDER / GUARD_MODEL choose which model classifies.
+GUARD_MODEL picks the model that classifies (the default model when unset).
 """
 
 import logging
@@ -37,7 +37,6 @@ async def classify_prompt(text: str) -> bool:
     result = await generate(
         CLASSIFIER_SYSTEM_PROMPT,
         [{"role": "user", "content": text}],
-        settings.guard_provider,
         settings.guard_model,
     )
     return parse_verdict(result.content)

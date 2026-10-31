@@ -1,0 +1,20 @@
+flowchart LR
+    subgraph before["V2: two ways to answer"]
+        direction TB
+        B1["Local model on your computer<br/>offline, private, small and terse"]
+        B2["Hosted free models via OpenRouter<br/>larger, but rate-limited"]
+        B3["A dropdown to switch between them"]
+    end
+    subgraph after["V3 after 1.3: one way, made reliable"]
+        direction TB
+        A1["Hosted free models only"]
+        A2["The gateway absorbs rate limits<br/>(fallback chain, retries, cool-down)"]
+        A3["One code path to test and explain"]
+    end
+    B1 ~~~ B2 ~~~ B3
+    A1 ~~~ A2 ~~~ A3
+    before --> after
+    classDef ok fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    classDef plan fill:#eceff1,stroke:#607d8b,color:#263238
+    class A1,A2,A3 ok
+    class B1,B2,B3 plan

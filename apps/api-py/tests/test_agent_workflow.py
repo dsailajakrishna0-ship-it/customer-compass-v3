@@ -11,7 +11,6 @@ from app.llm.types import GenerationResult
 def _result(text: str) -> GenerationResult:
     return GenerationResult(
         content=text,
-        provider="ollama",
         model="fake",
         tokens_in=1,
         tokens_out=1,

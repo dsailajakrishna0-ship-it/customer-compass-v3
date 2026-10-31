@@ -72,8 +72,6 @@ export type CrmFact = {
   lostDealsCount: number;
 };
 
-export type LlmProvider = "ollama" | "cloud";
-
 /** "general" = Stage 2 plain chat, "rag" = Stage 3 document-grounded chat, "crm" = Stage 5 facts + citations,
  * "tools" = Stage 9 MCP tool-calling copilot, "agent" = Stage 10 account follow-up agent workflow. */
 export type ChatMode = "general" | "rag" | "crm" | "tools" | "agent";
@@ -103,18 +101,16 @@ export type AgentRun = {
   guardrail?: ChatGuardrail;
 };
 
-/** Stage 7: per-request telemetry (which provider/model actually answered,
- * token counts, latency, a rough cost estimate, and whether automatic
- * cross-provider fallback kicked in) returned alongside every chat answer. */
+/** Per-request telemetry (which model actually answered, token counts, latency,
+ * a rough cost estimate, and whether a fallback model answered instead of the
+ * first choice) returned alongside every chat answer. */
 export type ChatUsage = {
-  provider: LlmProvider;
   model: string;
   tokensIn: number | null;
   tokensOut: number | null;
   latencyMs: number;
   estimatedCost: number | null;
   fallbackUsed: boolean;
-  fallbackFrom: LlmProvider | null;
   /** The model that was tried first and failed, when a fallback answered. */
   fallbackFromModel: string | null;
 };
@@ -135,7 +131,6 @@ export type ChatMessage = {
   citations?: Citation[];
   facts?: CrmFact | null;
   scopedCompany?: string | null;
-  provider?: LlmProvider;
   usage?: ChatUsage;
   guardrail?: ChatGuardrail;
   toolsUsed?: ToolCallSummary[];
@@ -166,7 +161,6 @@ export type ChatResponse = {
   citations?: Citation[];
   facts?: CrmFact | null;
   scopedCompany?: string | null;
-  provider?: LlmProvider;
   usage?: ChatUsage;
   guardrail?: ChatGuardrail;
   toolsUsed?: ToolCallSummary[];

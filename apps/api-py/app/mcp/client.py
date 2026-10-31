@@ -28,7 +28,7 @@ def _server_params() -> StdioServerParameters:
     #
     # MCP's StdioServerParameters defaults to a minimal env allowlist (PATH,
     # HOME, etc.) for subprocess security -- it does NOT inherit secrets like
-    # GOOGLE_API_KEY/DATABASE_URL/OLLAMA_URL/OPENROUTER_API_KEY. The tool
+    # GOOGLE_API_KEY/DATABASE_URL/OPENROUTER_API_KEY. The tool
     # server needs those (it calls the same crm/rag modules the API does),
     # so we explicitly pass through the parent process's full environment.
     return StdioServerParameters(

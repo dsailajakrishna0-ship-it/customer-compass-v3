@@ -28,7 +28,7 @@ Stages refer to [the roadmap](roadmap.md). "Seed" means it came with V2's final 
 | **🟩Qdrant** | Stores document meaning as numbers and finds the closest matches | Seed | In use |
 | **Google `gemini-embedding-001`** | Turns text into numbers (🟪embeddings) for 🟪similarity search | Seed | In use; compared with an open model in 4.3 |
 | **🟩OpenRouter** | One doorway to many hosted models, including free ones | Seed | In use, called through 🟦LiteLLM since 1.2 |
-| **🟩Ollama** (`qwen2.5:3b`) | Runs a small 🟪language model on the local computer | Seed | **Removed** in 1.3 (cloud-only) |
+| **🟩Ollama** (`qwen2.5:3b`) | Ran a small 🟪language model on the local computer | Seed | **Removed** in 1.3 (cloud-only, [ADR 0010](adr/0010-cloud-only-models.md)) |
 | **🟦MCP Python SDK (stdio)** | Lets the model call tools in a standard way | Seed | **Replaced** by FastMCP in 2.2 |
 | **Rule-based 🟪guardrails** (our code) | Blocks 🟪prompt-injection patterns | Seed | In use; compared with 🟦NeMo Guardrails and 🟧Llama Guard in 5.3 |
 | **🟦promptfoo** | Runs test questions against the live API and grades answers | Seed | In use; 🟦Ragas or DeepEval added in 5.2 |
@@ -69,7 +69,7 @@ Optional comparisons (decided by an ADR, never adopted by default): 🟦Pydantic
 | Stage | Added | Replaced or removed | Stage guide |
 | --- | --- | --- | --- |
 | 0 Foundation | CI/CD, code-quality tools, migrations, releases, evaluation baseline | none (no behaviour change) | [Stage 0](stages/00-foundation.md) |
-| 1 Model layer | 1.1: pydantic-settings, structlog, `models.yaml`; 1.2: 🟦LiteLLM gateway | planned: 🟩Ollama removed | [Stage 1](stages/01-model-layer.md) (in progress) |
+| 1 Model layer | 1.1: pydantic-settings, structlog, `models.yaml`; 1.2: 🟦LiteLLM gateway | 1.3: 🟩Ollama and the local/cloud provider switch removed | [Stage 1](stages/01-model-layer.md) (in progress) |
 | 2 Tools and 🟦MCP | Native 🟪tool calling, FastMCP | stdio MCP, fenced `tool_call` text | planned |
 | 3 🟦LangGraph port | LangGraph, Postgres 🟪checkpointer | hand-written workflow code | planned |
 | 4 🟪Retrieval upgrade | 🟪Hybrid search, 🟪reranker, 🟦Docling, open 🟪embeddings (comparison) | Markdown-only ingestion | planned |
@@ -82,18 +82,18 @@ Optional comparisons (decided by an ADR, never adopted by default): 🟦Pydantic
 ## How swapping works
 
 Where an alternative is available, it is wired in as an **additive, opt-in
-toggle** — never a silent replacement. Two mechanisms are used:
+choice**, never a silent replacement. Two mechanisms are used:
 
-1. **Environment variable** (application-level choice, e.g. which 🟪LLM
-   provider the API talks to: `LLM_PROVIDER`, `OPENROUTER_MODEL`).
-2. **Live UI selector, per request** (LLM provider and, for the cloud
-   provider, the specific model) — the web app lets the user pick the
-   provider from a dropdown on every message, no restart needed; when
-   "Cloud" is selected, a second dropdown lets them pick any currently
-   available free 🟩OpenRouter model (fetched live from `GET /api/v1/llm/models`),
-   with paid examples shown disabled for reference only. The server still
-   supports env-var defaults (`LLM_PROVIDER`, `OPENROUTER_MODEL`) for clients
-   that don't specify one (e.g. curl/tests).
+1. **Settings** (application-level choice, read once at start-up by
+   `app/config.py`): for example `OPENROUTER_MODEL` for the default chat
+   model, with the default model, the fallback chain and the free-model list
+   in `apps/api-py/models.yaml`.
+2. **Live UI selector, per request** (the chat model): the web app lets the
+   user pick any currently available free 🟩OpenRouter model from a dropdown on
+   every message, no restart needed (the list comes from `GET
+   /api/v1/llm/models`, with `models.yaml` as the fallback), with paid
+   examples shown disabled for reference only. The server's defaults apply
+   to clients that name no model (curl, tests).
 
 ## V2 progress by stage (the seed)
 
@@ -232,41 +232,39 @@ information, organized the other way (by technology, not by stage).
 
 | | Technology | Status |
 | --- | --- | --- |
-| **Active (default)** | 🟩Ollama, local, `qwen2.5:3b` | Stage 2 |
-| **Swappable alternative** | 🟩OpenRouter (cloud, free tier), selectable live per request via the web UI's "Model" dropdown, or `provider: "cloud"` in the request body, or `LLM_PROVIDER=cloud` as the server-side default | Stage 4 |
+| **Active (default)** | Free 🟩OpenRouter models, called through the 🟦LiteLLM gateway with an ordered fallback chain (`models.yaml`) | V3 sub-stage 1.2 |
+| **Removed** | Running a model on the local computer (the V2 default) | V3 sub-stage 1.3, see [ADR 0010](adr/0010-cloud-only-models.md) |
 
-Current OpenRouter default free model: `liquid/lfm-2.5-2.6b:free`. Since
-free-tier slugs get promoted to paid-only or rate-limited under shared-pool
-contention frequently, the web UI additionally exposes a second **"OpenRouter
-model"** dropdown (visible when "Cloud" is selected) populated live from
-`GET /api/v1/llm/models` — the user can pick any currently free model per
-message, no server restart or `.env` edit needed. A couple of well-known paid
-models (GPT-4o-mini, Claude Sonnet 4) are listed alongside for reference but
-rendered disabled/greyed out — never selectable, so no request can
-accidentally incur cost. See `apps/api-py/.env.example` for a curl one-liner to
-inspect the raw free-model list server-side if needed.
+The default free model is set in `models.yaml` (`OPENROUTER_MODEL` overrides it). Free-tier models are promoted to
+paid-only or rate-limited frequently, so the web UI offers an **"🟩OpenRouter model"** dropdown populated live from
+`GET /api/v1/llm/models`, falling back to the saved list in `models.yaml` when OpenRouter is unreachable. A couple of
+well-known paid models are listed for reference but rendered disabled, so no request can accidentally incur cost.
+When a model fails, the gateway retries or moves to the next model in the chain
+([Stage 1 guide](stages/01-model-layer.md#concept-4--calling-models-safely-the-model-gateway)).
 
 Free options worth exploring later:
 
-- **🟩Groq** — very low latency, 🟪OpenAI-compatible API, generous free tier.
-- **Google 🟧Gemini (free tier)** — strong quality, own SDK shape.
-- **🟩Together.ai** — free credits, OpenAI-compatible.
+- **🟩Groq**: very low latency, 🟪OpenAI-compatible API, generous free tier.
+- **Google 🟧Gemini (free tier)**: strong quality, own SDK shape.
+- **🟩Together.ai**: free credits, OpenAI-compatible.
+
+LiteLLM already speaks to all of these, so adding one is a new entry in `models.yaml`, not new code.
 
 ## Embeddings
 
 | | Technology | Status |
 | --- | --- | --- |
 | **Active (default)** | Google `gemini-embedding-001` (768-dim, via `GOOGLE_API_KEY`; `GOOGLE_EMBEDDING_MODEL` overrides) | v2 migration |
-| **Previously (v1)** | 🟩Ollama, local, `mxbai-embed-large` (1024-dim) | Stage 3 |
+| **Previously (v1)** | A local `mxbai-embed-large` 🟪embedding model (1024-dim) | Stage 3 |
 | **Swappable alternative** | Not yet planned | — |
 
 Free options worth exploring later:
 
-- **🟩Ollama `mxbai-embed-large`** — the original local, no-API-key option.
+- **`mxbai-embed-large`** (run locally) — the original local, no-API-key option.
 - **Cohere** — free-tier embed API, strong 🟪retrieval performance.
 - **Sentence-Transformers** (self-hosted, e.g. `all-MiniLM-L6-v2`) — fully
   free/local, smaller/faster than `mxbai-embed-large`, good for comparing
-  🟪embedding quality vs. speed trade-offs.
+  embedding quality vs. speed trade-offs.
 
 ## Vector storage / retrieval database
 

@@ -415,7 +415,7 @@ terms:
     name: Ollama
     category: service
     match: ["Ollama"]
-    meaning: "Runs a small open model on your own computer. V3 removes it in sub-stage 1.3 (cloud only)."
+    meaning: "Ran a small open model on your own computer. V3 removed it in sub-stage 1.3 (cloud only)."
     since: Seed
     learn: v2-baseline/part-1-foundations/02-first-llm-chat.md
   - id: google-ai-studio

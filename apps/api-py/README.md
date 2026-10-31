@@ -34,16 +34,15 @@ narrative); `/health` stays unprefixed.
 ```bash
 cd apps/api-py
 uv sync                 # installs dependencies into .venv
-cp .env.example .env    # then edit: DATABASE_URL, QDRANT_URL, GOOGLE_API_KEY, OLLAMA_URL/OPENROUTER_API_KEY
+cp .env.example .env    # then edit: DATABASE_URL, QDRANT_URL, GOOGLE_API_KEY, OPENROUTER_API_KEY
 uv run uvicorn app.main:app --reload --port 8001
 ```
 
-Requires Postgres, Qdrant, and Ollama running: `docker compose up -d db
-qdrant ollama` (from the repo root). Get a free `GOOGLE_API_KEY` at
+Requires Postgres and Qdrant running: `docker compose up -d db qdrant`
+(from the repo root). Get a free `GOOGLE_API_KEY` at
 https://aistudio.google.com/apikey — needed for `/api/v1/documents/ingest`
 (not for `/health`). Get a free `OPENROUTER_API_KEY` at
-https://openrouter.ai/keys — needed only for `provider: "cloud"` requests or
-`LLM_PROVIDER=cloud`.
+https://openrouter.ai/keys — needed for every chat mode (V3 is cloud-only).
 
 ## Verify
 
@@ -63,17 +62,17 @@ curl -s http://localhost:8001/api/v1/documents/ingestion-runs
 curl -s -X POST http://localhost:8001/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{"messages":[{"role":"user","content":"Hello"}]}'
-# {"message":"...","provider":"ollama"}
+# {"message":"...","usage":{...}}
 
 curl -s -X POST http://localhost:8001/api/v1/chat/rag \
   -H "Content-Type: application/json" \
   -d '{"messages":[{"role":"user","content":"What is our refund policy?"}]}'
-# {"message":"...","citations":[...],"provider":"ollama"}
+# {"message":"...","citations":[...],"usage":{...}}
 
 curl -s -X POST http://localhost:8001/api/v1/chat/crm \
   -H "Content-Type: application/json" \
   -d '{"messages":[{"role":"user","content":"Tell me about Acme Corp"}]}'
-# {"message":"...","facts":{...},"citations":[...],"scopedCompany":"Acme Fabrication","provider":"ollama"}
+# {"message":"...","facts":{...},"citations":[...],"scopedCompany":"Acme Fabrication","usage":{...}}
 
 curl -s http://localhost:8001/api/v1/llm/models
 # {"free":[...],"paid":[...]}

@@ -1,5 +1,5 @@
 import { apiGet, apiPost } from "./client";
-import type { AgentRun, ChatMessage, ChatMode, ChatResponse, LlmProvider, ModelCatalog } from "../types";
+import type { AgentRun, ChatMessage, ChatMode, ChatResponse, ModelCatalog } from "../types";
 
 export function getCloudModels(): Promise<ModelCatalog> {
   return apiGet<ModelCatalog>("/api/v1/llm/models");
@@ -7,7 +7,6 @@ export function getCloudModels(): Promise<ModelCatalog> {
 
 type SendChatRequest = {
   messages: ChatMessage[];
-  provider: LlmProvider;
   model?: string;
 };
 
@@ -25,7 +24,7 @@ export function sendChat(mode: Exclude<ChatMode, "agent">, body: SendChatRequest
 }
 
 /** Stage 10: runs the bounded agent workflow. Never creates a task. */
-export function recommendForAccount(body: { message: string; provider: LlmProvider; model?: string }): Promise<AgentRun> {
+export function recommendForAccount(body: { message: string; model?: string }): Promise<AgentRun> {
   return apiPost<AgentRun>("/api/v1/agent/recommend", body);
 }
 

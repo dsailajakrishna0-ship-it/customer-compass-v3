@@ -33,20 +33,6 @@ services:
         condition: service_healthy
     restart: "no"
 
-  # Model cache: if you already ran the original `customer-compass` repo on
-  # this machine, run `./scripts/setup-ollama-cache.sh` once before `up` —
-  # it detects that repo's existing Ollama volume (already holding
-  # qwen2.5:3b / mxbai-embed-large) and reuses it here, skipping a fresh
-  # multi-GB download. If no prior cache is found, a new volume is created
-  # and models are pulled fresh on first use. See README for details.
-  ollama:
-    image: ollama/ollama:0.40.10
-    container_name: customer-compass-v3-ollama
-    ports:
-      - "11435:11434"
-    volumes:
-      - ollama-data:/root/.ollama
-
   # Vector DB for v2 (replacing pgvector from v1 — see docs/tech-stack.md
   # and the v2 migration plan). Standing this up here in PR 1; ingestion/
   # retrieval code is migrated to use it in later PRs. Postgres (above)
@@ -65,10 +51,7 @@ services:
   # the frontend cut over to this service under /api/v1 — the old Express
   # API, apps/api, has been removed). sample-data is mounted read-only since
   # the Docker image only contains apps/api-py, not the whole repo.
-  # OLLAMA_URL points at the ollama service's internal Docker DNS name/port
-  # (http://ollama:11434), since api-py reaches it over the compose network
-  # rather than from the host (which used the host-mapped 11435 port).
-  # api-py: FastAPI backend tying together Postgres, Qdrant, Ollama, OpenRouter and Google embeddings
+  # api-py: FastAPI backend tying together Postgres, Qdrant, OpenRouter (chat models) and Google (embeddings)
   api-py:
     build:
       context: ./apps/api-py
@@ -79,9 +62,6 @@ services:
       QDRANT_URL: http://qdrant:6333
       GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}  # Google embedding API key (gemini-embedding-001)
       SAMPLE_DATA_DIR: /sample-data/documents
-      LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
-      OLLAMA_URL: http://ollama:11434
-      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:3b}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}  # key for hosted cloud models via OpenRouter
       OPENROUTER_MODEL: ${OPENROUTER_MODEL:-}  # empty: the default in apps/api-py/models.yaml
       LLM_TIMEOUT_SECONDS: ${LLM_TIMEOUT_SECONDS:-}  # empty: the default in app/config.py
@@ -91,7 +71,6 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       LOG_FORMAT: ${LOG_FORMAT:-json}  # json (one object per line) or console (readable)
       GUARD_MODE: ${GUARD_MODE:-rules}  # Stage 8.d: rules | llm | both
-      GUARD_PROVIDER: ${GUARD_PROVIDER:-ollama}
       GUARD_MODEL: ${GUARD_MODEL:-}
       SECURITY_AUDIT_RETENTION_DAYS: ${SECURITY_AUDIT_RETENTION_DAYS:-90}
       QDRANT_COLLECTION: ${QDRANT_COLLECTION:-document_chunks}  # Stage 3.a: set to document_chunks_demo to try fake data
@@ -118,15 +97,7 @@ services:
         condition: service_completed_successfully
       qdrant:
         condition: service_started
-      ollama:
-        condition: service_started
 
 volumes:
   postgres-data:
-  # Explicit, overridable name so this volume can point at an existing
-  # Ollama model cache (e.g. from the original customer-compass repo)
-  # instead of always creating a brand-new one. Set via .env — see
-  # scripts/setup-ollama-cache.sh.
-  ollama-data:
-    name: ${OLLAMA_VOLUME_NAME:-customer-compass-v3_ollama-data}
   qdrant-data:

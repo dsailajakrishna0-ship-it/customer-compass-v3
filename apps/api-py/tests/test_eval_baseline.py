@@ -108,6 +108,32 @@ def test_adversarial_suite_matches_the_recorded_rule_expectations():
     assert result["false_positive_rate"] == 0.0
 
 
+LEGACY_ENV = {"llm_provider": "ollama", "ollama_model": "qwen2.5:3b"}  # how v2.json was recorded
+
+
+def test_a_report_from_before_cloud_only_names_its_local_model():
+    assert run_eval.chat_model_of(LEGACY_ENV) == "ollama/qwen2.5:3b"
+    assert run_eval.chat_model_of({"chat_model": "openrouter/x:free"}) == "openrouter/x:free"
+
+
+def test_model_dependent_suites_are_dropped_when_the_chat_model_changed():
+    now = {"chat_model": "openrouter/google/gemma-4-31b-it:free"}
+    suites, note = run_eval.comparable_suites(LEGACY_ENV, now, list(run_eval.SUITES))
+    assert suites == ["adversarial", "retrieval"]
+    assert "tools, agent" in note and "ollama/qwen2.5:3b" in note and "gemma-4-31b" in note
+
+
+def test_every_suite_is_kept_when_the_chat_model_is_the_same():
+    env = {"chat_model": "openrouter/x:free"}
+    suites, note = run_eval.comparable_suites(env, env, list(run_eval.SUITES))
+    assert suites == list(run_eval.SUITES) and note is None
+
+
+def test_no_note_when_there_were_no_model_dependent_suites_to_drop():
+    suites, note = run_eval.comparable_suites(LEGACY_ENV, {"chat_model": "z"}, ["retrieval"])
+    assert suites == ["retrieval"] and note is None
+
+
 def _report(**suite_metrics) -> dict:
     return {"tolerances": {"retrieval": 0.02}, "suites": {"retrieval": {"metrics": suite_metrics}}}
 
