@@ -20,6 +20,7 @@ One short file per decision, so the reason for a choice is not buried in a long 
 | [0010](0010-cloud-only-models.md) | Cloud-only chat models | Accepted |
 | [0011](0011-streaming-deferred.md) | Streaming answers (SSE): deferred | Accepted |
 | [0012](0012-agent-limits.md) | Agent limits (steps and time) | Accepted (numbers pending) |
+| [0013](0013-conflict-bot.md) | A conflict-resolving helper (Phase 1: a script run by hand) | Accepted |
 
 ## Template
 
