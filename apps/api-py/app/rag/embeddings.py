@@ -34,7 +34,8 @@ async def embed_texts(texts: list[str]) -> list[list[float]]:
     model = settings.google_embedding_model
     if not api_key:
         raise RuntimeError(
-            "GOOGLE_API_KEY is not set. Add it to apps/api-py/.env to use embeddings."
+            "GOOGLE_API_KEY is not set. Put it in the .env file in the project root (apps/api-py/.env "
+            "if you run the API outside Docker), without a leading #, then restart the API."
         )
 
     async with httpx.AsyncClient(timeout=30.0) as client:

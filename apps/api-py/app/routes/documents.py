@@ -1,6 +1,7 @@
 """Document ingestion + inspection routes (ported from apps/api/src/routes/documents.ts)."""
 
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import JSONResponse
 
 from app.config import get_settings
 from app.db import get_pool
@@ -45,9 +46,9 @@ async def ingest():
     }
     if summary.error:
         body["error"] = summary.error
-    if status_code != 200:
-        raise HTTPException(status_code=status_code, detail=body)
-    return body
+    # A failed run is returned as the summary itself (not wrapped in an error object), so the web
+    # app can read `status` and a plain-text `error`.
+    return JSONResponse(status_code=status_code, content=body)
 
 
 @router.get("")
