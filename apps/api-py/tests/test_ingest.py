@@ -18,6 +18,7 @@ requires_google_key = pytest.mark.skipif(
 
 
 @requires_google_key
+@pytest.mark.network
 @pytest.mark.asyncio
 async def test_ingest_then_list_documents() -> None:
     transport = ASGITransport(app=app)

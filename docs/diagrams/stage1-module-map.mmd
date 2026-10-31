@@ -1,23 +1,23 @@
 flowchart TB
-    W["Web: chat panel and message bubble<br/>(provider dropdown removed)"] --> C
-    C["Callers: routes/chat.py, routes/agent.py,<br/>guardrails/llm_guard.py"] --> G["llm/gateway.py<br/>cloud-only: chain, retries, fallback"]
-    G --> L["LiteLLM Router<br/>(library, 1.2)"]
-    L --> O["OpenRouter free models"]
-    G --> CF["config.py + models.yaml<br/>(local-model settings removed)"]
-    T["tests/test_no_local_models.py<br/>keeps the local runner out"]
-    X["Removed in 1.3: the Ollama service and volume,<br/>the provider switch, the cache script"]
-    E["Earlier: logs, middleware (1.1)"]
-    X ~~~ T
-    subgraph legend["Legend: state after sub-stage 1.3"]
+    R["routes/agent.py<br/>real call: ignores the role"] --> A
+    A["agent/agents.py<br/>AgentRole + LlmCall(role, prompt, messages)"] --> W["agent/workflow.py<br/>(unchanged)"]
+    F["tests/fakes.py<br/>FakeAgentModel: answers by role"] -.->|replaces the real call in tests| A
+    N["tests/conftest.py<br/>refuses non-local network"]
+    H["tests/test_test_hygiene.py<br/>no prompt sniffing"]
+    M["evals/measure_limits.py<br/>times the live agent API"] --> P["evals/metrics.py<br/>percentile, round_up_to"]
+    M -->|HTTP| R
+    E["Earlier (1.1 to 1.3): settings, logs,<br/>gateway, cloud-only models"]
+    R --> E
+    subgraph legend["Legend: state after sub-stage 1.4"]
         direction LR
         K1["new in this sub-stage"]
         K2["changed in this sub-stage"]
         K3["existing, untouched"]
     end
-    E ~~~ legend
+    N ~~~ legend
     classDef new fill:#a5d6a7,stroke:#1b5e20,stroke-width:3px,color:#0d3b12
     classDef changed fill:#fff3cd,stroke:#f9a825,stroke-width:2px,color:#5d4037
     classDef existing fill:#eceff1,stroke:#b0bec5,color:#78909c
-    class T,K1 new
-    class W,C,G,CF,K2 changed
-    class L,O,E,X,K3 existing
+    class F,N,H,M,K1 new
+    class R,A,P,K2 changed
+    class W,E,K3 existing

@@ -1,8 +1,8 @@
 # Stage 1 — Model layer: settings, logging, and calling models safely
 
 > **Level:** beginner friendly. **Reading time:** about 45 minutes for what is written so far.
-> **Status:** in progress. **1.1 to 1.3 are written; 1.4 is added when it is built.**
-> **Roadmap:** [Stage 1](../roadmap.md#stage-1--model-layer-cloud-only) · **Decisions:** [ADR 0008](../adr/0008-config-and-logging.md), [ADR 0009](../adr/0009-litellm-gateway.md), [ADR 0010](../adr/0010-cloud-only-models.md) (more to come)
+> **Status:** in progress. **1.1 to 1.4 are written (1.4 closes the stage).**
+> **Roadmap:** [Stage 1](../roadmap.md#stage-1--model-layer-cloud-only) · **Decisions:** [ADR 0008](../adr/0008-config-and-logging.md), [ADR 0009](../adr/0009-litellm-gateway.md), [ADR 0010](../adr/0010-cloud-only-models.md), [ADR 0011](../adr/0011-streaming-deferred.md), [ADR 0012](../adr/0012-agent-limits.md)
 
 **AI colour code:** 🟪 concept · 🟦 framework or tool · 🟩 data store or service · 🟧 model. Unmarked technical terms are ordinary software. [A to Z list](../ai-terms.md)
 
@@ -17,8 +17,9 @@ Stage 1 prepares the part of the app that talks to AI models. Before swapping in
 | A numbered ticket attached to every order, so you can follow it through every station | **Request IDs and structured logs** | Every log line of a request carries the same id |
 | A switchboard that tries the next line when one is busy, waits a moment if a line only glitches, and stops ringing a line that just failed | **🟪Model gateway** (1.2) | `gateway.py`: an ordered fallback chain, retries with growing waits, a cool-down, one result shape |
 | Switching off the building's own generator and drawing power from the grid, after fitting a backup battery | **Cloud-only models** (1.3) | The local model, its container and the provider switch are gone; the gateway is the safety net |
+| A test bench with labelled fake parts and an alarm if anything is plugged into the outside grid | **Test seam** (1.4) | `tests/fakes.py` answers by role; tests that touch the internet fail; `just measure-limits` times the 🟪agent |
 
-Still to come in this stage: a fake model for tests plus a decision on 🟪streaming (1.4). Its section is added when it is built.
+Last in this stage (1.4): a test fake that answers by role and a check that tests use no network, a decision to leave 🟪streaming for later, and a tool to measure the agent's limits.
 
 ## The big picture (1.1)
 
@@ -274,11 +275,55 @@ A new baseline for those two suites needs a hosted model, and therefore an OpenR
 
 ---
 
-## Code tour: what changed in 1.1 to 1.3, and why
+## Concept 6 — Tests that need no model, and two decisions about limits
 
-Bright green is new in this sub-stage, amber is an existing module that changed, grey is existing and untouched (earlier sub-stages are collapsed to one grey box). In each later sub-stage the green boxes turn grey and the newly added modules turn bright. Markers in the tables: 🟢 new, 🟡 changed, ⚪ earlier.
+**The problem.** Tests that call a real model are slow, flaky and need a key. The usual fix is a fake model, but a careless fake is brittle too. Before 1.4, the 🟪agent tests decided which role was calling by looking for words inside the 🟪prompt text (`"Analyst agent" in system_prompt`). Reword a prompt and a test fails (or, worse, silently answers the wrong role).
 
-![Module map after sub-stage 1.3: the web chat panel and the callers (routes and the LLM guard) call llm/gateway.py, which is now cloud-only and uses the LiteLLM Router to reach OpenRouter free models, and reads config.py and models.yaml. A new test keeps the local runner out. The removed Ollama service, volume, provider switch and cache script are shown as removed, and the earlier 1.1 work is collapsed to one grey box.](../img/diagrams/stage1-module-map.png)
+**The seam.** A *seam* is a place where you can swap a real part for a stand-in without editing the code around it. The agent code already took its model call as a parameter (`llm`); 1.4 changes what that call is told. It now receives the **role** (`"analyst"`, `"reviewer"` or `"task_drafter"`) as its first argument, so a test answers by role and never reads the prompt.
+
+```python
+llm = FakeAgentModel(ANALYST_OK, [REVISE, APPROVE])   # analyst answer, then two review verdicts
+result = await workflow.run_account_review("Analyze Acme Fabrication", llm, AgentLimits())
+assert llm.calls == ["analyst", "reviewer", "analyst", "reviewer", "task_drafter"]
+```
+
+`FakeAgentModel` (in `tests/fakes.py`) takes typed answers (a `Recommendation`, a `Review`), records which roles were called and what prompt each got, and lets a test pass a raw string to simulate malformed model output. A rule test (`test_test_hygiene.py`) fails if anyone goes back to sniffing prompts.
+
+**Proving the tests are offline.** "CI has no network" was a habit, not a fact. An autouse fixture in `conftest.py` now makes any connection to a non-local address raise an error that names the host, unless the test is marked `@pytest.mark.network` (only the one live ingest test is). `localhost` stays open because the tests use Postgres and 🟩Qdrant containers.
+
+| Before | After |
+| --- | --- |
+| The fake guessed the role from prompt wording | The code says the role; the fake answers by role |
+| "Tests don't use the network" was believed | A test that tries fails loudly, with the host name |
+
+### Decision: no streaming yet ([ADR 0011](../adr/0011-streaming-deferred.md))
+
+Streaming shows the answer as it is written. We chose **not yet**: the safety checks on the output need the whole text, citations and facts are attached after the reply, and the agent makes several model calls and returns a structured result, not prose. The gateway is the only door to models, so adding 🟪streaming later is a contained change. The ADR lists the signals that would reopen the question.
+
+### Decision: keep the agent limits, measure before changing them ([ADR 0012](../adr/0012-agent-limits.md))
+
+The agent stops after 8 budgeted steps or 180 seconds. A normal run uses 6 steps and each revision adds 2, so the step limit allows exactly one revision; it is a safety rule and does not depend on the model. The time limit does depend on the model, and the old number came from a slow local model (about 41 s per case in V2).
+
+`just measure-limits` runs the agent cases several times and reports the slowest runs, how much of the time limit they used and a *suggested* new timeout (the slowest run plus 50%). Its maths and its collection are tested offline.
+
+> [!WARNING]
+> **Not measured yet.** Measuring needs a real 🟩OpenRouter key and none was available, so ADR 0012 holds the method and the V2 numbers, not hosted-model numbers. Run the recipe once a key is in `.env` and paste the result into the ADR.
+
+### Lessons
+
+> [!IMPORTANT]
+> 1. **Tell the fake the role; don't make it read the 🟪prompt.** A test should break when behaviour changes, not when a sentence is reworded.
+> 2. **Enforce "no network" with a check.** A belief nobody tests stops being true unnoticed.
+> 3. **A decision may be "not yet", if it says what would change it.** That is a decision record, not a postponement.
+> 4. **Ship the measuring tool even when you can't take the measurement, and say so.**
+
+---
+
+## Code tour: what changed in 1.1 to 1.4, and why
+
+Bright green is new in this sub-stage (1.4, the last of the stage), amber is an existing module that changed in it, grey is existing and untouched (1.1 to 1.3 are collapsed to one grey box). Markers in the tables: 🟢 new, 🟡 changed, ⚪ earlier.
+
+![Module map after sub-stage 1.4: the agent routes and workflow call the model through a function that now receives the agent's role. In tests, a new FakeAgentModel answers by role instead of reading prompt text. A new conftest check refuses any non-local network connection, and a new hygiene test forbids prompt sniffing. A new measure_limits script calls the live agent API and uses the new percentile functions in evals/metrics.py. Models, the gateway and settings from 1.1 to 1.3 are collapsed into one grey box.](../img/diagrams/stage1-module-map.png)
 
 <sub>Diagram source: [stage1-module-map.mmd](../diagrams/stage1-module-map.mmd)</sub>
 
@@ -286,52 +331,48 @@ Bright green is new in this sub-stage, amber is an existing module that changed,
 
 | | Added in | File | What it is for | Names to look at | Used by |
 | --- | --- | --- | --- | --- | --- |
-| 🟢 | 1.3 | [`tests/test_no_local_models.py`](../../apps/api-py/tests/test_no_local_models.py) | Fails if the removed local runner reappears outside a short allowlist | `ALLOWED`, `tracked_text_files()` | CI |
-| ⚪ | 1.2 | [`app/llm/gateway.py`](../../apps/api-py/app/llm/gateway.py) | The one door for every model call | `generate()`, `build_chain()`, `Route`, `Plan`, `LlmUnavailableError` | `routes/chat.py`, `routes/agent.py`, `guardrails/llm_guard.py` |
-| ⚪ | 1.2 | [`tests/test_gateway.py`](../../apps/api-py/tests/test_gateway.py) | Gateway tests with a scripted fake provider | `Scripted`, `use_models()` | CI |
-| ⚪ | 1.2 | [`apps/web/.../fallbackNote.ts`](../../apps/web/src/components/chat/fallbackNote.ts) | Wording of the "a fallback answered" note | `fallbackNote()` | `MessageBubble.tsx` |
-| ⚪ | 1.1 | [`app/config.py`](../../apps/api-py/app/config.py), [`models.yaml`](../../apps/api-py/models.yaml) | Every setting and the model catalogue | `Settings`, `get_settings()` | Everything |
-| ⚪ | 1.1 | [`app/logs.py`](../../apps/api-py/app/logs.py), [`app/middleware.py`](../../apps/api-py/app/middleware.py) | JSON logging and request ids | `configure_logging()`, `RequestIdMiddleware` | `main.py` |
+| 🟢 | 1.4 | [`tests/fakes.py`](../../apps/api-py/tests/fakes.py) | The typed fake 🟪agent model: answers by role, records calls and 🟪prompts | `FakeAgentModel`, `constant_model()`, `model_result()` | `test_agent_workflow.py`, `test_agents.py` |
+| 🟢 | 1.4 | [`tests/test_network_guard.py`](../../apps/api-py/tests/test_network_guard.py) | Proves the no-network check works, and that `network` tests are exempt | | CI |
+| 🟢 | 1.4 | [`tests/test_test_hygiene.py`](../../apps/api-py/tests/test_test_hygiene.py) | Fails if a test goes back to reading prompt text to guess the role | | CI |
+| 🟢 | 1.4 | [`evals/measure_limits.py`](../../evals/measure_limits.py) | Times the agent workflow against the live API and suggests a timeout | `agent_cases()`, `measure()`, `summarise()` | `just measure-limits` |
+| 🟢 | 1.4 | [`tests/test_measure_limits.py`](../../apps/api-py/tests/test_measure_limits.py) | Offline tests for the statistics and the collection logic | | CI |
+| 🟢 | 1.4 | [ADR 0011](../adr/0011-streaming-deferred.md), [ADR 0012](../adr/0012-agent-limits.md) | The 🟪streaming decision and the agent limits | | Readers |
+| ⚪ | 1.3 | [`tests/test_no_local_models.py`](../../apps/api-py/tests/test_no_local_models.py) | Fails if the removed local runner reappears outside a short allowlist | `ALLOWED`, `tracked_text_files()` | CI |
+| ⚪ | 1.2 | [`app/llm/gateway.py`](../../apps/api-py/app/llm/gateway.py), [`tests/test_gateway.py`](../../apps/api-py/tests/test_gateway.py) | The one door for every model call, and its scripted-provider tests | `generate()`, `build_chain()`, `Scripted` | Routes, guard, CI |
+| ⚪ | 1.1 | [`app/config.py`](../../apps/api-py/app/config.py), [`models.yaml`](../../apps/api-py/models.yaml), [`logs.py`](../../apps/api-py/app/logs.py), [`middleware.py`](../../apps/api-py/app/middleware.py) | Settings, model catalogue, JSON logs, request ids | `Settings`, `configure_logging()` | Everything |
 
 ### Existing files that changed, and what changed
 
 | | Changed in | File | Change |
 | --- | --- | --- | --- |
-| 🟡 | 1.3 | `app/llm/gateway.py` | Cloud-only: `generate(system_prompt, messages, model)`, no provider, no local route; no key means no chain and one clear error |
-| 🟡 | 1.3 | `app/config.py`, `app/llm/types.py` | Local-model and provider settings removed; `GenerationResult` loses `provider` and `fallback_from` |
-| 🟡 | 1.3 | `app/routes/chat.py`, `app/routes/agent.py`, `app/agent/workflow.py`, `app/guardrails/llm_guard.py` | No provider in requests, responses or the guard; the classifier uses the default model |
-| 🟡 | 1.3 | `apps/web/src/` (9 files) | Provider dropdown, state and types removed; the model dropdown is always shown; the fallback note names models only |
-| 🟡 | 1.3 | `evals/run_eval.py`, `evals/promptfooconfig.yaml`, `evals/compare_guards.py`, `evals/README.md` | The runner skips model-dependent suites when the chat model changed; the judge is a hosted model |
-| 🟡 | 1.3 | `docker-compose.yml`, `.github/workflows/ci.yml`, `justfile`, `.env.example`, `README.md` | The local model service, volume and script are gone; chat needs `OPENROUTER_API_KEY` |
-| 🟡 | 1.3 | `tests/` (6 files) | Gateway and config tests for the cloud-only contract; fixtures lose provider fields |
-| 🟡 | 1.3 | `docs/` (10 files) | Architecture, API reference, testing guide, troubleshooting, frontend docs, stack record |
+| 🟡 | 1.4 | `app/agent/agents.py` | The model-call type now takes the role first (`AgentRole`); the three agents pass their role |
+| 🟡 | 1.4 | `app/routes/agent.py` | The real model call accepts and ignores the role |
+| 🟡 | 1.4 | `tests/test_agent_workflow.py`, `tests/test_agents.py` | Rebuilt on `FakeAgentModel`; typed answers; no prompt sniffing |
+| 🟡 | 1.4 | `tests/conftest.py`, `pyproject.toml` | The no-network check and the `network` marker |
+| 🟡 | 1.4 | `tests/test_ingest.py` | The one live test is marked `network` |
+| 🟡 | 1.4 | `evals/metrics.py`, `justfile` | `percentile()`, `round_up_to()`; the `measure-limits` recipe |
+| ⚪ | 1.3 | gateway, config, routes, web app, 🟪evals, docs | Cloud-only models (see Concept 5) |
 | ⚪ | 1.2 | `app/llm/types.py`, `routes/*`, `guardrails/llm_guard.py`, web `types` and `MessageBubble.tsx`, `pyproject.toml` | Result field, gateway import, fallback note, `litellm` dependency |
 | ⚪ | 1.1 | 20 modules | Read their settings from `config.py` |
 
-### Removed
-
-| | In | What | Why |
-| --- | --- | --- | --- |
-| ⚪ | 1.2 | `app/llm/provider.py`, `cloud.py`, `ollama.py` | Replaced by the gateway |
-| ⚪ | 1.3 | The `ollama` Compose service and volume, `scripts/setup-ollama-cache.sh` | No local model |
-| ⚪ | 1.3 | `LLM_PROVIDER`, `GUARD_PROVIDER`, `OLLAMA_*`; the `provider` field and dropdown | No choice left to make |
-
 ### A good reading order
 
-1. **`gateway.py`, `build_chain()`**: now just "the requested model, then the fallback chain".
-2. **`gateway.py`, `generate()`**: note the early, clear error when no key is set.
-3. **`test_no_local_models.py`**: the whole removal rule in 40 lines, with its allowlist.
-4. **`evals/run_eval.py`, `comparable_suites()`**: how a measurement admits it can no longer be compared.
-5. **The web `ChatModeSelector.tsx`**: shorter by one dropdown.
+1. **`tests/fakes.py`**: the whole fake in one screen; note `calls` and `prompts`.
+2. **`tests/test_agent_workflow.py`, `test_reviewer_sends_back_once_then_approves`**: a story told in roles.
+3. **`tests/conftest.py`, `_no_outside_network`**: how a belief became a check.
+4. **`evals/measure_limits.py`, `summarise()`**: how raw timings become a suggestion.
+5. **ADR 0011 and 0012**: the two decisions, with the signals that reopen them.
 
 ### What happens, in order, when a model call is made
 
-1. A route (chat, 🟪agent, guard) calls `generate(system_prompt, messages, model)`.
+1. A route (chat, agent, guard) calls `generate(system_prompt, messages, model)`; the agent routes wrap it in a function that is told the role.
 2. `build_chain()` returns the requested (or default) model followed by the `fallback_chain`; with no `OPENROUTER_API_KEY` it returns nothing and `generate()` raises the clear "set the key" error, which the route turns into a 503.
 3. `_router()` returns the cached 🟦LiteLLM Router for that chain.
 4. LiteLLM calls the first model and follows the failure policy (retry with growing waits, or bench the model and move on).
-5. Each failed attempt is logged with the request id, never a 🟪prompt or key.
+5. Each failed attempt is logged with the request id, never a prompt or key.
 6. The first answer becomes a `GenerationResult`, flagged if a fallback produced it.
+
+In tests, step 1's function is replaced by `FakeAgentModel`, and nothing below it runs.
 
 ## What this stage added to the tech stack (so far)
 
@@ -383,8 +424,11 @@ The full list and the stage each tool joins are in [tech-stack.md](../tech-stack
 - **Settings (configuration)**: the values that change how the program behaves without changing its code.
 - **Retry**: trying the same call again after a failure.
 - **Structured logging**: logs written as named fields, not free-form sentences.
+- **Percentile (p50, p90)**: the value below which that share of measurements fall; p90 is "nine runs in ten were this fast or faster".
 - **Timeout**: giving up on a call that takes too long.
+- **Seam**: a place where a real part can be swapped for a stand-in without changing the code around it.
 - **Transient error**: a failure that usually clears by itself (a timeout, a server hiccup).
+- **🟪SSE (Server-Sent Events)**: a way for a server to push text to the browser piece by piece over one open request.
 - **Twelve-factor app**: a set of habits for portable services; the first one here is "configuration lives in the environment".
 
 ## Check your understanding
@@ -467,6 +511,26 @@ It costs offline development of the chat path, the privacy of local 🟪inferenc
 <details><summary>16. What is the point of a test that fails when a word reappears?</summary>
 
 A removal only lasts if something enforces it. The test makes the rule visible and checkable, and its allowlist shows exactly which places are allowed to mention the removed thing and why.
+</details>
+
+<details><summary>17. Why does the fake model get the agent's role instead of reading the prompt?</summary>
+
+A test that finds the role by looking for words in the prompt breaks when someone rewords the prompt, and can quietly answer the wrong role. Passing the role makes the link explicit, so a test fails only when behaviour changes.
+</details>
+
+<details><summary>18. How do we know the tests really use no network?</summary>
+
+A check in `conftest.py` makes any connection to a non-local address fail with the host's name, unless the test is marked `network`. Without it, "offline" was only an assumption.
+</details>
+
+<details><summary>19. Why was 🟪streaming deferred, and what would reopen it?</summary>
+
+The output safety checks, the citations and the agent's structured result all need the complete reply, so streaming would weaken or fork them. It reopens if measured waits get long, if the guard can work on partial text, or if another client needs incremental output.
+</details>
+
+<details><summary>20. The agent limits were not changed in 1.4. Why not, and what is missing?</summary>
+
+The step limit is a safety rule about the workflow's shape; the time limit depends on the model and should follow measurements, not guesses. The measuring tool exists and is tested, but no hosted-model numbers were taken because no OpenRouter key was available. The ADR says so.
 </details>
 
 ## Further reading

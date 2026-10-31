@@ -1,25 +1,7 @@
 import pytest
 
 from app.agent import agents
-from app.llm.types import GenerationResult
-
-
-def _result(text: str) -> GenerationResult:
-    return GenerationResult(
-        content=text,
-        model="fake",
-        tokens_in=1,
-        tokens_out=1,
-        latency_ms=1,
-        estimated_cost=None,
-    )
-
-
-def _fake_llm(reply: str):
-    async def llm(_system, _messages):
-        return _result(reply)
-
-    return llm
+from tests.fakes import FakeAgentModel, constant_model
 
 
 def test_parse_json_handles_fences_and_prose():
@@ -49,23 +31,21 @@ def test_labels_in_evidence():
 
 @pytest.mark.asyncio
 async def test_analyst_includes_reviewer_feedback_on_revision():
-    seen = {}
-
-    async def llm(_system, messages):
-        seen["prompt"] = messages[0]["content"]
-        return _result('{"action": "Call them", "rationale": "r", "evidence": ["E1"]}')
-
+    llm = FakeAgentModel(
+        agents.Recommendation(action="Call them", rationale="r", evidence=["E1"]),
+        reviews=[agents.Review("approve", [])],
+    )
     rec, _ = await agents.run_analyst(llm, "E1 fact", reviewer_feedback=["cite evidence"])
-    assert "cite evidence" in seen["prompt"]
+    assert "cite evidence" in llm.prompts["analyst"][0]
     assert rec.evidence == ["E1"]
 
 
 @pytest.mark.asyncio
 async def test_drafter_falls_back_to_action_and_caps_length():
     rec = agents.Recommendation(action="Send pricing", rationale="r")
-    note, _ = await agents.run_task_drafter(_fake_llm("not json"), rec)
+    note, _ = await agents.run_task_drafter(constant_model("not json"), rec)
     assert note == "Send pricing"
     long_note, _ = await agents.run_task_drafter(
-        _fake_llm('{"task_note": "' + "a" * 900 + '"}'), rec
+        constant_model('{"task_note": "' + "a" * 900 + '"}'), rec
     )
     assert len(long_note) == agents.TASK_NOTE_MAX_CHARS

@@ -69,6 +69,10 @@ eval-baseline:
 eval-offline:
     uv run --project {{api}} python evals/run_eval.py --suites adversarial
 
+# time the agent workflow against the live API and suggest limits (needs the stack, seeded data and OPENROUTER_API_KEY); see docs/adr/0012-agent-limits.md
+measure-limits runs="3":
+    uv run --project {{api}} python evals/measure_limits.py --runs {{runs}} --out evals/baseline/limits.json
+
 # the older promptfoo suite (needs the stack and OPENROUTER_API_KEY for the judge model); see evals/README.md
 eval-promptfoo:
     cd evals && npx promptfoo@latest eval -c promptfooconfig.yaml

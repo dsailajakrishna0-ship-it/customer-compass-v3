@@ -19,8 +19,12 @@ from typing import Literal
 
 from app.llm.types import ChatMessage, GenerationResult
 
-# One LLM call: (system prompt, messages) -> result. The workflow binds the model.
-LlmCall = Callable[[str, list[ChatMessage]], Awaitable[GenerationResult]]
+# Which agent is asking. It travels with every model call, so logs, traces and test fakes can tell the
+# agents apart without looking at the wording of their prompts.
+AgentRole = Literal["analyst", "reviewer", "task_drafter"]
+
+# One LLM call: (agent role, system prompt, messages) -> result. The workflow binds the model.
+LlmCall = Callable[[AgentRole, str, list[ChatMessage]], Awaitable[GenerationResult]]
 
 TASK_NOTE_MAX_CHARS = 300
 
@@ -120,7 +124,7 @@ async def run_analyst(
             "\n\nThe Reviewer sent your last recommendation back. Fix these issues:\n- "
             + "\n- ".join(reviewer_feedback)
         )
-    result = await llm(ANALYST_SYSTEM_PROMPT, [{"role": "user", "content": prompt}])
+    result = await llm("analyst", ANALYST_SYSTEM_PROMPT, [{"role": "user", "content": prompt}])
     return parse_recommendation(result.content), result
 
 
@@ -132,7 +136,7 @@ async def run_reviewer(
         f"action: {recommendation.action}\nrationale: {recommendation.rationale}\n"
         f"cited evidence: {', '.join(recommendation.evidence) or 'none'}"
     )
-    result = await llm(REVIEWER_SYSTEM_PROMPT, [{"role": "user", "content": prompt}])
+    result = await llm("reviewer", REVIEWER_SYSTEM_PROMPT, [{"role": "user", "content": prompt}])
     return parse_review(result.content), result
 
 
@@ -140,7 +144,7 @@ async def run_task_drafter(
     llm: LlmCall, recommendation: Recommendation
 ) -> tuple[str, GenerationResult]:
     prompt = f"Approved recommendation:\naction: {recommendation.action}\nrationale: {recommendation.rationale}"
-    result = await llm(DRAFTER_SYSTEM_PROMPT, [{"role": "user", "content": prompt}])
+    result = await llm("task_drafter", DRAFTER_SYSTEM_PROMPT, [{"role": "user", "content": prompt}])
     data = parse_json_object(result.content)
     note = data.get("task_note") if data else None
     if not isinstance(note, str) or not note.strip():

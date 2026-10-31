@@ -18,6 +18,8 @@ One short file per decision, so the reason for a choice is not buried in a long 
 | [0008](0008-config-and-logging.md) | Settings, model catalogue and structured logging | Accepted |
 | [0009](0009-litellm-gateway.md) | The model gateway (LiteLLM) | Accepted |
 | [0010](0010-cloud-only-models.md) | Cloud-only chat models | Accepted |
+| [0011](0011-streaming-deferred.md) | Streaming answers (SSE): deferred | Accepted |
+| [0012](0012-agent-limits.md) | Agent limits (steps and time) | Accepted (numbers pending) |
 
 ## Template
 
