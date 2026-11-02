@@ -1,0 +1,21 @@
+flowchart TB
+    W["Web app"] --> CH["routes/chat.py: tools_chat<br/>L5 the tool-calling loop"]
+    W --> AR["routes/agent.py<br/>recommend / confirm"]
+    CH --> GEN["llm/provider.py: generate<br/>L1 one model call"]
+    GEN --> M(["Model: Ollama (local)<br/>or OpenRouter (cloud)"])
+    CH --> CL["mcp/client.py<br/>L4 MCP client"]
+    CL -->|"stdio: JSON-RPC<br/>a new subprocess per turn"| SV["mcp/server.py<br/>L3 MCP server: MCPServer, @server.tool"]
+    SV --> TL["mcp/tools.py<br/>L2 the four tool functions"]
+    TL --> DB[("Postgres + Qdrant")]
+    AR --> WF["agent/workflow.py + policies.py + trace.py<br/>L7 plain-code orchestration"]
+    WF --> AG["agent/agents.py<br/>L6 three agents: prompt + parser"]
+    AG --> GEN
+    WF -.->|"calls the tool functions directly,<br/>not through MCP"| TL
+    classDef llm fill:#fff3cd,stroke:#f9a825,color:#5d4037
+    classDef mcp fill:#e1f5fe,stroke:#0288d1,color:#01579b
+    classDef agent fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    classDef plain fill:#eceff1,stroke:#b0bec5,color:#455a64
+    class GEN,M llm
+    class CL,SV,TL mcp
+    class AG,WF agent
+    class W,CH,AR,DB plain

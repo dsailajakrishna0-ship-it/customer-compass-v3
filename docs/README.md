@@ -39,7 +39,7 @@ Start here. The repo is the V3 learning project, seeded from `customer-compass-v
 
 ## Learning record (V2 baseline)
 
-[v2-baseline/](v2-baseline/README.md) holds the frozen Stage 1–10 documents: how each part was hand-built in V2, with the goal, scope, acceptance criteria and honest limits. They are the "before" that V3 stages compare against.
+[v2-baseline/](v2-baseline/README.md) holds the frozen Stage 1–10 documents: how each part was hand-built in V2, with the goal, scope, acceptance criteria and honest limits. They are the "before" that V3 stages compare against. For the code level (what `MCPServer`, an agent module or a tool loop actually do), read the [V2 code walkthrough](v2-baseline/code-walkthrough.md).
 
 ## Conventions
 

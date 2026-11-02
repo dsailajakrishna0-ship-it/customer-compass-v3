@@ -11,6 +11,8 @@ These are the Stage 1–10 records from `customer-compass-v2` (tag `v2-final`). 
 
 Also here: [`testing-walkthrough.md`](testing-walkthrough.md), a guided Ask / Observe / Learn path through the ten stages.
 
+Also here, added later and *not* one of the frozen stage records: [`code-walkthrough.md`](code-walkthrough.md), a library-level explanation of how V2's MCP server and client, tool-calling loop, agents and workflow work inside (with real transcripts, and [scripts](walkthrough-scripts/README.md) to reproduce them). Read it before comparing the same ideas in Java or LangGraph.
+
 ## Reading notes (moved here from the top of individual stage documents)
 
 Stages 1–6 were written against the original Express API (`apps/api`, port 3001, `/api/...`). The code now has a FastAPI service (`apps/api-py`, port 8001, `/api/v1/...`). Paths, ports and curl examples inside those stages are kept as originally recorded.
