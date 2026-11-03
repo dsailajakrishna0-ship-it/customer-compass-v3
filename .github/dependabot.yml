@@ -15,9 +15,14 @@ updates:
     schedule: { interval: weekly }
     groups:
       npm-minor-patch: { update-types: [minor, patch] }
+  # Base images are moved on purpose, not by the bot (each of these failed CI when proposed):
+  # - python: litellm's fastuuid has no wheel for 3.15 yet, and the slim image has no compiler to build it
   - package-ecosystem: docker
     directory: /apps/api-py
     schedule: { interval: weekly }
+    ignore:
+      - dependency-name: python
+        update-types: ["version-update:semver-minor", "version-update:semver-major"]
   - package-ecosystem: docker
     directory: /apps/web
     schedule: { interval: weekly }
@@ -26,9 +31,19 @@ updates:
     schedule: { interval: weekly }
     groups:
       maven-minor-patch: { update-types: [minor, patch] }
+  # - eclipse-temurin: stay on the Java 21 LTS (24 is not LTS and its image failed the Trivy scan)
+  # - maven: its tag carries a JDK version, and the build JDK moves with the runtime JDK
   - package-ecosystem: docker
     directory: /services/mcp-java
     schedule: { interval: weekly }
+    ignore:
+      - dependency-name: eclipse-temurin
+        update-types: ["version-update:semver-major"]
+      - dependency-name: maven
+  # - postgres: 18 stores data in a new layout (a mount change plus pg_upgrade for existing volumes)
   - package-ecosystem: docker-compose
     directory: /
     schedule: { interval: weekly }
+    ignore:
+      - dependency-name: postgres
+        update-types: ["version-update:semver-major"]
