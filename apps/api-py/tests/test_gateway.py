@@ -115,7 +115,6 @@ def test_the_default_chain_is_the_default_model_then_the_fallback_chain(monkeypa
         "liquid/lfm-2.5-2.6b:free",
         "google/gemma-4-31b-it:free",
         "google/gemma-4-26b-a4b-it:free",
-        "poolside/laguna-xs-2.1:free",
     ]
     assert [r.litellm_model for r in plan.chain[:2]] == [
         "openrouter/liquid/lfm-2.5-2.6b:free",
@@ -136,7 +135,7 @@ def test_a_chosen_model_goes_first_and_is_not_repeated(monkeypatch):
 def test_a_model_outside_the_chain_can_still_be_chosen(monkeypatch):
     monkeypatch.setenv("OPENROUTER_API_KEY", "k")
     names = [r.model for r in gateway.build_chain("someone/new-model:free").chain]
-    assert names[0] == "someone/new-model:free" and len(names) == 4
+    assert names[0] == "someone/new-model:free" and len(names) == 3
 
 
 def test_the_environment_default_model_wins_over_models_yaml(monkeypatch):
@@ -262,6 +261,23 @@ async def test_an_empty_answer_is_an_error_not_a_blank_reply(monkeypatch):
     use_models(monkeypatch, {"a:free": [""]})
     with pytest.raises(LlmUnavailableError, match="empty response"):
         await ask()
+
+
+@pytest.mark.asyncio
+async def test_an_empty_answer_falls_back_to_the_next_model(monkeypatch):
+    use_models(monkeypatch, {"a:free": [""], "b:free": ["from b"], "c:free": ["unused"]})
+    result = await ask()
+    assert result.content == "from b" and result.model == "b:free"
+    assert result.fallback_used and result.fallback_from_model == "a:free"
+    assert Scripted.calls == ["a:free", "b:free"], "c is never called"
+
+
+@pytest.mark.asyncio
+async def test_empty_answers_all_the_way_down_the_chain_end_in_one_clear_error(monkeypatch):
+    use_models(monkeypatch, {"a:free": [""], "b:free": [""]})
+    with pytest.raises(LlmUnavailableError, match="empty response"):
+        await ask()
+    assert Scripted.calls == ["a:free", "b:free"]
 
 
 @pytest.mark.asyncio

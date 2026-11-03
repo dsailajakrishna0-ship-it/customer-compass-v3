@@ -200,39 +200,56 @@ async def generate(
     plan = build_chain(model)
     if not plan.chain:
         raise LlmUnavailableError(NO_MODEL_MESSAGE)
-    router = _router(
-        plan.chain,
-        settings.llm_timeout_seconds,
-        settings.llm_max_retries,
-        settings.llm_retry_min_seconds,
-        settings.llm_cooldown_seconds,
-    )
     payload: list[Any] = [{"role": "system", "content": system_prompt}, *messages]
+    extra: dict[str, Any] = {"tools": tools, "tool_choice": tool_choice} if tools else {}
     started = time.perf_counter()
-    try:
-        extra: dict[str, Any] = {"tools": tools, "tool_choice": tool_choice} if tools else {}
-        response = await router.acompletion(
-            model="r0",
-            messages=payload,
-            temperature=TEMPERATURE,
-            max_tokens=MAX_RESPONSE_TOKENS,
-            **extra,
+    first = 0  # where in the chain to start: moves past a model that answered with nothing
+    while True:
+        remaining = plan.chain[first:]
+        router = _router(
+            remaining,
+            settings.llm_timeout_seconds,
+            settings.llm_max_retries,
+            settings.llm_retry_min_seconds,
+            settings.llm_cooldown_seconds,
         )
-    except Exception as error:  # noqa: BLE001 - any failure of the whole chain becomes one clear error
+        try:
+            response = await router.acompletion(
+                model="r0",
+                messages=payload,
+                temperature=TEMPERATURE,
+                max_tokens=MAX_RESPONSE_TOKENS,
+                **extra,
+            )
+        except Exception as error:  # noqa: BLE001 - any failure of the whole chain becomes one clear error
+            log.warning(
+                "llm_chain_failed", tried=[r.model for r in remaining], error=type(error).__name__
+            )
+            raise LlmUnavailableError(
+                _friendly_failure(Plan(remaining, plan.requested_model), error)
+            ) from error
+        message = response.choices[0].message
+        content = message.content or ""
+        tool_calls = _parse_tool_calls(message)
+        if content or tool_calls:
+            break
+        # A model can answer with no text and no tool call (a thinking model may spend every
+        # allowed token on its reasoning, finish_reason "length"). That is a failed attempt, so
+        # the next model in the chain gets the question instead of the user getting a blank.
+        position = first + _answering_index(response, len(remaining))
         log.warning(
-            "llm_chain_failed", tried=[r.model for r in plan.chain], error=type(error).__name__
+            "llm_empty_response",
+            model=plan.chain[position].model,
+            finish_reason=getattr(response.choices[0], "finish_reason", None),
         )
-        raise LlmUnavailableError(_friendly_failure(plan, error)) from error
+        first = position + 1
+        if first >= len(plan.chain):
+            raise LlmUnavailableError(
+                "The model returned an empty response. Try again or pick a different model."
+            )
     latency_ms = round((time.perf_counter() - started) * 1000)
-
-    message = response.choices[0].message
-    content = message.content or ""
-    tool_calls = _parse_tool_calls(message)
-    if not content and not tool_calls:
-        raise LlmUnavailableError(
-            "The model returned an empty response. Try again or pick a different model."
-        )
-    answered = plan.chain[_answering_index(response, len(plan.chain))]
+    chain = plan.chain[first:]
+    answered = chain[_answering_index(response, len(chain))]
     fallback_used = answered.model != plan.requested_model
     usage = getattr(response, "usage", None)
     hidden = getattr(response, "_hidden_params", None) or {}
