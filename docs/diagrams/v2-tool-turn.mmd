@@ -1,0 +1,23 @@
+sequenceDiagram
+    autonumber
+    participant U as User
+    participant R as tools_chat (the loop)
+    participant C as MCP client
+    participant S as MCP server (subprocess)
+    participant M as Model
+    U->>R: "What are Acme's open deals?"
+    R->>C: start session
+    C->>S: spawn python -m app.mcp.server
+    C->>S: initialize, then tools/list
+    S-->>C: the four tools and their schemas
+    C-->>R: tool list (names, descriptions, arguments)
+    R->>M: system prompt that lists the tools + the question
+    M-->>R: text with a fenced tool_call block
+    R->>R: regex finds the block, json.loads it
+    R->>C: call get_open_deals(company_name="Acme")
+    C->>S: tools/call
+    S-->>C: result as a JSON text block
+    R->>M: conversation + "Tool result ..." in untrusted_context tags
+    M-->>R: plain-text final answer
+    R-->>U: answer + toolsUsed
+    C->>S: close, and the subprocess exits

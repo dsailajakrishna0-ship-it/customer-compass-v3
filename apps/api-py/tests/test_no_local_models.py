@@ -18,6 +18,7 @@ ALLOWED = (
     "docs/tech-stack.md",  # records what V3 removed, plus the V2 stage history
     "docs/stages/01-model-layer.md",  # the guide that teaches the removal
     "docs/diagrams/stage1-",  # that guide's diagrams
+    "docs/diagrams/v2-",  # diagrams of the frozen V2 code (they show the local model it used)
     "docs/ai-terms.",  # the glossary lists it as removed
     "evals/baseline/",  # the saved V2 baseline recorded which model it used
     "evals/run_eval.py",  # recognises old baselines taken with a local model
