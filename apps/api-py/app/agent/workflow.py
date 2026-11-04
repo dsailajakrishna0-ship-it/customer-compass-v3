@@ -1,21 +1,30 @@
-"""Stage 10 workflow: the code-controlled "Account Follow-up Recommender".
+"""Stage 10 workflow as a LangGraph graph: the "Account Follow-up Recommender".
 
-This module (plain code, no LLM) decides the order of steps:
+The same steps as before (Stage 3.2a only changes how they are wired, not what they do):
 
-  find company -> gather evidence (3 steps) -> Analyst agent -> Reviewer agent
-  -> [Analyst revises once if sent back] -> Task Drafter agent
-  -> stop and wait for the user to confirm
+  classify -> evidence -> documents -> analyze <-> review -> draft -> human_approval
 
-It composes existing capabilities instead of re-implementing them: the Stage 9
-tools for CRM facts and document search, the Stage 5 CRM queries, and the
-Stage 8 guardrails. It never creates a task; that happens only in the
-separate confirm step (see routes/agent.py).
+Each box is a node: a plain async function that reads the run's state and returns the pieces it
+changed. The edges, including the one loop (review can send analyze back once), are declared in
+`build_graph()`, so the shape of the agent is visible in one place instead of inside a `while`.
+
+What stays in code, never in a prompt: the step and time limits (`RunBudget`), the guardrails and
+the rule that nothing is written here. Creating a task happens only in the separate confirm
+step (routes/agent.py). The graph ends at `human_approval` and does not write.
+
+State holds plain data only (dicts, lists, strings). Anything process-local that must survive an
+exception, such as the trace and the step budget, lives in `RunContext` instead, so a run that is
+stopped by a limit still reports every step it took.
 """
 
 import asyncio
 import logging
 import time
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
+from typing import Any, TypedDict
+
+from langchain_core.runnables import RunnableConfig
+from langgraph.graph import END, START, StateGraph
 
 from app.agent import agents
 from app.agent.policies import AgentLimits, BudgetExceeded, RunBudget
@@ -38,39 +47,138 @@ from app.mcp.tools import get_company_summary_tool, search_documents_tool
 logger = logging.getLogger("app.agent.workflow")
 
 MAX_DEALS, MAX_INTERACTIONS, MAX_DOCS = 3, 5, 3
+RECURSION_LIMIT = 30  # LangGraph's own backstop; a normal run takes 9 steps at most
+
+
+class AgentState(TypedDict, total=False):
+    """Everything the graph remembers between nodes. Plain data only."""
+
+    message: str
+    question_finding: dict  # the guarded request: {neutralized_text, matched_patterns, ...}
+    company: dict | None  # {"id", "name"}; None when the request names no CRM company
+    company_names: list[str]  # every CRM company, for the cross-customer output scan
+    evidence: list[dict]  # [{"label": "E1", "source": ..., "text": ...}, ...]
+    findings: list[dict]  # guard findings on stored text: {"location", ...GuardFinding fields}
+    recommendation: dict  # {"action", "rationale", "evidence", "structured"}
+    review: dict  # {"verdict", "reasons"}
+    feedback: list[str] | None  # the reviewer's reasons, handed back to the analyst
+    revisions: int
+    task_note: str
+    output_findings: dict  # {"action", "rationale", "note"} each a GuardFinding as a dict
+    flagged: dict  # {"flagged": bool, "reasons": [...]}
+    status: str  # "completed" or "company_not_found"
 
 
 @dataclass
-class EvidenceBundle:
-    text: str
-    items: list[dict] = field(default_factory=list)
-    findings: list[tuple[GuardFinding, str]] = field(default_factory=list)
+class RunContext:
+    """Process-local helpers for one run. Not part of the state: they hold the model call, the
+    limits and the trace, none of which can be saved, and the trace must outlive an exception."""
+
+    llm: agents.LlmCall
+    limits: AgentLimits
+    budget: RunBudget
+    trace: Trace = field(default_factory=Trace)
+    llm_calls: list[dict] = field(default_factory=list)
+
+    def note_call(self, agent: str, result) -> None:
+        self.llm_calls.append(
+            {
+                "agent": agent,
+                "model": result.model,
+                "latencyMs": result.latency_ms,
+                "fallbackUsed": result.fallback_used,
+            }
+        )
 
 
-def _add_item(bundle: EvidenceBundle, source: str, text: str, location: str, scan: bool) -> None:
-    """Adds one labelled evidence item (E1, E2, ...). Items that came from
-    stored text are scanned and neutralized before any agent sees them."""
+def _ctx(config: RunnableConfig) -> RunContext:
+    return config["configurable"]["ctx"]
+
+
+def _finding_dict(finding: GuardFinding, location: str | None = None) -> dict:
+    data = asdict(finding)
+    if location is not None:
+        data["location"] = location
+    return data
+
+
+def _finding(data: dict) -> GuardFinding:
+    return GuardFinding(
+        neutralized_text=data["neutralized_text"],
+        matched_patterns=list(data["matched_patterns"]),
+        matched_snippets=list(data["matched_snippets"]),
+    )
+
+
+def _add_item(
+    items: list[dict], findings: list[dict], source: str, text: str, location: str, scan: bool
+) -> None:
+    """Adds one labelled evidence item (E1, E2, ...). Items that came from stored text are
+    scanned and neutralized before any agent sees them."""
     if scan:
         finding = scan_and_neutralize(text)
         text = finding.neutralized_text
         if finding.matched_patterns:
-            bundle.findings.append((finding, location))
-    label = f"E{len(bundle.items) + 1}"
-    bundle.items.append({"label": label, "source": source, "text": text})
-    bundle.text += f"{label} [{source}] {text}\n"
+            findings.append(_finding_dict(finding, location))
+    items.append({"label": f"E{len(items) + 1}", "source": source, "text": text})
 
 
-async def _gather_evidence(
-    company_name: str, company_id: int, budget: RunBudget, trace: Trace
-) -> EvidenceBundle:
-    bundle = EvidenceBundle(text="")
+def _evidence_text(items: list[dict]) -> str:
+    lines = "".join(f"{i['label']} [{i['source']}] {i['text']}\n" for i in items)
+    return UNTRUSTED_CONTEXT_INSTRUCTION + "\n" + wrap_untrusted_context(lines.strip())
 
-    budget.spend()
+
+# ------------------------------------------------------------------------------------ nodes
+
+
+async def classify(state: AgentState, config: RunnableConfig) -> AgentState:
+    """Guard the request and find which CRM company it is about."""
+    ctx = _ctx(config)
     started = time.monotonic()
-    summary = await get_company_summary_tool(company_name)
+    question_finding = await guard_input(state["message"])
+    companies = await list_companies()
+    company = find_mentioned_company(question_finding.neutralized_text, companies)
+    ctx.trace.record(
+        "code",
+        "identify_company",
+        state["message"],
+        company.name if company else "no company found",
+        started,
+        status="ok" if company else "error",
+    )
+    return {
+        "question_finding": _finding_dict(question_finding),
+        "company": {"id": company.id, "name": company.name} if company else None,
+        "company_names": [c.name for c in companies],
+        "status": "completed" if company else "company_not_found",
+    }
+
+
+def _company(state: AgentState) -> dict:
+    """The company the run is about. Every node after `classify` runs only when one was found."""
+    company = state["company"]
+    assert company is not None
+    return company
+
+
+def after_classify(state: AgentState) -> str:
+    return "evidence" if state["company"] else END
+
+
+async def evidence(state: AgentState, config: RunnableConfig) -> AgentState:
+    """Evidence steps 1 and 2: CRM facts and deals (a tool), then recent interactions (code)."""
+    ctx = _ctx(config)
+    name, company_id = _company(state)["name"], _company(state)["id"]
+    items: list[dict] = []
+    findings: list[dict] = []
+
+    ctx.budget.spend()
+    started = time.monotonic()
+    summary = await get_company_summary_tool(name)
     company = summary.get("company", {})
     _add_item(
-        bundle,
+        items,
+        findings,
         "CRM facts",
         f"{company.get('name')}: industry {company.get('industry')}, status {company.get('relationshipStatus')}, "
         f"{company.get('wonDealsCount')} won / {company.get('lostDealsCount')} lost deals.",
@@ -79,64 +187,206 @@ async def _gather_evidence(
     )
     for deal in company.get("openDeals", [])[:MAX_DEALS]:
         _add_item(
-            bundle,
+            items,
+            findings,
             "open deal",
             f"{deal['name']}, {deal['amount']}, expected close {deal['expectedCloseDate']}.",
             "tool: get_company_summary",
             scan=False,
         )
-    trace.record(
-        "tool",
-        "get_company_summary",
-        company_name,
-        f"{len(bundle.items)} evidence item(s)",
-        started,
-    )
+    ctx.trace.record("tool", "get_company_summary", name, f"{len(items)} evidence item(s)", started)
 
-    budget.spend()
+    ctx.budget.spend()
     started = time.monotonic()
     interactions = await get_recent_interactions(company_id, MAX_INTERACTIONS)
-    before = len(bundle.items)
+    before = len(items)
     for item in interactions:
         _add_item(
-            bundle,
+            items,
+            findings,
             f"{item.interaction_type} {item.occurred_at[:10]}",
             f"{item.subject}: {item.summary}",
             f"interaction: {item.subject}",
             scan=True,
         )
-    trace.record(
-        "code",
-        "get_recent_interactions",
-        company_name,
-        f"{len(bundle.items) - before} interaction(s)",
-        started,
+    ctx.trace.record(
+        "code", "get_recent_interactions", name, f"{len(items) - before} interaction(s)", started
     )
+    return {"evidence": items, "findings": findings}
 
-    budget.spend()
+
+async def documents(state: AgentState, config: RunnableConfig) -> AgentState:
+    """Evidence step 3: search the ingested documents for this company."""
+    ctx = _ctx(config)
+    name = _company(state)["name"]
+    items = list(state["evidence"])
+    findings = list(state["findings"])
+
+    ctx.budget.spend()
     started = time.monotonic()
-    docs = await search_documents_tool("recent history, requests and open issues", company_name)
-    before = len(bundle.items)
+    docs = await search_documents_tool("recent history, requests and open issues", name)
+    before = len(items)
     for doc in docs.get("results", [])[:MAX_DOCS]:
         _add_item(
-            bundle,
+            items,
+            findings,
             f"document: {doc['title']}",
             doc["content"],
             f"document: {doc['title']}",
             scan=True,
         )
-    trace.record(
-        "tool",
-        "search_documents",
-        company_name,
-        f"{len(bundle.items) - before} document chunk(s)",
+    ctx.trace.record(
+        "tool", "search_documents", name, f"{len(items) - before} document chunk(s)", started
+    )
+    return {"evidence": items, "findings": findings}
+
+
+async def analyze(state: AgentState, config: RunnableConfig) -> AgentState:
+    """The Analyst agent proposes a next action (again, with the reviewer's reasons, on a revision)."""
+    ctx = _ctx(config)
+    revisions = state.get("revisions", 0)
+    ctx.budget.spend()
+    started = time.monotonic()
+    recommendation, result = await agents.run_analyst(
+        ctx.llm, _evidence_text(state["evidence"]), state.get("feedback")
+    )
+    ctx.note_call("analyst", result)
+    ctx.trace.record(
+        "agent",
+        "Analyst agent" + (" (revision)" if revisions else ""),
+        f"{len(state['evidence'])} evidence item(s)",
+        recommendation.action,
         started,
     )
-    return bundle
+    return {"recommendation": asdict(recommendation)}
 
 
-def _evidence_for_agents(bundle: EvidenceBundle) -> str:
-    return UNTRUSTED_CONTEXT_INSTRUCTION + "\n" + wrap_untrusted_context(bundle.text.strip())
+async def review(state: AgentState, config: RunnableConfig) -> AgentState:
+    """The Reviewer agent checks the proposal. Code adds two rules no model can waive."""
+    ctx = _ctx(config)
+    recommendation = agents.Recommendation(**state["recommendation"])
+    labels = {item["label"] for item in state["evidence"]}
+    ctx.budget.spend()
+    started = time.monotonic()
+    verdict, result = await agents.run_reviewer(
+        ctx.llm, _evidence_text(state["evidence"]), recommendation
+    )
+    ctx.note_call("reviewer", result)
+    unknown = agents.unknown_citations(recommendation, labels)
+    if unknown:
+        verdict = agents.Review(
+            "revise",
+            [*verdict.reasons, f"Cited evidence that does not exist: {', '.join(unknown)}"],
+        )
+    elif not recommendation.evidence:
+        verdict = agents.Review("revise", [*verdict.reasons, "No evidence was cited."])
+    ctx.trace.record(
+        "agent",
+        "Reviewer agent",
+        recommendation.action,
+        f"{verdict.verdict}: {'; '.join(verdict.reasons)}",
+        started,
+    )
+    return {"review": asdict(verdict)}
+
+
+def after_review(state: AgentState, config: RunnableConfig) -> str:
+    """Approved, or out of revisions: go on. Otherwise send the analyst back with the reasons."""
+    if state["review"]["verdict"] == "approve":
+        return "draft"
+    if state.get("revisions", 0) >= _ctx(config).limits.max_revisions:
+        return "draft"
+    return "revise"
+
+
+async def prepare_revision(state: AgentState) -> AgentState:
+    return {"revisions": state.get("revisions", 0) + 1, "feedback": state["review"]["reasons"]}
+
+
+async def draft(state: AgentState, config: RunnableConfig) -> AgentState:
+    """The Task Drafter writes the follow-up note, then the output guard scans every text the user
+    will see (same cross-customer and leak scan the chat routes use)."""
+    ctx = _ctx(config)
+    recommendation = agents.Recommendation(**state["recommendation"])
+    company_name = _company(state)["name"]
+    ctx.budget.spend()
+    started = time.monotonic()
+    task_note, result = await agents.run_task_drafter(ctx.llm, recommendation)
+    ctx.note_call("task_drafter", result)
+    ctx.trace.record("agent", "Task Drafter agent", recommendation.action, task_note, started)
+
+    names = state["company_names"]
+    action = scan_output(recommendation.action, company_name, names)
+    rationale = scan_output(recommendation.rationale, company_name, names)
+    note = scan_output(task_note, company_name, names)
+    report = build_report(
+        (_finding(state["question_finding"]), "user_input"),
+        *[(_finding(f), f["location"]) for f in state["findings"]],
+    )
+    report = add_findings(
+        report,
+        (action, "output: recommendation"),
+        (rationale, "output: rationale"),
+        (note, "output: task note"),
+    )
+    if report.flagged:
+        logger.warning("prompt_guard_flagged agent %s", report.reasons)
+        await record_events("agent", report.events)
+    return {
+        "task_note": task_note,
+        "output_findings": {
+            "action": _finding_dict(action),
+            "rationale": _finding_dict(rationale),
+            "note": _finding_dict(note),
+        },
+        "flagged": {"flagged": report.flagged, "reasons": report.reasons},
+    }
+
+
+async def human_approval(state: AgentState, config: RunnableConfig) -> AgentState:
+    """The gate. In 3.2a the graph simply ends here and the user confirms through the separate
+    /agent/confirm endpoint; nothing is written. (3.2b turns this into a real pause.)"""
+    note = _finding(state["output_findings"]["note"])
+    _ctx(config).trace.record(
+        "gate",
+        "awaiting_user_confirmation",
+        "task not created",
+        f"proposed: {note.neutralized_text}",
+        time.monotonic(),
+    )
+    return {}
+
+
+def build_graph():
+    """The agent's shape, in one place. Compiled once and reused: it holds no per-run state."""
+    graph = StateGraph(AgentState)
+    graph.add_node("classify", classify)
+    graph.add_node("evidence", evidence)
+    graph.add_node("documents", documents)
+    graph.add_node("analyze", analyze)
+    graph.add_node("review", review)
+    graph.add_node("prepare_revision", prepare_revision)
+    graph.add_node("draft", draft)
+    graph.add_node("human_approval", human_approval)
+
+    graph.add_edge(START, "classify")
+    graph.add_conditional_edges("classify", after_classify, ["evidence", END])
+    graph.add_edge("evidence", "documents")
+    graph.add_edge("documents", "analyze")
+    graph.add_edge("analyze", "review")
+    graph.add_conditional_edges(
+        "review", after_review, {"draft": "draft", "revise": "prepare_revision"}
+    )
+    graph.add_edge("prepare_revision", "analyze")
+    graph.add_edge("draft", "human_approval")
+    graph.add_edge("human_approval", END)
+    return graph.compile()
+
+
+_GRAPH = build_graph()
+
+
+# ------------------------------------------------------------------------------ entry point
 
 
 def _response(status: str, trace: Trace, **extra) -> dict:
@@ -147,144 +397,46 @@ async def run_account_review(
     message: str, llm: agents.LlmCall, limits: AgentLimits | None = None
 ) -> dict:
     limits = limits or AgentLimits.from_env()
-    trace = Trace()
+    ctx = RunContext(llm=llm, limits=limits, budget=RunBudget(limits))
     try:
         async with asyncio.timeout(limits.timeout_seconds):
-            return await _run(message, llm, limits, trace)
+            final = await _GRAPH.ainvoke(
+                {"message": message},
+                config={"configurable": {"ctx": ctx}, "recursion_limit": RECURSION_LIMIT},
+            )
     except TimeoutError:
         return _response(
-            "timed_out", trace, message=f"Stopped after {limits.timeout_seconds:.0f}s."
+            "timed_out", ctx.trace, message=f"Stopped after {limits.timeout_seconds:.0f}s."
         )
     except BudgetExceeded as exc:
-        return _response("budget_exceeded", trace, message=str(exc))
+        return _response("budget_exceeded", ctx.trace, message=str(exc))
+    return _build_result(final, ctx)
 
 
-async def _run(message: str, llm: agents.LlmCall, limits: AgentLimits, trace: Trace) -> dict:
-    budget = RunBudget(limits)
-    started = time.monotonic()
-    question_finding = await guard_input(message)
-    companies = await list_companies()
-    company = find_mentioned_company(question_finding.neutralized_text, companies)
-    trace.record(
-        "code",
-        "identify_company",
-        message,
-        company.name if company else "no company found",
-        started,
-        status="ok" if company else "error",
-    )
-    if company is None:
+def _build_result(final: dict[str, Any], ctx: RunContext) -> dict:
+    if final["status"] == "company_not_found":
         return _response(
-            "company_not_found", trace, message="Name a company from the CRM to analyze."
+            "company_not_found", ctx.trace, message="Name a company from the CRM to analyze."
         )
-
-    bundle = await _gather_evidence(company.name, company.id, budget, trace)
-    evidence_text = _evidence_for_agents(bundle)
-    labels = {item["label"] for item in bundle.items}
-    llm_calls: list[dict] = []
-
-    def note_call(agent: str, result) -> None:
-        llm_calls.append(
-            {
-                "agent": agent,
-                "model": result.model,
-                "latencyMs": result.latency_ms,
-                "fallbackUsed": result.fallback_used,
-            }
-        )
-
-    feedback: list[str] | None = None
-    revisions = 0
-    while True:
-        budget.spend()
-        started = time.monotonic()
-        recommendation, result = await agents.run_analyst(llm, evidence_text, feedback)
-        note_call("analyst", result)
-        trace.record(
-            "agent",
-            "Analyst agent" + (" (revision)" if revisions else ""),
-            f"{len(bundle.items)} evidence item(s)",
-            recommendation.action,
-            started,
-        )
-
-        budget.spend()
-        started = time.monotonic()
-        review, result = await agents.run_reviewer(llm, evidence_text, recommendation)
-        note_call("reviewer", result)
-        unknown = agents.unknown_citations(recommendation, labels)
-        if unknown:
-            review = agents.Review(
-                "revise",
-                [*review.reasons, f"Cited evidence that does not exist: {', '.join(unknown)}"],
-            )
-        elif not recommendation.evidence:
-            review = agents.Review("revise", [*review.reasons, "No evidence was cited."])
-        trace.record(
-            "agent",
-            "Reviewer agent",
-            recommendation.action,
-            f"{review.verdict}: {'; '.join(review.reasons)}",
-            started,
-        )
-
-        if review.verdict == "approve":
-            break
-        if revisions >= limits.max_revisions:
-            break
-        revisions += 1
-        feedback = review.reasons
-
-    approved = review.verdict == "approve"
-    budget.spend()
-    started = time.monotonic()
-    task_note, result = await agents.run_task_drafter(llm, recommendation)
-    note_call("task_drafter", result)
-    trace.record("agent", "Task Drafter agent", recommendation.action, task_note, started)
-
-    # Output guard: same cross-customer / leak scan the chat routes use
-    names = [c.name for c in companies]
-    action_finding = scan_output(recommendation.action, company.name, names)
-    rationale_finding = scan_output(recommendation.rationale, company.name, names)
-    note_finding = scan_output(task_note, company.name, names)
-    report = build_report(
-        (question_finding, "user_input"),
-        *bundle.findings,
-    )
-    report = add_findings(
-        report,
-        (action_finding, "output: recommendation"),
-        (rationale_finding, "output: rationale"),
-        (note_finding, "output: task note"),
-    )
-    if report.flagged:
-        logger.warning("prompt_guard_flagged agent %s", report.reasons)
-        await record_events("agent", report.events)
-
-    trace.record(
-        "gate",
-        "awaiting_user_confirmation",
-        "task not created",
-        f"proposed: {note_finding.neutralized_text}",
-        time.monotonic(),
-    )
+    company = final["company"]
+    guarded = final["output_findings"]
     return _response(
         "completed",
-        trace,
-        company={"id": company.id, "name": company.name},
-        evidence=bundle.items,
+        ctx.trace,
+        company={"id": company["id"], "name": company["name"]},
+        evidence=final["evidence"],
         recommendation={
-            "action": action_finding.neutralized_text,
-            "rationale": rationale_finding.neutralized_text,
-            "evidence": recommendation.evidence,
+            "action": guarded["action"]["neutralized_text"],
+            "rationale": guarded["rationale"]["neutralized_text"],
+            "evidence": final["recommendation"]["evidence"],
         },
         review={
-            "approved": approved,
-            "verdict": review.verdict,
-            "reasons": review.reasons,
-            "revisions": revisions,
+            "approved": final["review"]["verdict"] == "approve",
+            "verdict": final["review"]["verdict"],
+            "reasons": final["review"]["reasons"],
+            "revisions": final.get("revisions", 0),
         },
-        proposedTask={"companyName": company.name, "note": note_finding.neutralized_text},
-        guardrail={"flagged": report.flagged, "reasons": report.reasons},
-        llmCalls=llm_calls,
+        proposedTask={"companyName": company["name"], "note": guarded["note"]["neutralized_text"]},
+        guardrail=final["flagged"],
+        llmCalls=ctx.llm_calls,
     )

@@ -531,6 +531,26 @@ Mode **Account follow-up agent**. One run takes up to a minute or two on free mo
 
 Reading order: `apps/api-py/tests/README.md`, then `tests/contract/conftest.py` (the two seams and nothing else faked), then the *names* in `tests/contract/test_agent_recommend.py`, then `tests/test_contract_boundary.py`, then `make_llm()` in `app/routes/agent.py`. The [Stage 3 guide](stages/03-langgraph-port.md) explains each step.
 
+### Stage 3.2a: the agent is now a LangGraph graph (same behaviour)
+
+The account follow-up agent's inside was rebuilt as a graph of nodes. From the outside nothing should change, and that is what you check. Pause and resume across a restart arrive in 3.2b.
+
+```bash
+git pull
+docker compose up -d --build api-py            # the agent code changed (needs your keys for a real run)
+cd apps/api-py && uv run pytest tests/contract tests/agent_internals -q    # 55 passed (needs the db container: just up, or just test-contract)
+```
+
+| # | Do | Expect | What it shows |
+|---|---|---|---|
+| 1 | `just test-contract` | `26 passed`, the same test file as in 3.1, not edited | The graph keeps the promises of the old code |
+| 2 | `just test-internal` | Passes, including two new graph tests | The graph has the eight nodes and one loop; its state is plain data |
+| 3 | Web app, **Account follow-up agent**: `Analyze Acme Fabrication and recommend a next action` (needs both keys) | The same result as before: recommendation, "Reviewer agent approved", evidence E1.., a trace of 8 steps ending in `awaiting_user_confirmation`, Confirm and Decline | Same screen, new engine |
+| 4 | Same mode: `What is Acme Fabrication's industry?` and `Analyze Globex and recommend a next action` | Sent back to the CRM copilot; `company_not_found` with one trace step | Early exits still work |
+| 5 | Open `docs/img/diagrams/stage3-agent-graph.png` next to `app/agent/workflow.py` | Each box is one function; `build_graph()` lists the arrows | The shape is written down in one place |
+
+**Without a key:** steps 1, 2, 4 (the `curl` versions are in the 3.1 section above) and 5. **With a key:** step 3. Free models rate-limit and sometimes answer slowly; "chain unavailable" for a few minutes is normal.
+
 ### Fix: an empty model reply no longer stops the agent (found testing 3.1 with a real key)
 
 The agent makes several model calls per run. A free *thinking* model can spend all 700 allowed tokens on its reasoning and return no text (`finish_reason: length`). Before, that ended the run with "The model returned an empty response." Now the gateway treats it as a failed attempt and asks the next model in the chain. The same PR removes `poolside/laguna-xs-2.1:free` from `models.yaml` (OpenRouter no longer lists it, so every chain paid a 404).
