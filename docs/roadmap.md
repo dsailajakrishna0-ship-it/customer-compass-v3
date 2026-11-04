@@ -46,6 +46,7 @@ repo findings (R1–R12) and doc findings (D1–D9) are cited below. Decisions a
 | 7 | 🟪Agents and supervisor | Planned |
 | 8 | Product features | Planned |
 | 9 | Close-out | Planned |
+| After 9 | Split into two repos, Java and Python | Idea, not scheduled |
 
 ![The ten roadmap stages in order: 0 Foundation (current), then 1 Model layer, 2 Tools and MCP, 3 LangGraph port, 4 Retrieval upgrade, 5 Observability and evals, 6 CRM modules and auth, 7 Agents and supervisor, 8 Product features, 9 Close-out.](img/diagrams/roadmap-stage-flow.png)
 
@@ -130,6 +131,27 @@ repo findings (R1–R12) and doc findings (D1–D9) are cited below. Decisions a
 | --- | --- | --- |
 | **9.1 Concepts section** | Assemble [`concepts/`](concepts/README.md) from the stage guides: the **final architecture overview** (system context, containers, main flows; refreshes the V2-era [`architecture.md`](architecture.md)), concept map, A-to-Z glossary, questions and answers by level, "which stage taught what" table, reading paths for a learner, a teammate new to AI and a wider audience. | Every answer links to the guide that proves it; numbers re-checked against the final baseline. |
 | **9.2 Close-out** | Final docs pass, V3 retrospective, V2-vs-V3 comparison table (quality, latency, tokens, lines of code), tag `v3.0.0`. | Tag `v3.0.0` produces the release; no stale status anywhere. |
+
+## After V3 — Split into two repos (idea, not scheduled)
+
+When V3 is complete (tag `v3.0.0`), this repository stays as it is. The same application is then built again as two **new** repositories, so the Java and Python ways of doing each job can be compared side by side:
+
+| Repo | What it holds | Frameworks |
+| --- | --- | --- |
+| **Java** | The whole application on Spring Boot | Both ways, as in the [manual-versus-framework comparison](v2-baseline/code-walkthrough.md): hand-written on plain Spring Boot, and with a framework (🟦Spring AI, LangChain4j, LangGraph4j) |
+| **Python** | The whole application in Python | The current stack: FastAPI, 🟦LangGraph, 🟦LiteLLM |
+
+**What already makes this possible:** the tool contract (`contracts/mcp-tools.json`), the API-contract tests (`apps/api-py/tests/contract/`, which must pass unchanged on any implementation), the sample data and the 🟪eval 🟪golden set. The new repos copy these as their shared "must behave the same" spec.
+
+**To decide when it is planned** (add anything missed):
+
+- Repository names, and which git identity owns them.
+- How much of the web app is shared or copied.
+- Which database schema is owned by whom ([the Stage 6 question](#stage-6--new-crm-modules-and-auth)).
+- Whether the Java repo runs the 🟪agent graph with LangGraph4j, with `langchain4j-agentic`, or hand-written, and how each is compared fairly.
+- What the comparison measures (lines of code, latency, tokens, quality on the same evals).
+
+**Exit criteria (draft):** each repo starts from a clean `docker compose up`, passes the same contract tests, and has a short guide that says what it does differently from the other.
 
 ## Risks
 
