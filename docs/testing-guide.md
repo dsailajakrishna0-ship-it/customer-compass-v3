@@ -531,6 +531,23 @@ Mode **Account follow-up agent**. One run takes up to a minute or two on free mo
 
 Reading order: `apps/api-py/tests/README.md`, then `tests/contract/conftest.py` (the two seams and nothing else faked), then the *names* in `tests/contract/test_agent_recommend.py`, then `tests/test_contract_boundary.py`, then `make_llm()` in `app/routes/agent.py`. The [Stage 3 guide](stages/03-langgraph-port.md) explains each step.
 
+### Fix: an empty model reply no longer stops the agent (found testing 3.1 with a real key)
+
+The agent makes several model calls per run. A free *thinking* model can spend all 700 allowed tokens on its reasoning and return no text (`finish_reason: length`). Before, that ended the run with "The model returned an empty response." Now the gateway treats it as a failed attempt and asks the next model in the chain. The same PR removes `poolside/laguna-xs-2.1:free` from `models.yaml` (OpenRouter no longer lists it, so every chain paid a 404).
+
+```bash
+git pull && docker compose up -d --build api-py     # the gateway changed
+cd apps/api-py && uv run pytest tests/test_gateway.py -q     # 31 passed (two new empty-reply tests)
+```
+
+| # | Do | Expect | What it shows |
+|---|---|---|---|
+| 1 | Web app: **Chat mode: Account follow-up agent**, model dropdown on `dots-studio/dots-3-note-preview:free`, type `Analyze Acme Fabrication and recommend a next action` | Either a full recommendation with a "was unavailable... answered by" note, or the clear message that the chain is unavailable (rate limit). No longer a bare "empty response" after one model | An empty reply hands over to the next model |
+| 2 | `docker compose logs api-py --since 5m \| grep llm_empty_response` | A line with the model name and `"finish_reason": "length"` | The log says which model came back empty and why |
+| 3 | Open the model dropdown | No "Poolside: Laguna XS 2.1" entry | Stale model removed |
+
+**Without a key:** only `uv run pytest tests/test_gateway.py -q` applies. **With a key:** the table above. Free models rate-limit by the hour, so "chain unavailable (RateLimitError)" for a few minutes is normal, not a bug.
+
 ### Model notes (apply to every combo above)
 
 - **OpenRouter free models** can be occasionally slow, rate-limited or return an
