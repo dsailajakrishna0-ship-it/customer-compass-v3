@@ -1,8 +1,8 @@
 # Stage 3 — LangGraph port: change the inside, keep the outside
 
-> **Level:** beginner friendly; read [Stage 2](02-tools-and-mcp.md) first for the tools the 🟪agent uses. **Reading time:** about 15 minutes for what is written so far.
-> **Status:** in progress. **3.1 (the test split), 3.2a (the graph) and 3.2b (pause and resume) are written; 3.3 and 3.4 follow.**
-> **Roadmap:** [Stage 3](../roadmap.md#stage-3--langgraph-port) · **Decisions:** [ADR 0017](../adr/0017-contract-and-internal-tests.md) (more to come)
+> **Level:** beginner friendly; read [Stage 2](02-tools-and-mcp.md) first for the tools the 🟪agent uses. **Reading time:** about 25 minutes.
+> **Status:** written. **3.1 (the test split), 3.2a (the graph) and 3.2b (pause and resume) are done; Stage 4 is next.**
+> **Roadmap:** [Stage 3](../roadmap.md#stage-3--langgraph-port) · **Decisions:** [ADR 0017](../adr/0017-contract-and-internal-tests.md), [ADR 0018](../adr/0018-langgraph-graph-and-resume.md)
 
 **AI colour code:** 🟪 concept · 🟦 framework or tool · 🟩 data store or service · 🟧 model. Unmarked technical terms are ordinary software. [A to Z list](../ai-terms.md)
 
@@ -194,12 +194,14 @@ Bright green is new in this sub-stage, amber is an existing module that changed,
 4. **`tests/test_contract_boundary.py`**: how a rule becomes a check.
 5. **`app/routes/agent.py`, `make_llm()`**: the seam in the production code.
 
-## What this stage added to the tech stack (so far)
+## What this stage added to the tech stack
 
 | Tool | What it does in plain words | Where to look |
 | --- | --- | --- |
 | **pytest markers** (already used) | Label tests so you can run a group: `pytest -m contract` | `apps/api-py/pyproject.toml` |
 | **httpx `ASGITransport`** (already used) | Calls the FastAPI app in-process over a real HTTP interface, without opening a port | `apps/api-py/tests/contract/conftest.py` |
+| **🟦LangGraph** | Writes the 🟪agent's steps as a graph of nodes with a saved state, so it can stop and continue | `apps/api-py/app/agent/workflow.py` |
+| **🟦LangGraph Postgres 🟪checkpointer** (`langgraph-checkpoint-postgres`, `psycopg-pool`) | Saves a paused run in Postgres, in tables the library creates itself | `apps/api-py/app/agent/checkpoint.py` |
 
 ## Glossary
 
@@ -210,6 +212,12 @@ Bright green is new in this sub-stage, amber is an existing module that changed,
 - **Fake**: a simple stand-in used in tests, here a scripted model and canned document 🟪chunks.
 - **Port (a rewrite)**: rebuilding something on a new foundation while keeping its behaviour.
 - **Boundary check**: a test that enforces a rule about the tests themselves.
+- **Graph, node, edge**: the 🟪agent drawn as boxes (nodes, each a small function) joined by arrows (edges).
+- **State**: the plain dictionary the nodes hand to each other; a node returns only what it changed.
+- **`interrupt()`**: the 🟦LangGraph call that stops a run at a node and waits for an answer.
+- **Checkpoint, 🟪checkpointer**: a saved copy of the state; the checkpointer is what writes it, here to Postgres.
+- **Thread id**: the label a saved run is stored under; here a hash of the company name and the proposed note.
+- **Resume**: continuing a saved run with the user's answer (`Command(resume=...)`).
 
 ## Check your understanding
 
@@ -246,6 +254,31 @@ A real analysis with no model or 🟪embeddings key returned an opaque 500. It n
 <details><summary>7. What can these tests not prove?</summary>
 
 What a real model does with the 🟪prompts, and anything outside the 🟪agent API (the chat modes). The model is a fake and its JSON reply format is part of the seam.
+</details>
+
+<details><summary>8. Why is the agent drawn as a graph and not left as a function with a loop?</summary>
+
+The drawing and the code are the same thing, so what the agent does can be read in one place and changed by editing the drawing: add a node, move an arrow. The one loop (review sends analyze back once) is a single arrow you can see.
+</details>
+
+<details><summary>9. Why does the state have to be plain data, and where do the model call, the limits and the trace live?</summary>
+
+The 🟪checkpointer saves the state in Postgres, and only plain values (strings, numbers, lists, dictionaries) can be saved. Things that cannot be saved or must survive an exception live in `RunContext`, outside the state; a test keeps the state JSON-clean.
+</details>
+
+<details><summary>10. The API has no run id. How does /agent/confirm find the run that /agent/recommend paused?</summary>
+
+Both compute the same thread id from the company name and the proposed note. If no saved run matches (an edited note, a different company spelling), /confirm writes directly, as it always did, so the worst case is the old behaviour.
+</details>
+
+<details><summary>11. Why is the agent two graphs and not one?</summary>
+
+The thread id comes from the drafted note, which exists only after the agent has run, but a LangGraph run needs its thread id before it starts. So part 1 (question to draft) runs unsaved, and part 2 (the gate and the write) starts from part 1's finished state under the derived id.
+</details>
+
+<details><summary>12. How do we know a paused run survives a restart?</summary>
+
+`test_a_paused_run_survives_an_api_restart` pauses a run, throws away the connection pool, the saver and the compiled graph, builds new ones over the same Postgres and resumes: exactly one task is written.
 </details>
 
 ## Further reading

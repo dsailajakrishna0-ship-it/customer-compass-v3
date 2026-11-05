@@ -38,12 +38,12 @@ repo findings (R1–R12) and doc findings (D1–D9) are cited below. Decisions a
 | --- | --- | --- |
 | 0 | Foundation | Done |
 | 1 | Model layer (cloud-only) | Done |
-| 2 | Tools and 🟦MCP | In progress (2.1 and 2.2a done; 2.2b in review) |
-| 3 | 🟦LangGraph port | In progress (3.1 and 3.2a done; 3.2b in review) |
+| 2 | Tools and 🟦MCP | Done, except the tool-call 🟪eval check that needs an 🟩OpenRouter key |
+| 3 | 🟦LangGraph port | Done (3.1, 3.2a, 3.2b); the live 🟪agent test with keys is the owner's |
 | 4 | 🟪Retrieval upgrade | Planned |
-| 5 | Observability and 🟪evals | Planned |
+| 5 | Observability and evals | Planned |
 | 6 | New CRM modules and auth | Planned |
-| 7 | 🟪Agents and supervisor | Planned |
+| 7 | Agents and supervisor | Planned |
 | 8 | Product features | Planned |
 | 9 | Close-out | Planned |
 

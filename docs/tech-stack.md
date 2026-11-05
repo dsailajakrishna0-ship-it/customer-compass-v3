@@ -52,7 +52,7 @@ Stages refer to [the roadmap](roadmap.md). "Seed" means it came with V2's final 
 | **🟦LiteLLM** | One interface to many model providers, with an ordered fallback chain, retries with backoff and a cool-down | 1.2 | In use |
 | **Pydantic** (🟪structured output and tool schemas) | Makes the model answer in a checked shape | 2.1 | Planned |
 | **🟦FastMCP** (streamable HTTP) | A long-running tool server instead of a new process per chat turn | 2.2 | Planned |
-| **🟦LangGraph** (+ Postgres 🟪checkpointer) | Models the agent steps as a graph, pausable for 🟪human approval | 3.2 | Planned |
+| **🟦LangGraph** (+ Postgres 🟪checkpointer) | Models the agent steps as a graph, pausable for 🟪human approval | 3.2 | In use |
 | **🟪Hybrid search + 🟪reranker** (Qdrant, 🟦FastEmbed) | Combines keyword and meaning search, then re-orders results | 4.1 | Planned |
 | **🟦Docling** | Reads PDFs, Word and spreadsheets, not only Markdown | 4.2 | Planned |
 | **🟦FastEmbed / 🟦sentence-transformers** | Open-source embeddings that run without an API key | 4.3 | Planned (comparison) |
@@ -71,11 +71,11 @@ Optional comparisons (decided by an ADR, never adopted by default): 🟦Pydantic
 | 0 Foundation | CI/CD, code-quality tools, migrations, releases, evaluation baseline | none (no behaviour change) | [Stage 0](stages/00-foundation.md) |
 | 1 Model layer | 1.1: pydantic-settings, structlog, `models.yaml`; 1.2: 🟦LiteLLM gateway; 1.4: typed test fake | 1.3: 🟩Ollama and the local/cloud provider switch removed | [Stage 1](stages/01-model-layer.md) (done) |
 | 2 Tools and 🟦MCP | 2.1: native 🟪tool calling with Pydantic schemas; 2.2a: FastMCP over HTTP with a selectable tool server; 2.2b: a Spring Boot (Java) twin of the tools | 2.1: fenced `tool_call` text removed; 2.2a: the stdio subprocess per chat turn removed | [Stage 2](stages/02-tools-and-mcp.md) (in progress) |
-| 3 🟦LangGraph port | 3.1: API-contract tests and internal tests, two named seams; next: LangGraph, Postgres 🟪checkpointer | next: hand-written workflow code | [Stage 3](stages/03-langgraph-port.md) (in progress) |
+| 3 🟦LangGraph port | 3.1: API-contract tests and internal tests, two named seams; 3.2: the 🟪agent as a LangGraph graph, a Postgres 🟪checkpointer and a real pause for 🟪human approval | 3.2: the hand-written workflow loop | [Stage 3](stages/03-langgraph-port.md) (done) |
 | 4 🟪Retrieval upgrade | 🟪Hybrid search, 🟪reranker, 🟦Docling, open 🟪embeddings (comparison) | Markdown-only ingestion | planned |
 | 5 Observability and 🟪evals | 🟦Langfuse, OpenTelemetry, 🟦Ragas or DeepEval, 🟪guardrail comparison | log-line tracing | planned |
 | 6 CRM modules and auth | Auth, tickets, contracts, meeting notes | none | planned |
-| 7 🟪Agents and supervisor | Added only if evals show a gain | none | planned |
+| 7 Agents and supervisor | Added only if evals show a gain | none | planned |
 | 8 Product features | Add-company form, uploads, Playwright | none | planned |
 | 9 Close-out | The [concepts](concepts/README.md) section, retrospective, V2-vs-V3 table | none | planned |
 
