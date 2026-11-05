@@ -18,6 +18,9 @@ dependencies = [
     "structlog>=26.1.0",
     "pyyaml>=6.0.3",
     "litellm>=1.106.6",
+    "langgraph>=1.2.19,<2",
+    "langgraph-checkpoint-postgres>=3.2.0,<4",
+    "psycopg-pool>=3.2",
 ]
 
 [dependency-groups]

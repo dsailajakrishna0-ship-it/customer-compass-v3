@@ -27,6 +27,8 @@ Start here. The repo is the V3 learning project, seeded from `customer-compass-v
 | [tech-stack.md](tech-stack.md) | **Single source of truth** for the technology in use, what each replaced, and free alternatives. |
 | [api-reference.md](api-reference.md) | Every HTTP endpoint, request and response shape, error shape. |
 | [agent-boundaries.md](agent-boundaries.md) | Which pattern to use for which question (SQL, RAG, tool calling, workflow, agents). |
+| [agent-models.md](agent-models.md) | Which kind of model each agent and model call needs, and a checklist for new agents. |
+| [port-status.md](port-status.md) | The Java sibling repo, the planned claims project, and how far the Java edition has caught up. |
 | [fe/](fe/fe-architecture-overview.md) | Frontend layering and the chat request lifecycle. |
 
 ## Run and test

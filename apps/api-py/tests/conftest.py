@@ -14,6 +14,7 @@ import socket
 import pytest
 import pytest_asyncio
 
+from app.agent.checkpoint import close_checkpointer
 from app.config import reset_settings
 from app.db import close_pool
 from app.rag.qdrant_store import close_client
@@ -62,4 +63,5 @@ def _fresh_settings():
 async def _reset_singletons():
     yield
     await close_pool()
+    await close_checkpointer()
     await close_client()

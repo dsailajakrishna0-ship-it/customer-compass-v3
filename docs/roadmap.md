@@ -39,7 +39,7 @@ repo findings (R1–R12) and doc findings (D1–D9) are cited below. Decisions a
 | 0 | Foundation | Done |
 | 1 | Model layer (cloud-only) | Done |
 | 2 | Tools and 🟦MCP | In progress (2.1 and 2.2a done; 2.2b in review) |
-| 3 | 🟦LangGraph port | In progress (3.1 in review; 3.2 next) |
+| 3 | 🟦LangGraph port | In progress (3.1 and 3.2a done; 3.2b in review) |
 | 4 | 🟪Retrieval upgrade | Planned |
 | 5 | Observability and 🟪evals | Planned |
 | 6 | New CRM modules and auth | Planned |
@@ -87,7 +87,7 @@ repo findings (R1–R12) and doc findings (D1–D9) are cited below. Decisions a
 | Sub-stage | Tasks | Exit criteria |
 | --- | --- | --- |
 | **3.1 Test split** (R3) | Split tests into API-contract tests (must pass unchanged) and internal tests (may change). Two named seams (the model and document 🟪retrieval), a boundary check, and the 🟪agent API's failure behaviour in the contract ([ADR 0017](adr/0017-contract-and-internal-tests.md)). | The split is documented (`apps/api-py/tests/README.md`) and enforced by a test. |
-| **3.2 Graph** (T2) | Explicit nodes: classify, evidence, documents, analyze, review, draft, 🟪human approval, write. Postgres 🟪checkpointer and `interrupt()` before write. | Contract tests pass unchanged; a paused run survives an API restart. |
+| **3.2 Graph** (T2), in two PRs ([ADR 0018](adr/0018-langgraph-graph-and-resume.md)): **3.2a** the graph, same behaviour; **3.2b** pause and resume | Explicit nodes: classify, evidence, documents, analyze, review, draft, 🟪human approval, write. Postgres 🟪checkpointer and `interrupt()` before write. | Contract tests pass unchanged; a paused run survives an API restart. |
 
 ## Stage 4 — Retrieval upgrade
 
