@@ -1,7 +1,7 @@
 # Stage 3 — LangGraph port: change the inside, keep the outside
 
 > **Level:** beginner friendly; read [Stage 2](02-tools-and-mcp.md) first for the tools the 🟪agent uses. **Reading time:** about 15 minutes for what is written so far.
-> **Status:** in progress. **3.1 (the test split) and 3.2a (the graph) are written; 3.2b (pause and resume) is added when it is built.**
+> **Status:** in progress. **3.1 (the test split), 3.2a (the graph) and 3.2b (pause and resume) are written; 3.3 and 3.4 follow.**
 > **Roadmap:** [Stage 3](../roadmap.md#stage-3--langgraph-port) · **Decisions:** [ADR 0017](../adr/0017-contract-and-internal-tests.md) (more to come)
 
 **AI colour code:** 🟪 concept · 🟦 framework or tool · 🟩 data store or service · 🟧 model. Unmarked technical terms are ordinary software. [A to Z list](../ai-terms.md)
@@ -103,7 +103,7 @@ Writing "what the API does when the model is unavailable" showed that it did **n
 
 **The idea.** A 🟦LangGraph graph writes the shape down: each step is a **node** (a small function), each arrow is an **edge**, and a **state** (a plain dictionary) is what the nodes hand to each other. A node returns only what it changed.
 
-![The agent graph: classify, evidence, documents, analyze, review, then draft and human_approval; review can send analyze back once through prepare_revision. A dashed write node is added in 3.2b.](../img/diagrams/stage3-agent-graph.png)
+![The agent graph: classify, evidence, documents, analyze, review, then draft and human_approval; review can send analyze back once through prepare_revision. Part 2 (3.2b) pauses at human_approval, saved in Postgres, and a write node creates the task.](../img/diagrams/stage3-agent-graph.png)
 
 <sub>Diagram source: [stage3-agent-graph.mmd](../diagrams/stage3-agent-graph.mmd)</sub>
 
@@ -119,6 +119,24 @@ Writing "what the API does when the model is unavailable" showed that it did **n
 **Why the state must be plain data.** In 3.2b the state is saved in Postgres so a paused run can survive a restart. A test (`test_the_state_is_plain_data_so_a_checkpointer_can_save_it`) already checks the state is JSON, so 3.2b does not discover a problem late. The trace lives in `RunContext` for a second reason: when a limit stops the run with an exception, the steps taken so far are still reported.
 
 **Rule to remember.** *A graph is a drawing you can run: change the drawing, not the function.*
+
+## Concept 3 — Pause, save, resume (3.2b)
+
+**The problem.** Until now "wait for the user" meant the request simply ended and the run was forgotten; `/agent/confirm` knew nothing about it. If the API restarted between the two calls nothing was lost, because nothing was kept either, but the approval was never really part of the 🟪agent.
+
+**The idea.** The gate becomes a real step. `human_approval` calls `interrupt()`: the 🟦LangGraph run stops, and the 🟪checkpointer saves the whole state in Postgres. Later `/agent/confirm` resumes that saved run with the user's answer (`Command(resume=...)`). Only the `write` node, after a "yes", creates the task. A "no" ends the run without writing.
+
+| Shop idea | Project idea | In the code |
+| --- | --- | --- |
+| Putting an order in the "waiting for customer" drawer, written on paper, not remembered | **Checkpoint** | `app/agent/checkpoint.py`: LangGraph's Postgres saver and its own tables |
+| The order number on the drawer label | **Thread id** | `thread_id(company, note)`: a hash both endpoints can recompute |
+| The customer says yes, you pull the order and finish it | **Resume** | `resume_run()` in `app/agent/workflow.py` |
+
+**Why a derived id.** The API contract has no run id (`/recommend` has exact keys; `/confirm` takes three fields), and the 26 contract tests must pass unchanged. So both endpoints compute the id from what the user sees: the company name and the proposed note. If no saved run matches (an edited note, a restart before 3.2b, a different company name such as "Acme" instead of "Acme Fabrication"), `/confirm` does what it always did: it writes directly. The worst case is today's behaviour. See [ADR 0018](../adr/0018-langgraph-graph-and-resume.md), including its 3.2b amendment: the pause lives in a second small graph, because the id is only known once the note is drafted.
+
+**The proof.** `test_a_paused_run_survives_an_api_restart` pauses a run, throws away the pool, the saver and the compiled graph (an "API restart"), builds new ones over the same Postgres and resumes: exactly one task is written. `test_confirm_resumes_the_run_that_recommend_paused` does the same over HTTP.
+
+**Rule to remember.** *Save the state, not the process: anything that survives a restart is data in a database.*
 
 ---
 
@@ -153,7 +171,7 @@ Bright green is new in this sub-stage, amber is an existing module that changed,
 | 🟡 | 3.1 | Web: `AgentRunPanel.tsx`, `types/index.ts` and a new test | Shows the API's error text |
 | ⚪ | 0 to 2 | workflow, 🟪agents, policies, 🟪guardrails, 🟦MCP, gateway | Not touched |
 
-### Added in 3.2a
+### Added in 3.2b and 3.2a
 
 | | Added in | File | Change |
 | --- | --- | --- | --- |
@@ -161,6 +179,11 @@ Bright green is new in this sub-stage, amber is an existing module that changed,
 | 🟡 | 3.2a | `tests/agent_internals/test_agent_workflow.py` | Two graph tests: the node list and the loop, and "state is plain data" |
 | 🟡 | 3.2a | `pyproject.toml`, `uv.lock` | `langgraph` (and the packages it needs) |
 | 🟢 | 3.2a | [`docs/diagrams/stage3-agent-graph.mmd`](../diagrams/stage3-agent-graph.mmd) | The graph |
+| 🟢 | 3.2b | `app/agent/checkpoint.py` | The Postgres 🟪checkpointer (pool, `setup()`), and `thread_id()` |
+| 🟡 | 3.2b | `app/agent/workflow.py` | `build_graph()` is now part 1 (ends at `draft`); new `build_approval_graph()` (`human_approval` with `interrupt()`, `write`); `resume_run()`; `run_account_review()` saves the paused run |
+| 🟡 | 3.2b | `app/routes/agent.py`, `app/main.py` | `/confirm` resumes the paused run, or falls back to the direct write; the pool is closed at shutdown |
+| 🟡 | 3.2b | `tests/agent_internals/` | Pause, resume, decline, edited note, restart-survival; an HTTP test of recommend then confirm |
+| 🟡 | 3.2b | `pyproject.toml`, `uv.lock` | `langgraph-checkpoint-postgres`, `psycopg-pool` |
 | 🟢 | 3.2a | [ADR 0018](../adr/0018-langgraph-graph-and-resume.md) | The graph, and the plan for pause and resume |
 
 ### A good reading order

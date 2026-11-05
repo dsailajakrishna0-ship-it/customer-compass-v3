@@ -4,6 +4,32 @@ from fastapi import HTTPException
 from app.routes import agent as agent_route
 
 
+@pytest.fixture(autouse=True)
+def no_paused_run(monkeypatch):
+    """By default there is no paused run to resume, so /confirm takes its direct path."""
+
+    async def none(*_args, **_kwargs):
+        return None
+
+    monkeypatch.setattr(agent_route, "resume_run", none)
+
+
+@pytest.mark.asyncio
+async def test_a_paused_run_is_resumed_instead_of_writing_directly(monkeypatch):
+    async def resumed(company_name, note, confirm):
+        return {"status": "confirmed", "task": {"id": 7}}
+
+    async def boom(*_args, **_kwargs):
+        raise AssertionError("the resumed run does the write, not the route")
+
+    monkeypatch.setattr(agent_route, "resume_run", resumed)
+    monkeypatch.setattr(agent_route, "create_followup_task_tool", boom)
+    result = await agent_route.confirm(
+        agent_route.ConfirmRequest(companyName="Acme", note="Call them", confirm=True)
+    )
+    assert result["task"]["id"] == 7
+
+
 @pytest.mark.asyncio
 async def test_simple_question_bypasses_the_agent(monkeypatch):
     async def boom(*_args, **_kwargs):

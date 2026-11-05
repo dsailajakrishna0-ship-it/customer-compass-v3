@@ -18,15 +18,19 @@ stopped by a limit still reports every step it took.
 """
 
 import asyncio
+import functools
 import logging
 import time
 from dataclasses import asdict, dataclass, field
 from typing import Any, TypedDict
 
 from langchain_core.runnables import RunnableConfig
+from langgraph.checkpoint.base import BaseCheckpointSaver
 from langgraph.graph import END, START, StateGraph
+from langgraph.types import Command, interrupt
 
 from app.agent import agents
+from app.agent.checkpoint import get_checkpointer, thread_id
 from app.agent.policies import AgentLimits, BudgetExceeded, RunBudget
 from app.agent.trace import Trace
 from app.chat.router import find_mentioned_company
@@ -42,7 +46,11 @@ from app.guardrails.prompt_guard import (
     scan_output,
     wrap_untrusted_context,
 )
-from app.mcp.tools import get_company_summary_tool, search_documents_tool
+from app.mcp.tools import (
+    create_followup_task_tool,
+    get_company_summary_tool,
+    search_documents_tool,
+)
 
 logger = logging.getLogger("app.agent.workflow")
 
@@ -67,6 +75,8 @@ class AgentState(TypedDict, total=False):
     output_findings: dict  # {"action", "rationale", "note"} each a GuardFinding as a dict
     flagged: dict  # {"flagged": bool, "reasons": [...]}
     status: str  # "completed" or "company_not_found"
+    approved: bool  # the user's answer at the gate
+    result: dict  # what the write node returned
 
 
 @dataclass
@@ -344,21 +354,36 @@ async def draft(state: AgentState, config: RunnableConfig) -> AgentState:
 
 
 async def human_approval(state: AgentState, config: RunnableConfig) -> AgentState:
-    """The gate. In 3.2a the graph simply ends here and the user confirms through the separate
-    /agent/confirm endpoint; nothing is written. (3.2b turns this into a real pause.)"""
+    """The gate. The run stops here and is saved to Postgres; nothing is written. It continues only
+    when /agent/confirm resumes it with the user's answer ({"confirm": true or false})."""
     note = _finding(state["output_findings"]["note"])
-    _ctx(config).trace.record(
-        "gate",
-        "awaiting_user_confirmation",
-        "task not created",
-        f"proposed: {note.neutralized_text}",
-        time.monotonic(),
-    )
-    return {}
+    ctx = config["configurable"].get("ctx")
+    if ctx is not None:  # absent when the run is resumed later: the first request already traced it
+        ctx.trace.record(
+            "gate",
+            "awaiting_user_confirmation",
+            "task not created",
+            f"proposed: {note.neutralized_text}",
+            time.monotonic(),
+        )
+    answer = interrupt({"proposedNote": note.neutralized_text})
+    return {"approved": bool(answer.get("confirm"))}
+
+
+def after_approval(state: AgentState) -> str:
+    return "write" if state.get("approved") else END
+
+
+async def write(state: AgentState) -> AgentState:
+    """The only node that changes anything: creates the task the user approved."""
+    company = _company(state)["name"]
+    note = _finding(state["output_findings"]["note"]).neutralized_text
+    return {"result": await create_followup_task_tool(company, note, confirm=True)}
 
 
 def build_graph():
-    """The agent's shape, in one place. Compiled once and reused: it holds no per-run state."""
+    """Part 1 of the agent: from the question to a drafted note. It holds no per-run state, so it is
+    compiled once. It has no checkpointer: the run is only worth saving once it reaches the gate."""
     graph = StateGraph(AgentState)
     graph.add_node("classify", classify)
     graph.add_node("evidence", evidence)
@@ -367,7 +392,6 @@ def build_graph():
     graph.add_node("review", review)
     graph.add_node("prepare_revision", prepare_revision)
     graph.add_node("draft", draft)
-    graph.add_node("human_approval", human_approval)
 
     graph.add_edge(START, "classify")
     graph.add_conditional_edges("classify", after_classify, ["evidence", END])
@@ -378,12 +402,31 @@ def build_graph():
         "review", after_review, {"draft": "draft", "revise": "prepare_revision"}
     )
     graph.add_edge("prepare_revision", "analyze")
-    graph.add_edge("draft", "human_approval")
-    graph.add_edge("human_approval", END)
+    graph.add_edge("draft", END)
     return graph.compile()
 
 
+def build_approval_graph(checkpointer: BaseCheckpointSaver | None = None):
+    """Part 2: the gate and the write. It starts from part 1's finished state, stops at
+    `human_approval` and is saved under a thread id that /agent/confirm can derive again.
+
+    It is a second small graph because the thread id comes from the drafted note, which does not
+    exist until part 1 has run (ADR 0018, amended in 3.2b)."""
+    graph = StateGraph(AgentState)
+    graph.add_node("human_approval", human_approval)
+    graph.add_node("write", write)
+    graph.add_edge(START, "human_approval")
+    graph.add_conditional_edges("human_approval", after_approval, ["write", END])
+    graph.add_edge("write", END)
+    return graph.compile(checkpointer=checkpointer)
+
+
 _GRAPH = build_graph()
+
+
+@functools.cache
+def _approval_graph(checkpointer: BaseCheckpointSaver):
+    return build_approval_graph(checkpointer)
 
 
 # ------------------------------------------------------------------------------ entry point
@@ -394,7 +437,10 @@ def _response(status: str, trace: Trace, **extra) -> dict:
 
 
 async def run_account_review(
-    message: str, llm: agents.LlmCall, limits: AgentLimits | None = None
+    message: str,
+    llm: agents.LlmCall,
+    limits: AgentLimits | None = None,
+    checkpointer: BaseCheckpointSaver | None = None,
 ) -> dict:
     limits = limits or AgentLimits.from_env()
     ctx = RunContext(llm=llm, limits=limits, budget=RunBudget(limits))
@@ -404,6 +450,8 @@ async def run_account_review(
                 {"message": message},
                 config={"configurable": {"ctx": ctx}, "recursion_limit": RECURSION_LIMIT},
             )
+            if final["status"] == "completed":
+                await _pause_at_gate(final, ctx, checkpointer or await get_checkpointer())
     except TimeoutError:
         return _response(
             "timed_out", ctx.trace, message=f"Stopped after {limits.timeout_seconds:.0f}s."
@@ -411,6 +459,35 @@ async def run_account_review(
     except BudgetExceeded as exc:
         return _response("budget_exceeded", ctx.trace, message=str(exc))
     return _build_result(final, ctx)
+
+
+def _thread_config(final: dict[str, Any]) -> dict:
+    note = final["output_findings"]["note"]["neutralized_text"]
+    return {"configurable": {"thread_id": thread_id(final["company"]["name"], note)}}
+
+
+async def _pause_at_gate(
+    final: dict[str, Any], ctx: RunContext, saver: BaseCheckpointSaver
+) -> None:
+    """Runs the gate: the run stops at `human_approval` and is saved in Postgres."""
+    config = _thread_config(final)
+    config["configurable"]["ctx"] = ctx
+    await _approval_graph(saver).ainvoke(final, config=config)
+
+
+async def resume_run(
+    company_name: str, note: str, confirm: bool, checkpointer: BaseCheckpointSaver | None = None
+) -> dict | None:
+    """Continues a paused run with the user's answer. Returns what `/agent/confirm` should answer, or
+    None when no paused run matches (a restart without a saved run, an edited note, an unknown name),
+    in which case the caller writes directly, as it did before 3.2b."""
+    graph = _approval_graph(checkpointer or await get_checkpointer())
+    config = {"configurable": {"thread_id": thread_id(company_name, note)}}
+    snapshot = await graph.aget_state(config)
+    if snapshot.next != ("human_approval",):
+        return None
+    final = await graph.ainvoke(Command(resume={"confirm": confirm}), config=config)
+    return final["result"] if confirm else {"status": "declined", "message": "No task was created."}
 
 
 def _build_result(final: dict[str, Any], ctx: RunContext) -> dict:

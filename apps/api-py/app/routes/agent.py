@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 
 from app.agent.agents import AgentRole, LlmCall
 from app.agent.policies import needs_agent
-from app.agent.workflow import run_account_review
+from app.agent.workflow import resume_run, run_account_review
 from app.guardrails.audit import record_events
 from app.guardrails.prompt_guard import build_report, scan_and_neutralize
 from app.llm.gateway import LlmUnavailableError, generate
@@ -69,12 +69,16 @@ async def confirm(body: ConfirmRequest):
     finding = scan_and_neutralize(body.note)
     if finding.matched_patterns:
         await record_events("agent", build_report((finding, "user_input: task note")).events)
-    if not body.confirm:
-        return {"status": "declined", "message": "No task was created."}
 
-    result = await create_followup_task_tool(
-        body.company_name, finding.neutralized_text, confirm=True
-    )
+    # Resume the paused run if there is one. If not (API restarted without a saved run, an edited
+    # note) fall back to what this endpoint always did: write directly, or decline.
+    result = await resume_run(body.company_name, body.note, body.confirm)
+    if result is None:
+        if not body.confirm:
+            return {"status": "declined", "message": "No task was created."}
+        result = await create_followup_task_tool(
+            body.company_name, finding.neutralized_text, confirm=True
+        )
     if result.get("status") == "not_found":
         raise HTTPException(status_code=404, detail=result["message"])
     return result

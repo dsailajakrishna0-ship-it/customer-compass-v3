@@ -16,6 +16,19 @@ REVISE = Review("revise", ["too vague"])
 
 
 @pytest.fixture(autouse=True)
+def memory_checkpointer(monkeypatch):
+    """These tests do not need Postgres: runs are saved in memory unless a test asks for the real one."""
+    from langgraph.checkpoint.memory import InMemorySaver
+
+    saver = InMemorySaver()
+
+    async def get():
+        return saver
+
+    monkeypatch.setattr(workflow, "get_checkpointer", get)
+
+
+@pytest.fixture(autouse=True)
 def fake_dependencies(monkeypatch):
     state = {"interaction_summary": "Asked for a pricing breakdown.", "audit": []}
 
@@ -164,12 +177,19 @@ async def test_injected_interaction_text_is_neutralized_and_audited(fake_depende
 def test_the_graph_has_the_documented_nodes_and_one_loop():
     graph = workflow.build_graph().get_graph()
     assert set(graph.nodes) - {"__start__", "__end__"} == {
-        "classify", "evidence", "documents", "analyze", "review",
-        "prepare_revision", "draft", "human_approval",
+        "classify", "evidence", "documents", "analyze", "review", "prepare_revision", "draft",
     }  # fmt: skip
     edges = {(e.source, e.target) for e in graph.edges}
     assert ("prepare_revision", "analyze") in edges, "the one loop: review can send analyze back"
-    assert ("human_approval", "__end__") in edges, "the graph never writes; it ends at the gate"
+    assert ("draft", "__end__") in edges, "part 1 only drafts; it can never write"
+
+
+def test_only_the_write_node_can_change_anything_and_only_after_approval():
+    graph = workflow.build_approval_graph().get_graph()
+    assert set(graph.nodes) - {"__start__", "__end__"} == {"human_approval", "write"}
+    edges = {(e.source, e.target) for e in graph.edges}
+    assert ("human_approval", "write") in edges and ("human_approval", "__end__") in edges
+    assert ("write", "__end__") in edges
 
 
 @pytest.mark.asyncio
@@ -187,3 +207,90 @@ async def test_the_state_is_plain_data_so_a_checkpointer_can_save_it():
     )
     json.dumps(final)  # raises TypeError if any value is not plain data
     assert "ctx" not in final and "llm" not in final
+
+
+# ------------------------------------------------------- pause and resume (Stage 3.2b)
+
+ASK = "Analyze Acme Fabrication and recommend a next action"
+
+
+@pytest.fixture
+def writes(monkeypatch):
+    """Replaces the task write so a test can count what was created."""
+    calls: list[tuple] = []
+
+    async def create(company_name, note, confirm=False):
+        calls.append((company_name, note, confirm))
+        return {"status": "confirmed", "task": {"id": len(calls), "note": note}}
+
+    monkeypatch.setattr(workflow, "create_followup_task_tool", create)
+    return calls
+
+
+async def _run(saver):
+    llm = FakeAgentModel(ANALYST_OK, [APPROVE])
+    result = await workflow.run_account_review(ASK, llm, AgentLimits(), checkpointer=saver)
+    return result, result["proposedTask"]["note"]
+
+
+@pytest.mark.asyncio
+async def test_a_run_stops_at_the_gate_and_writes_nothing(writes):
+    from langgraph.checkpoint.memory import InMemorySaver
+
+    result, _note = await _run(InMemorySaver())
+    assert result["status"] == "completed"
+    assert writes == []
+
+
+@pytest.mark.asyncio
+async def test_confirming_resumes_the_paused_run_and_writes_once(writes):
+    from langgraph.checkpoint.memory import InMemorySaver
+
+    saver = InMemorySaver()
+    _result, note = await _run(saver)
+    answer = await workflow.resume_run("Acme Fabrication", note, True, saver)
+    assert answer and answer["status"] == "confirmed"
+    assert writes == [("Acme Fabrication", note, True)]
+    # the run is finished: a second confirm finds nothing to resume (the route then writes directly)
+    assert await workflow.resume_run("Acme Fabrication", note, True, saver) is None
+
+
+@pytest.mark.asyncio
+async def test_declining_ends_the_run_without_writing(writes):
+    from langgraph.checkpoint.memory import InMemorySaver
+
+    saver = InMemorySaver()
+    _result, note = await _run(saver)
+    answer = await workflow.resume_run("acme fabrication ", note, False, saver)
+    assert answer == {"status": "declined", "message": "No task was created."}
+    assert writes == []
+    assert await workflow.resume_run("Acme Fabrication", note, True, saver) is None
+
+
+@pytest.mark.asyncio
+async def test_an_edited_note_or_another_company_finds_no_paused_run(writes):
+    from langgraph.checkpoint.memory import InMemorySaver
+
+    saver = InMemorySaver()
+    _result, note = await _run(saver)
+    assert await workflow.resume_run("Acme Fabrication", note + " (edited)", True, saver) is None
+    assert await workflow.resume_run("Northstar Logistics", note, True, saver) is None
+    assert writes == []
+
+
+@pytest.mark.asyncio
+async def test_a_paused_run_survives_an_api_restart(writes):
+    """The 3.2b exit test: pause, throw away everything in the process, then resume from Postgres."""
+    from app.agent.checkpoint import close_checkpointer, get_checkpointer
+
+    workflow._approval_graph.cache_clear()
+    result, note = await _run(await get_checkpointer())  # the real Postgres checkpointer
+    assert writes == []
+
+    await close_checkpointer()  # "the API restarts": the pool, the saver and the compiled graph go
+    workflow._approval_graph.cache_clear()
+
+    answer = await workflow.resume_run("Acme Fabrication", note, True, await get_checkpointer())
+    assert answer and answer["status"] == "confirmed"
+    assert writes == [("Acme Fabrication", note, True)]
+    assert result["trace"][-1]["name"] == "awaiting_user_confirmation"

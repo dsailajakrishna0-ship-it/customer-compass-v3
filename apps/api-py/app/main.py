@@ -17,6 +17,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from app.agent.checkpoint import close_checkpointer
 from app.config import get_settings
 from app.db import close_pool, get_pool
 from app.guardrails.audit import ensure_schema_and_purge
@@ -38,6 +39,7 @@ async def lifespan(_app: FastAPI):
     await ensure_schema_and_purge()
     yield
     await close_pool()
+    await close_checkpointer()
     await close_client()
 
 

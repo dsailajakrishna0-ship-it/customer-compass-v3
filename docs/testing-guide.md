@@ -531,6 +531,28 @@ Mode **Account follow-up agent**. One run takes up to a minute or two on free mo
 
 Reading order: `apps/api-py/tests/README.md`, then `tests/contract/conftest.py` (the two seams and nothing else faked), then the *names* in `tests/contract/test_agent_recommend.py`, then `tests/test_contract_boundary.py`, then `make_llm()` in `app/routes/agent.py`. The [Stage 3 guide](stages/03-langgraph-port.md) explains each step.
 
+### Stage 3.2b: a paused agent run is saved in Postgres and resumed by Confirm
+
+When the agent reaches "awaiting user confirmation" the run now really stops and is saved in Postgres. Confirm resumes that saved run; it is the run that writes the task. The web screen looks the same. What is new is that the pause survives an API restart.
+
+```bash
+git pull
+docker compose up -d --build api-py            # new code and two new libraries
+cd apps/api-py && uv run pytest tests/contract tests/agent_internals -q    # 63 passed (needs the db container)
+```
+
+| # | Do | Expect | What it shows |
+|---|---|---|---|
+| 1 | `just test-contract` | `26 passed`, the same contract tests, unedited | The API's promises still hold |
+| 2 | `uv run pytest tests/agent_internals/test_agent_workflow.py -q -k "resume or restart or declin or edited"` | 5 passed | Pause, resume, decline, edited note, and a restart |
+| 3 | Web app, **Account follow-up agent** (needs both keys): `Analyze Acme Fabrication and recommend a next action`. **Do not click Confirm yet** | The usual result ending with "awaiting user confirmation" | The run is paused |
+| 4 | `docker exec customer-compass-v3-db psql -U customer_compass -d customer_compass -c "select thread_id, count(*) from checkpoints group by 1"` | One `followup-...` thread with a few rows | The paused run is saved in Postgres |
+| 5 | `docker compose restart api-py`, wait 10 s, then click **Confirm** | The task appears in the task list, once | The saved run survived the restart and was resumed |
+| 6 | Run the agent again, then click **Decline** | "No task was created." and the task count does not change | A "no" ends the run without writing |
+| 7 | Run the agent, then call `/confirm` with the note edited (`curl`) | A task is still created | No saved run matches, so the old direct write is used |
+
+**Without a key:** steps 1 and 2 (they fake the model). **With a key:** steps 3 to 7. If the table name in step 4 differs, `docker exec customer-compass-v3-db psql -U customer_compass -d customer_compass -c "\dt"` lists the tables the library created.
+
 ### Stage 3.2a: the agent is now a LangGraph graph (same behaviour)
 
 The account follow-up agent's inside was rebuilt as a graph of nodes. From the outside nothing should change, and that is what you check. Pause and resume across a restart arrive in 3.2b.
