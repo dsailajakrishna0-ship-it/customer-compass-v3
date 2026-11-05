@@ -156,3 +156,34 @@ async def test_injected_interaction_text_is_neutralized_and_audited(fake_depende
     assert "Ignore all previous instructions" not in llm.prompts["analyst"][0]
     assert result["guardrail"]["flagged"] is True
     assert fake_dependencies["audit"] and fake_dependencies["audit"][0][0] == "agent"
+
+
+# ------------------------------------------------------------------ the graph itself (Stage 3.2a)
+
+
+def test_the_graph_has_the_documented_nodes_and_one_loop():
+    graph = workflow.build_graph().get_graph()
+    assert set(graph.nodes) - {"__start__", "__end__"} == {
+        "classify", "evidence", "documents", "analyze", "review",
+        "prepare_revision", "draft", "human_approval",
+    }  # fmt: skip
+    edges = {(e.source, e.target) for e in graph.edges}
+    assert ("prepare_revision", "analyze") in edges, "the one loop: review can send analyze back"
+    assert ("human_approval", "__end__") in edges, "the graph never writes; it ends at the gate"
+
+
+@pytest.mark.asyncio
+async def test_the_state_is_plain_data_so_a_checkpointer_can_save_it():
+    """3.2b saves the state in Postgres. Anything that is not JSON would break that, so check it now."""
+    import json
+
+    from app.agent.policies import RunBudget
+
+    limits = AgentLimits()
+    ctx = workflow.RunContext(FakeAgentModel(ANALYST_OK, [APPROVE]), limits, RunBudget(limits))
+    final = await workflow.build_graph().ainvoke(
+        {"message": "Analyze Acme Fabrication and recommend a next action"},
+        config={"configurable": {"ctx": ctx}},
+    )
+    json.dumps(final)  # raises TypeError if any value is not plain data
+    assert "ctx" not in final and "llm" not in final

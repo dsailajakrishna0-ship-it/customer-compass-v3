@@ -1,7 +1,7 @@
 # Stage 3 — LangGraph port: change the inside, keep the outside
 
 > **Level:** beginner friendly; read [Stage 2](02-tools-and-mcp.md) first for the tools the 🟪agent uses. **Reading time:** about 15 minutes for what is written so far.
-> **Status:** in progress. **3.1 (the test split) is written; 3.2 (the graph) is added when it is built.**
+> **Status:** in progress. **3.1 (the test split) and 3.2a (the graph) are written; 3.2b (pause and resume) is added when it is built.**
 > **Roadmap:** [Stage 3](../roadmap.md#stage-3--langgraph-port) · **Decisions:** [ADR 0017](../adr/0017-contract-and-internal-tests.md) (more to come)
 
 **AI colour code:** 🟪 concept · 🟦 framework or tool · 🟩 data store or service · 🟧 model. Unmarked technical terms are ordinary software. [A to Z list](../ai-terms.md)
@@ -97,6 +97,29 @@ Writing "what the API does when the model is unavailable" showed that it did **n
 > 4. **Include failure in the contract.** The first thing writing it down found was a bad failure.
 > 5. **Prove a test can fail.** We broke the code and watched the right test go red.
 
+## Concept 2 — The agent as a graph (3.2a)
+
+**The problem.** Today's 🟪agent is a long function with a `while` loop. To know what the agent does, you read the whole function; to add a step, you edit the middle of it.
+
+**The idea.** A 🟦LangGraph graph writes the shape down: each step is a **node** (a small function), each arrow is an **edge**, and a **state** (a plain dictionary) is what the nodes hand to each other. A node returns only what it changed.
+
+![The agent graph: classify, evidence, documents, analyze, review, then draft and human_approval; review can send analyze back once through prepare_revision. A dashed write node is added in 3.2b.](../img/diagrams/stage3-agent-graph.png)
+
+<sub>Diagram source: [stage3-agent-graph.mmd](../diagrams/stage3-agent-graph.mmd)</sub>
+
+| Shop idea | Project idea | In the code |
+| --- | --- | --- |
+| A job card that travels with the order | **State** | `AgentState` in `app/agent/workflow.py` |
+| One counter per job | **Node** | `classify`, `evidence`, `documents`, `analyze`, `review`, `draft`, `human_approval` |
+| The arrows on the floor plan | **Edges** | `build_graph()`; the loop is `review` to `prepare_revision` to `analyze` |
+| The till and the stopwatch, which stay with the manager and never go on the job card | **`RunContext`** | the model call, the limits and the trace: not saved with the state |
+
+**What did not change.** The 26 contract tests pass unchanged: same response, same trace, same limits, same 503s. The steps and the 🟪guardrails are the same code moved into nodes. The graph ends at `human_approval` and writes nothing; confirming is still the separate `/agent/confirm`.
+
+**Why the state must be plain data.** In 3.2b the state is saved in Postgres so a paused run can survive a restart. A test (`test_the_state_is_plain_data_so_a_checkpointer_can_save_it`) already checks the state is JSON, so 3.2b does not discover a problem late. The trace lives in `RunContext` for a second reason: when a limit stops the run with an exception, the steps taken so far are still reported.
+
+**Rule to remember.** *A graph is a drawing you can run: change the drawing, not the function.*
+
 ---
 
 ## Code tour: what changed in 3.1, and why
@@ -129,6 +152,16 @@ Bright green is new in this sub-stage, amber is an existing module that changed,
 | 🟡 | 3.1 | `justfile`, `.github/workflows/ci.yml`, `pyproject.toml` | `just test-contract`, `just test-internal`, a separate CI step, the `contract` marker |
 | 🟡 | 3.1 | Web: `AgentRunPanel.tsx`, `types/index.ts` and a new test | Shows the API's error text |
 | ⚪ | 0 to 2 | workflow, 🟪agents, policies, 🟪guardrails, 🟦MCP, gateway | Not touched |
+
+### Added in 3.2a
+
+| | Added in | File | Change |
+| --- | --- | --- | --- |
+| 🟡 | 3.2a | `app/agent/workflow.py` | Rewritten as a graph: `AgentState`, `RunContext`, eight nodes, `build_graph()`. Same behaviour, same module and entry point (`run_account_review`) |
+| 🟡 | 3.2a | `tests/agent_internals/test_agent_workflow.py` | Two graph tests: the node list and the loop, and "state is plain data" |
+| 🟡 | 3.2a | `pyproject.toml`, `uv.lock` | `langgraph` (and the packages it needs) |
+| 🟢 | 3.2a | [`docs/diagrams/stage3-agent-graph.mmd`](../diagrams/stage3-agent-graph.mmd) | The graph |
+| 🟢 | 3.2a | [ADR 0018](../adr/0018-langgraph-graph-and-resume.md) | The graph, and the plan for pause and resume |
 
 ### A good reading order
 

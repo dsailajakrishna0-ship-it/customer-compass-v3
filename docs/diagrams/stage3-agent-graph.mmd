@@ -1,0 +1,17 @@
+flowchart LR
+    S(["start"]) --> C["classify<br/>guard the request,<br/>find the company"]
+    C -->|"no company"| E1(["end: company_not_found"])
+    C --> EV["evidence<br/>CRM facts, deals,<br/>interactions"]
+    EV --> DO["documents<br/>search the ingested<br/>documents"]
+    DO --> AN["analyze<br/>Analyst agent"]
+    AN --> RV["review<br/>Reviewer agent"]
+    RV -->|"approved, or out of revisions"| DR["draft<br/>Task Drafter agent,<br/>output guard"]
+    RV -->|"revise (once)"| PR["prepare_revision"]
+    PR --> AN
+    DR --> HA["human_approval<br/>the gate: nothing is written"]
+    HA --> E2(["end: completed"])
+    HA -.->|"3.2b: interrupt() pauses here,<br/>then a write node creates the task"| W["write"]
+    classDef new fill:#a5d6a7,stroke:#1b5e20,stroke-width:2px,color:#0d3b12
+    classDef later fill:#eceff1,stroke:#b0bec5,stroke-dasharray:4 3,color:#455a64
+    class C,EV,DO,AN,RV,PR,DR,HA new
+    class W later
