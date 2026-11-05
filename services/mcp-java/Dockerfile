@@ -12,6 +12,11 @@ RUN mvn -q -B -DskipTests package
 
 FROM eclipse-temurin:21-jre
 WORKDIR /app
+# Pull the patched apt now: the base image lags behind Ubuntu security fixes (Trivy: CVE-2026-109518).
+# Remove this line once a rebuilt eclipse-temurin image carries apt 3.2.1ubuntu0.1 or newer.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends --only-upgrade apt libapt-pkg7.0 \
+    && rm -rf /var/lib/apt/lists/*
 COPY --from=build /build/target/mcp-java-0.1.0.jar ./app.jar
 
 # Run as an unprivileged user (Trivy DS-0002)
