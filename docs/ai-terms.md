@@ -45,8 +45,10 @@ An idea or method used when building with language models.
 | 🟪 **Prompt injection** | Text that tries to trick a model into ignoring its rules, for example an instruction hidden in a document or a message. | V2 seed | [V2 record](v2-baseline/part-3-trust-safety/08-prompt-injection-guardrails.md) |
 | 🟪 **RAG** | Retrieval-augmented generation: fetch relevant documents first and give them to the model, so its answer is based on your data and can cite sources. | V2 seed | [V2 record](v2-baseline/part-1-foundations/03-basic-rag.md) |
 | 🟪 **recall@k** | Of the documents that should come back, the share found in the first k results. | sub-stage 0.7 | [stage guide](stages/00-foundation.md) |
+| 🟪 **Reciprocal rank fusion (RRF)** | A way to merge several best-first result lists into one using only each item's position, so scores from different searches never have to be compared. | sub-stage 4.1 |  |
 | 🟪 **Reranker** | A second, more careful model that re-orders the first search results so the best ones come first. | sub-stage 4.1 |  |
 | 🟪 **Retrieval** | Finding the pieces of text most relevant to a question before the model answers. | V2 seed | [V2 record](v2-baseline/part-2-grounded-intelligence/05-realistic-crm-rag.md) |
+| 🟪 **Sparse vector** | A vector with one number per word, mostly zeros: it records which words a text contains, for keyword search. The opposite of a dense embedding. | sub-stage 4.1 |  |
 | 🟪 **Streaming** | Sending the model's answer word by word as it is produced, instead of waiting for the whole answer. Usually done with Server-Sent Events (SSE). | sub-stage 1.4 |  |
 | 🟪 **Structured output** | Making the model answer in a fixed shape (JSON that matches a schema) instead of free text, so code can use it safely. | sub-stage 2.1 |  |
 | 🟪 **System prompt** | Hidden instructions that set the model's role and rules before the user's message. | V2 seed | [V2 record](v2-baseline/part-3-trust-safety/08-prompt-injection-guardrails.md) |

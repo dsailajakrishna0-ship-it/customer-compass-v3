@@ -81,6 +81,14 @@ eval:
 eval-baseline:
     uv run --project {{api}} python evals/run_eval.py --out evals/baseline/v2.json
 
+# only the retrieval suite against the saved baseline (stack up, documents ingested, GOOGLE_API_KEY)
+eval-retrieval:
+    uv run --project {{api}} python evals/run_eval.py --suites retrieval --check evals/baseline/v2.json
+
+# the same, with hybrid search on (Stage 4.1): needs `just up` and a fresh ingest first
+eval-hybrid:
+    RETRIEVAL_MODE=hybrid uv run --project {{api}} python evals/run_eval.py --suites retrieval --check evals/baseline/v2.json
+
 # offline suite only: the rule-based guard against the adversarial prompts (no stack needed)
 eval-offline:
     uv run --project {{api}} python evals/run_eval.py --suites adversarial
