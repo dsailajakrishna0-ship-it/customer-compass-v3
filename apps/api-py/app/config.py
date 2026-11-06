@@ -49,6 +49,11 @@ class Settings(BaseSettings):
     vector_index_min_points: int = 10_000
     vector_hnsw_ef: int = 64
     vector_count_cache_seconds: float = 60.0
+    # Stage 4.1: how chunks are found. "dense" = meaning only (Stage 3 behaviour);
+    # "hybrid" = meaning plus exact words, merged by reciprocal rank fusion (see app/rag/retrieve.py)
+    retrieval_mode: Literal["dense", "hybrid"] = "dense"
+    retrieval_candidates: int = 20  # chunks fetched by each search before merging
+    rrf_k: int = 60  # reciprocal rank fusion constant: larger = flatter blend of the two rankings
     sample_data_dir: Path | None = None
 
     # Embeddings (Google AI Studio)

@@ -176,6 +176,20 @@ terms:
     match: ["BM25"]
     meaning: "A classic keyword-scoring method for search, the keyword half of hybrid search."
     since: "4.1"
+  - id: rrf
+    name: Reciprocal rank fusion (RRF)
+    category: concept
+    match: ["reciprocal rank fusion", "RRF"]
+    ignore_case: true
+    meaning: "A way to merge several best-first result lists into one using only each item's position, so scores from different searches never have to be compared."
+    since: "4.1"
+  - id: sparse-vector
+    name: Sparse vector
+    category: concept
+    match: ["sparse vector", "sparse vectors"]
+    ignore_case: true
+    meaning: "A vector with one number per word, mostly zeros: it records which words a text contains, for keyword search. The opposite of a dense embedding."
+    since: "4.1"
   - id: reranker
     name: Reranker
     category: concept

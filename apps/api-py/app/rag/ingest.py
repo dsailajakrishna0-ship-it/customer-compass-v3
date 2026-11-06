@@ -22,7 +22,8 @@ from app.config import get_settings
 from app.db import get_pool
 from app.rag.chunking import chunk_text
 from app.rag.embeddings import embed_texts
-from app.rag.qdrant_store import recreate_collection, upsert_chunks
+from app.rag.qdrant_store import DENSE, SPARSE, recreate_collection, upsert_chunks
+from app.rag.sparse import document_vector
 
 DOCUMENT_TYPES = {"email", "call", "note", "support", "product"}
 
@@ -134,7 +135,7 @@ async def ingest_documents() -> IngestSummary:
             points = [
                 PointStruct(
                     id=str(uuid.uuid4()),
-                    vector=embeddings[i],
+                    vector={DENSE: embeddings[i], SPARSE: document_vector(chunk.content)},
                     payload={
                         "document_id": document_id,
                         "chunk_index": chunk.index,

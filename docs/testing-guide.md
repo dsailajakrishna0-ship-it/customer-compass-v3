@@ -531,6 +531,26 @@ Mode **Account follow-up agent**. One run takes up to a minute or two on free mo
 
 Reading order: `apps/api-py/tests/README.md`, then `tests/contract/conftest.py` (the two seams and nothing else faked), then the *names* in `tests/contract/test_agent_recommend.py`, then `tests/test_contract_boundary.py`, then `make_llm()` in `app/routes/agent.py`. The [Stage 3 guide](stages/03-langgraph-port.md) explains each step.
 
+### Stage 4.1a: hybrid search (meaning plus exact words)
+
+Retrieval can now also match a question's exact words (names, ids, abbreviations) and merge that with the meaning search. It is **off by default** (`RETRIEVAL_MODE=dense`), so nothing changes until you switch it on. The collection now stores two vectors per chunk, so you must **ingest once again** after pulling.
+
+```bash
+git pull
+docker compose up -d --build api-py            # new retrieval code
+cd apps/api-py && uv run pytest tests/test_sparse.py tests/test_hybrid_retrieval.py -q    # 16 passed, no key or database needed
+```
+
+| # | Do | Expect | What it shows |
+| --- | --- | --- | --- |
+| 1 | Web app: click **Ingest documents** | "completed", the same document and chunk counts as before | The collection was recreated with both vectors |
+| 2 | Chat mode **Document Q&A**, ask `What did Maya Chen ask about the renewal of the Premium Operations Plan?` (needs both keys) | The same cited answer as before | Default mode is unchanged |
+| 3 | Put `RETRIEVAL_MODE=hybrid` in `.env`, then `docker compose up -d --force-recreate api-py`, and ask the same question and `What is the capital of France?` | The same cited answer; for France, no sources (the model says it is not in the documents) | Hybrid still finds the right chunk, and the similarity floor still stops unrelated questions |
+| 4 | `docker compose logs api-py --since 5m \| grep hybrid_search` | A line like `hybrid_search dense=20 keyword=12 merged=...` | Both searches ran and were merged |
+| 5 | With the stack up and documents ingested: `just eval-retrieval`, then `just eval-hybrid` (needs `GOOGLE_API_KEY`) | Both end with "reproduced", or list a metric outside ±0.02 | Recall and MRR are not worse in hybrid mode (the exit test for 4.1a) |
+
+**Without a key:** only the `pytest` line above. **With a key:** steps 1 to 5. If step 5 shows a metric worse than the baseline, do not switch the default: tell me the numbers and we decide together (the ADR lists what to try).
+
 ### Stage 3.2b: a paused agent run is saved in Postgres and resumed by Confirm
 
 When the agent reaches "awaiting user confirmation" the run now really stops and is saved in Postgres. Confirm resumes that saved run; it is the run that writes the task. The web screen looks the same. What is new is that the pause survives an API restart.

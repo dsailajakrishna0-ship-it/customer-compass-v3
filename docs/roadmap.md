@@ -40,7 +40,7 @@ repo findings (R1–R12) and doc findings (D1–D9) are cited below. Decisions a
 | 1 | Model layer (cloud-only) | Done |
 | 2 | Tools and 🟦MCP | Done, except the tool-call 🟪eval check that needs an 🟩OpenRouter key |
 | 3 | 🟦LangGraph port | Done (3.1, 3.2a, 3.2b); the live 🟪agent test with keys is the owner's |
-| 4 | 🟪Retrieval upgrade | Planned |
+| 4 | 🟪Retrieval upgrade | In progress (4.1a 🟪hybrid search in review) |
 | 5 | Observability and evals | Planned |
 | 6 | New CRM modules and auth | Planned |
 | 7 | Agents and supervisor | Planned |
@@ -93,7 +93,7 @@ repo findings (R1–R12) and doc findings (D1–D9) are cited below. Decisions a
 
 | Sub-stage | Tasks | Exit criteria |
 | --- | --- | --- |
-| **4.1 Hybrid + rerank** (T5) | 🟪Hybrid search (dense + 🟪BM25) and a 🟪cross-encoder reranker on 🟩Qdrant. | Recall@k and 🟪MRR at least the baseline. |
+| **4.1 Hybrid + rerank** (T5), in two PRs ([ADR 0019](adr/0019-hybrid-search-and-reranker.md)): **4.1a** 🟪hybrid search; **4.1b** 🟪reranker | 4.1a: Hybrid search (dense + 🟪BM25 keyword vectors, merged by 🟪reciprocal rank fusion) on 🟩Qdrant. 4.1b: a hosted free-tier cross-encoder reranker, optional and time-limited. | Recall@k and 🟪MRR at least the baseline, measured with `just eval-hybrid`. |
 | **4.2 Ingestion** (T6) | 🟦Docling ingestion with source, page or sheet, and 🟪chunk metadata. | Citations show source and page or sheet. |
 | **4.3 🟪Embeddings** (T4) | Compare an open-source embedding model (🟦FastEmbed) with 🟧Gemini; re-embed on any change. | ADR records the decision. |
 

@@ -17,7 +17,9 @@ from qdrant_client.models import (
     FieldCondition,
     Filter,
     MatchValue,
+    Modifier,
     PointStruct,
+    SparseVectorParams,
     VectorParams,
 )
 
@@ -25,6 +27,11 @@ from app.config import get_settings
 from app.rag.embeddings import EMBEDDING_DIMENSIONS
 
 # Vector DB: Qdrant stores chunk embeddings and does nearest-neighbour search
+
+# Every chunk point holds two named vectors (Stage 4.1): "dense" is the meaning embedding,
+# "bm25" is the keyword vector built in app/rag/sparse.py.
+DENSE = "dense"
+SPARSE = "bm25"
 
 
 def collection_name() -> str:
@@ -58,7 +65,10 @@ async def recreate_collection() -> None:
     await client.create_collection(
         collection_name=collection_name(),
         # Cosine distance: compares vector direction, so similar meaning scores close to 1
-        vectors_config=VectorParams(size=EMBEDDING_DIMENSIONS, distance=Distance.COSINE),
+        vectors_config={DENSE: VectorParams(size=EMBEDDING_DIMENSIONS, distance=Distance.COSINE)},
+        # IDF modifier: Qdrant multiplies each word's weight by how rare the word is across all
+        # chunks, which together with the term weights from sparse.py gives BM25 scoring
+        sparse_vectors_config={SPARSE: SparseVectorParams(modifier=Modifier.IDF)},
     )
 
 

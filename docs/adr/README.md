@@ -26,6 +26,7 @@ One short file per decision, so the reason for a choice is not buried in a long 
 | [0016](0016-spring-boot-mcp-server.md) | The Spring Boot MCP server | Accepted |
 | [0017](0017-contract-and-internal-tests.md) | API-contract tests and internal tests | Accepted |
 | [0018](0018-langgraph-graph-and-resume.md) | The agent as a LangGraph graph, and how a paused run resumes | Accepted |
+| [0019](0019-hybrid-search-and-reranker.md) | Hybrid search with our own BM25 vectors, and a hosted free-tier reranker | Accepted |
 
 ## Template
 

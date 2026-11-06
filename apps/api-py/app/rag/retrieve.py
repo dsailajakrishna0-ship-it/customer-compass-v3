@@ -8,7 +8,9 @@ offsets), so no join back to Postgres is needed here.
 """
 
 import logging
+import math
 import time
+from collections.abc import Hashable, Sequence
 from dataclasses import dataclass
 from typing import cast
 
@@ -18,12 +20,14 @@ from qdrant_client.models import (
     IsNullCondition,
     MatchValue,
     PayloadField,
+    ScoredPoint,
     SearchParams,
 )
 
 from app.config import get_settings
 from app.rag.embeddings import embed_text
-from app.rag.qdrant_store import collection_name, get_client
+from app.rag.qdrant_store import DENSE, SPARSE, collection_name, get_client
+from app.rag.sparse import query_vector
 
 # Retrieval: embed the question, then ask Qdrant for the top-k most similar chunks
 DEFAULT_TOP_K = 4
@@ -108,47 +112,111 @@ def _company_filter(company_id: int | None) -> Filter | None:
     )
 
 
+def rrf_fuse[T: Hashable](rankings: Sequence[Sequence[T]], k: int = 60) -> list[T]:
+    """Reciprocal rank fusion: merges several best-first rankings into one.
+
+    Each item scores `1 / (k + rank)` in every ranking that contains it (rank starts at 1), and the
+    scores add up. An item both searches like beats an item only one of them found. Only positions
+    are used, never the raw scores, so a cosine score and a BM25 score (which are on different
+    scales) can be merged without any tuning. A larger `k` makes the blend flatter."""
+    scores: dict[T, float] = {}
+    for ranking in rankings:
+        for position, item in enumerate(ranking, start=1):
+            scores[item] = scores.get(item, 0.0) + 1 / (k + position)
+    return sorted(scores, key=lambda item: scores[item], reverse=True)
+
+
+def cosine(a: Sequence[float], b: Sequence[float]) -> float:
+    """Cosine similarity of two dense vectors (what Qdrant's own score is for the dense vector)."""
+    dot = sum(x * y for x, y in zip(a, b, strict=True))
+    norm = math.sqrt(sum(x * x for x in a)) * math.sqrt(sum(y * y for y in b))
+    return dot / norm if norm else 0.0
+
+
+async def _dense_points(
+    question_embedding: list[float], company_id: int | None, limit: int
+) -> list[ScoredPoint]:
+    strategy, search_params = choose_search_strategy(await get_point_count())
+    logger.info("vector_search strategy=%s collection=%s", strategy, collection_name())
+    result = await get_client().query_points(
+        collection_name=collection_name(),
+        query=question_embedding,
+        using=DENSE,
+        query_filter=_company_filter(company_id),
+        search_params=search_params,
+        limit=limit,
+        with_payload=True,
+    )
+    return result.points
+
+
+async def _keyword_points(question: str, company_id: int | None, limit: int) -> list[ScoredPoint]:
+    """Chunks that share the question's exact words, best first (BM25). The dense vector is returned
+    too, so a chunk found only by keywords can still get a meaning-similarity score."""
+    sparse = query_vector(question)
+    if not sparse.indices:
+        return []
+    result = await get_client().query_points(
+        collection_name=collection_name(),
+        query=sparse,
+        using=SPARSE,
+        query_filter=_company_filter(company_id),
+        limit=limit,
+        with_payload=True,
+        with_vectors=[DENSE],
+    )
+    return result.points
+
+
+def _chunk(point: ScoredPoint, similarity: float) -> RetrievedChunk:
+    payload = point.payload or {}
+    return RetrievedChunk(
+        chunk_id=cast(int | str, point.id),
+        document_id=payload["document_id"],
+        document_title=payload["document_title"],
+        source_path=payload["source_path"],
+        doc_type=payload["doc_type"],
+        company_name=payload.get("company_name"),
+        chunk_index=payload["chunk_index"],
+        content=payload["content"],
+        similarity=similarity,
+    )
+
+
 async def retrieve_relevant_chunks(
     question: str,
     company_id: int | None = None,
     top_k: int = DEFAULT_TOP_K,
 ) -> list[RetrievedChunk]:
-    """Finds the closest document chunks to `question`. When `company_id` is
-    given (company-scoped question), only that company's documents and
-    company-agnostic documents are eligible."""
-    query_embedding = await embed_text(question)
-    client = get_client()
-    strategy, search_params = choose_search_strategy(await get_point_count())
-    logger.info("vector_search strategy=%s collection=%s", strategy, collection_name())
+    """Finds the best document chunks for `question`. When `company_id` is given (company-scoped
+    question), only that company's documents and company-agnostic documents are eligible.
 
-    results = await client.query_points(
-        collection_name=collection_name(),
-        query=query_embedding,
-        query_filter=_company_filter(company_id),
-        search_params=search_params,
-        limit=top_k,
-        with_payload=True,
-    )
+    `retrieval_mode` decides how (Stage 4.1): "dense" asks Qdrant for the closest meanings;
+    "hybrid" also asks for the chunks sharing the question's exact words and merges the two
+    rankings with reciprocal rank fusion. In both modes a chunk whose meaning-similarity is
+    below MIN_SIMILARITY is dropped, so an unrelated question still finds nothing to cite."""
+    settings = get_settings()
+    question_embedding = await embed_text(question)
 
-    chunks = []
-    for point in results.points:
-        if point.score < MIN_SIMILARITY:
-            continue
-        payload = point.payload or {}
-        chunks.append(
-            RetrievedChunk(
-                chunk_id=cast(int | str, point.id),
-                document_id=payload["document_id"],
-                document_title=payload["document_title"],
-                source_path=payload["source_path"],
-                doc_type=payload["doc_type"],
-                company_name=payload.get("company_name"),
-                chunk_index=payload["chunk_index"],
-                content=payload["content"],
-                similarity=point.score,
+    if settings.retrieval_mode == "dense":
+        points = await _dense_points(question_embedding, company_id, top_k)
+        return [_chunk(p, p.score) for p in points if p.score >= MIN_SIMILARITY]
+
+    limit = settings.retrieval_candidates
+    dense = await _dense_points(question_embedding, company_id, limit)
+    keyword = await _keyword_points(question, company_id, limit)
+    similarity = {p.id: p.score for p in dense}
+    points_by_id = {p.id: p for p in [*keyword, *dense]}
+    for point in keyword:
+        if point.id not in similarity:
+            vector = point.vector.get(DENSE) if isinstance(point.vector, dict) else None
+            similarity[point.id] = (
+                cosine(question_embedding, cast(list[float], vector)) if vector else 0.0
             )
-        )
-    return chunks
+    order = rrf_fuse([[p.id for p in dense], [p.id for p in keyword]], settings.rrf_k)
+    logger.info("hybrid_search dense=%d keyword=%d merged=%d", len(dense), len(keyword), len(order))
+    kept = [i for i in order if similarity[i] >= MIN_SIMILARITY][:top_k]
+    return [_chunk(points_by_id[i], similarity[i]) for i in kept]
 
 
 def build_context(chunks: list[RetrievedChunk]) -> str:
