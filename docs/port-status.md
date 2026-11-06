@@ -6,9 +6,16 @@ Customer Compass V3 (this repo) has a Java sibling and a planned claims project.
 | --- | --- | --- | --- |
 | [`customer-compass-v3`](https://github.com/dsailajakrishna0-ship-it/customer-compass-v3) (this repo) | CRM | Python and Java; the web app's radio buttons pick the path | Stage 3 of 9 |
 | [`customer-compass-v3-java`](https://github.com/dsailajakrishna0-ship-it/customer-compass-v3-java) | CRM, same API contract | Java only: Spring Boot, Spring AI | J0 (plan and shared assets in review) |
-| `claims-compass-v1` | Insurance claims management | Java only; a Python version is decided later | Planned, created once the Java edition reaches RAG and MCP |
+| `claims-compass-v1` | Insurance claims management | Java only; a Python version is decided later | **Deferred** until this repo and the Java edition are almost complete |
+| `inbox-compass-v1` (name to confirm) | Email: categorize an email and answer from help articles | Python, the same free-tier stack | **Deferred**, same condition. An experiment sandbox for studying model behaviour (structured output, RAG off versus on, prompt changes) |
 
 `claims-compass-v1` keeps the "Compass" family name; the `v1` is the API version (`/api/v1/...`, `contracts/mcp-tools.json` version 1). A breaking change would be `claims-compass-v2`.
+
+## Scope order (decided 2026-11-06)
+
+Only the first two repos are active: `customer-compass-v3` and `customer-compass-v3-java`. `claims-compass-v1` and `inbox-compass-v1` start only when those two are almost complete.
+
+`inbox-compass-v1` uses ideas only. It must not contain any employer's code, data, documents, prompts or category lists: its emails and help articles are synthetic or written from public knowledge.
 
 ## The rule
 
