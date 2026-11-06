@@ -46,6 +46,7 @@ repo findings (R1–R12) and doc findings (D1–D9) are cited below. Decisions a
 | 7 | 🟪Agents and supervisor | Planned |
 | 8 | Product features | Planned |
 | 9 | Close-out | Planned |
+| Alongside | Sibling repos: [`customer-compass-v3-java`](https://github.com/dsailajakrishna0-ship-it/customer-compass-v3-java) and `claims-compass-v1` | Java repo started; claims and email experiments deferred ([port-status.md](port-status.md)) |
 
 ![The ten roadmap stages in order: 0 Foundation (current), then 1 Model layer, 2 Tools and MCP, 3 LangGraph port, 4 Retrieval upgrade, 5 Observability and evals, 6 CRM modules and auth, 7 Agents and supervisor, 8 Product features, 9 Close-out.](img/diagrams/roadmap-stage-flow.png)
 
@@ -130,6 +131,30 @@ repo findings (R1–R12) and doc findings (D1–D9) are cited below. Decisions a
 | --- | --- | --- |
 | **9.1 Concepts section** | Assemble [`concepts/`](concepts/README.md) from the stage guides: the **final architecture overview** (system context, containers, main flows; refreshes the V2-era [`architecture.md`](architecture.md)), concept map, A-to-Z glossary, questions and answers by level, "which stage taught what" table, reading paths for a learner, a teammate new to AI and a wider audience. | Every answer links to the guide that proves it; numbers re-checked against the final baseline. |
 | **9.2 Close-out** | Final docs pass, V3 retrospective, V2-vs-V3 comparison table (quality, latency, tokens, lines of code), tag `v3.0.0`. | Tag `v3.0.0` produces the release; no stale status anywhere. |
+
+## Alongside V3 — Sibling repos (decided 2026-11-05)
+
+This repository continues as planned, Stages 0 to 9. The Java edition runs next to it now; the other siblings wait until both are almost complete; [`port-status.md`](port-status.md) is the live table.
+
+| Repo | Domain | Languages | When |
+| --- | --- | --- | --- |
+| `customer-compass-v3` (this repo) | CRM | Python and Java; the web app's radio buttons pick the path | Now |
+| [`customer-compass-v3-java`](https://github.com/dsailajakrishna0-ship-it/customer-compass-v3-java) | CRM, the same API contract | Java only: Spring Boot, 🟦Spring AI | Started; follows this repo by about one stage |
+| `claims-compass-v1` | Insurance claims management | Java only; a Python version is decided after seeing it | Deferred until this repo and the Java edition are almost complete |
+| `inbox-compass-v1` (name to confirm) | Email: categorize and answer from help articles; an experiment sandbox for model behaviour, built from synthetic or public material only | Python, the same free-tier stack | Deferred, same condition |
+
+**What makes the Java edition possible:** the tool contract (`contracts/mcp-tools.json`), the API-contract tests (`apps/api-py/tests/contract/`, which must pass unchanged on any implementation), the sample data and the 🟪eval 🟪golden set. They are copied to the sibling and recorded in its `docs/shared-assets.md`. A contract change is made here first.
+
+**`claims-compass-v1` in one paragraph:** a claim arrives with forms and photos; policy wording is searched (🟪RAG); coverage is checked with tools; a second 🟪agent reviews fraud signals; a settlement is recommended; a human adjuster approves it. The `v1` is the API version: routes are `/api/v1/claims`, `/api/v1/claims/{id}/documents`, `/api/v1/agent/recommend`, `/api/v1/agent/confirm`; a breaking change would be a new `claims-compass-v2` repo.
+
+**To decide later** (add anything missed):
+
+- Whether the Java edition's agent graph uses Spring AI workflow patterns or LangGraph4j (an ADR in the Java repo, Stage J5).
+- The no-framework (plain Java) version and what the comparison measures: lines of code, latency, tokens, quality on the same evals.
+- Whether the web app's backend radio points at the Java repo's API, or each edition keeps its own copy of the web app.
+- Whether claims also gets a Python version.
+
+**Exit criteria (draft):** each repo starts from a clean `docker compose up`, passes the same contract tests (this repo and the Java edition), and has a short guide that says what it does differently.
 
 ## Risks
 
