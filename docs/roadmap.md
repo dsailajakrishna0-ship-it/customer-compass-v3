@@ -46,7 +46,7 @@ repo findings (R1–R12) and doc findings (D1–D9) are cited below. Decisions a
 | 7 | 🟪Agents and supervisor | Planned |
 | 8 | Product features | Planned |
 | 9 | Close-out | Planned |
-| Alongside | Sibling repos: [`customer-compass-v3-java`](https://github.com/dsailajakrishna0-ship-it/customer-compass-v3-java) and `claims-compass-v1` | Java repo started; claims planned ([port-status.md](port-status.md)) |
+| Alongside | Sibling repos: [`customer-compass-v3-java`](https://github.com/dsailajakrishna0-ship-it/customer-compass-v3-java) and `claims-compass-v1` | Java repo started; claims and email experiments deferred ([port-status.md](port-status.md)) |
 
 ![The ten roadmap stages in order: 0 Foundation (current), then 1 Model layer, 2 Tools and MCP, 3 LangGraph port, 4 Retrieval upgrade, 5 Observability and evals, 6 CRM modules and auth, 7 Agents and supervisor, 8 Product features, 9 Close-out.](img/diagrams/roadmap-stage-flow.png)
 
@@ -134,17 +134,18 @@ repo findings (R1–R12) and doc findings (D1–D9) are cited below. Decisions a
 
 ## Alongside V3 — Sibling repos (decided 2026-11-05)
 
-This repository continues as planned, Stages 0 to 9. Two sibling repositories run next to it; [`port-status.md`](port-status.md) is the live table.
+This repository continues as planned, Stages 0 to 9. The Java edition runs next to it now; the other siblings wait until both are almost complete; [`port-status.md`](port-status.md) is the live table.
 
 | Repo | Domain | Languages | When |
 | --- | --- | --- | --- |
 | `customer-compass-v3` (this repo) | CRM | Python and Java; the web app's radio buttons pick the path | Now |
 | [`customer-compass-v3-java`](https://github.com/dsailajakrishna0-ship-it/customer-compass-v3-java) | CRM, the same API contract | Java only: Spring Boot, 🟦Spring AI | Started; follows this repo by about one stage |
-| `claims-compass-v1` | Insurance claims management | Java only; a Python version is decided after seeing it | After the Java edition reaches 🟪RAG and 🟦MCP |
+| `claims-compass-v1` | Insurance claims management | Java only; a Python version is decided after seeing it | Deferred until this repo and the Java edition are almost complete |
+| `inbox-compass-v1` (name to confirm) | Email: categorize and answer from help articles; an experiment sandbox for model behaviour, built from synthetic or public material only | Python, the same free-tier stack | Deferred, same condition |
 
 **What makes the Java edition possible:** the tool contract (`contracts/mcp-tools.json`), the API-contract tests (`apps/api-py/tests/contract/`, which must pass unchanged on any implementation), the sample data and the 🟪eval 🟪golden set. They are copied to the sibling and recorded in its `docs/shared-assets.md`. A contract change is made here first.
 
-**`claims-compass-v1` in one paragraph:** a claim arrives with forms and photos; policy wording is searched (RAG); coverage is checked with tools; a second 🟪agent reviews fraud signals; a settlement is recommended; a human adjuster approves it. The `v1` is the API version: routes are `/api/v1/claims`, `/api/v1/claims/{id}/documents`, `/api/v1/agent/recommend`, `/api/v1/agent/confirm`; a breaking change would be a new `claims-compass-v2` repo.
+**`claims-compass-v1` in one paragraph:** a claim arrives with forms and photos; policy wording is searched (🟪RAG); coverage is checked with tools; a second 🟪agent reviews fraud signals; a settlement is recommended; a human adjuster approves it. The `v1` is the API version: routes are `/api/v1/claims`, `/api/v1/claims/{id}/documents`, `/api/v1/agent/recommend`, `/api/v1/agent/confirm`; a breaking change would be a new `claims-compass-v2` repo.
 
 **To decide later** (add anything missed):
 
