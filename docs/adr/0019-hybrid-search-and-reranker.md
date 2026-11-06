@@ -8,7 +8,7 @@
 
 Retrieval today is dense only: the question is embedded and Qdrant returns the closest chunks by meaning. That blurs exact terms (a deal name, an invoice id, an abbreviation). 4.1 adds keyword matching (hybrid search) and a reranker that re-orders the candidates. The exit criterion is that recall@k and MRR are at least the baseline. The baseline is already near its ceiling (MRR 1.00, recall@3 0.99), so the realistic goal of 4.1a is "no regression, and the exact-word cases work"; harder questions are added when the baseline is next re-taken.
 
-Two constraints from earlier decisions: V3 is cloud-only ([ADR 0010](0010-cloud-only-v3.md)), and everything must run on free tiers.
+Two constraints from earlier decisions: V3 is cloud-only ([ADR 0010](0010-cloud-only-models.md)), and everything must run on free tiers.
 
 ## Decision
 
