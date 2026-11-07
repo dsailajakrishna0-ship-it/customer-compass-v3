@@ -531,6 +531,26 @@ Mode **Account follow-up agent**. One run takes up to a minute or two on free mo
 
 Reading order: `apps/api-py/tests/README.md`, then `tests/contract/conftest.py` (the two seams and nothing else faked), then the *names* in `tests/contract/test_agent_recommend.py`, then `tests/test_contract_boundary.py`, then `make_llm()` in `app/routes/agent.py`. The [Stage 3 guide](stages/03-langgraph-port.md) explains each step.
 
+### Stage 4.3: choosing the embedding model, and noticing a changed one
+
+The embedding model is now a setting (`EMBEDDING_PROVIDER`: `google` is the default, `fastembed` is an open-source option for comparison), the index remembers which model built it, and a search with a different model stops with a clear "re-ingest" message. The open-source model is an **optional install** and is not in the Docker image.
+
+```bash
+git pull
+docker compose up -d --build api-py            # the Docker image still uses Google embeddings
+cd apps/api-py && uv run pytest tests/test_embedding_models.py -q     # 12 passed, no key or model download
+```
+
+| # | Do | Expect | What it shows |
+| --- | --- | --- | --- |
+| 1 | `uv run --project apps/api-py --extra local-embeddings python evals/compare_embeddings.py --models fastembed` (no key; downloads a 67 MB model the first time) | A table with `fastembed:BAAI/bge-small-en-v1.5`, 384 dimensions, recall@1 about 0.79, recall@3 about 0.99, MRR about 0.97, and a **negative** similarity gap | The open-source model ranks well, but its scores cannot separate unrelated questions (ADR 0021) |
+| 2 | `uv run --project apps/api-py python evals/compare_embeddings.py` (needs `GOOGLE_API_KEY`) | The same table with a second column for `google:gemini-embedding-001` (768 dimensions) | The Gemini numbers on the same corpus. **Please send me this table** so I can fill the ADR |
+| 3 | Web app: **Ingest documents**, then ask a Document Q&A question | Works as before (needs both keys) | The index now records `google:gemini-embedding-001` |
+| 4 | In `.env` set `EMBEDDING_PROVIDER=fastembed`, recreate the API container, and ask a Document Q&A question | A message: the documents were embedded with `google:gemini-embedding-001`, but the model is now `fastembed:...`, **click Ingest documents** (the API container has no FastEmbed package; to see the whole flow run the API outside Docker with `--extra local-embeddings`) | A changed model is noticed instead of returning nonsense |
+| 5 | Remove the line again, recreate the container | The same questions work again, no re-ingest needed | Switching back to the model that built the index is fine |
+
+**Without a key:** the `pytest` line and step 1. **With keys:** steps 2 to 5. The comparison in step 2 is the one thing I could not run myself.
+
 ### Stage 4.2: PDF, Word and Excel documents, with the page or sheet in the citation
 
 Ingestion now reads `.pdf`, `.docx` and `.xlsx` as well as Markdown, and a citation says where in the file the text is. Three invented sample files were added to `sample-data/documents` (a two-page service agreement PDF, a two-sheet rate card, a data-handling policy). Every file other than Markdown has a small `<name>.meta.yaml` beside it.
