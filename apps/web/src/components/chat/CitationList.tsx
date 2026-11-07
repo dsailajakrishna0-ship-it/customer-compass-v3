@@ -9,7 +9,10 @@ export function CitationList({ citations }: { citations: Citation[] }) {
         <li key={citation.number}>
           [{citation.number}] {citation.title}
           {citation.companyName ? ` · ${citation.companyName}` : ""}
-          {" "}({citation.docType}, similarity {citation.similarity.toFixed(2)})
+          {" "}({citation.docType}
+          {citation.page != null ? `, page ${citation.page}` : ""}
+          {citation.sheet ? `, sheet ${citation.sheet}` : ""}, similarity{" "}
+          {citation.similarity.toFixed(2)})
         </li>
       ))}
     </ol>

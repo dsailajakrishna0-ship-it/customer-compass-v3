@@ -1,7 +1,7 @@
 # Stage 4 — Retrieval upgrade: find the right chunks more often
 
-> **Level:** beginner friendly; read [Stage 3](03-langgraph-port.md) for how the 🟪agent uses 🟪retrieval. **Reading time:** about 15 minutes for what is written so far.
-> **Status:** in progress. **4.1a (🟪hybrid search) and 4.1b (🟪reranker) are written; 4.2 (parsing) and 4.3 (🟪embeddings) are added when built.**
+> **Level:** beginner friendly; read [Stage 3](03-langgraph-port.md) for how the 🟪agent uses 🟪retrieval. **Reading time:** about 20 minutes for what is written so far.
+> **Status:** in progress. **4.1a (🟪hybrid search), 4.1b (🟪reranker) and 4.2 (reading PDF, Word and Excel) are written; 4.3 (🟪embeddings) is added when built.**
 > **Roadmap:** [Stage 4](../roadmap.md#stage-4--retrieval-upgrade) · **Decisions:** [ADR 0019](../adr/0019-hybrid-search-and-reranker.md)
 
 **AI colour code:** 🟪 concept · 🟦 framework or tool · 🟩 data store or service · 🟧 model. Unmarked technical terms are ordinary software. [A to Z list](../ai-terms.md)
@@ -51,9 +51,28 @@ A 🟪RAG answer is only as good as the 🟪chunks it is given. Today's search f
 
 **Rule to remember.** *Search is wide and fast; the reranker is narrow and careful. Use the cheap one to get a shortlist and the careful one to order it, and never let the careful one be a single point of failure.*
 
+## Concept 3 — Reading real documents, and citing the page (4.2)
+
+**The problem.** Until now every document was a tidy Markdown file. Real material is a PDF contract, a Word policy, an Excel rate card. And a citation that says only "Service agreement" makes a reader hunt: *which page?*
+
+**The idea.** Read each file into **segments** that remember where they came from (a PDF page, an Excel sheet), cut each segment into 🟪chunks, and let every chunk keep that location. Then a citation can say "Acme service agreement, **page 2**" or "Rate card, **sheet SLA credits**".
+
+| Shop idea | Project idea | In the code |
+| --- | --- | --- |
+| Each page of a contract is photocopied separately and labelled with its page number | **Segments with a location** | `Segment(text, page, sheet)` in `app/rag/parse.py` |
+| A different clerk for each kind of paper | **One reader per format** | `parse_pdf_pages`, `parse_word`, `parse_sheets` |
+| A label stuck to the folder, because a PDF has no place to write who it is about | **Sidecar metadata** | `report.pdf` plus `report.meta.yaml` |
+| The label travels with every copy | **The 🟪chunk inherits the location** | `chunk_segments()` in `app/rag/ingest.py` |
+
+**Why not the full 🟦Docling?** Docling reads a lot, but its PDF reader needs a large machine-learning layout model (a multi-gigabyte install, PyTorch, a model download). We measured it: the light `docling-slim` reads Word and Excel with no model and keeps each sheet's name, but a PDF fails without PyTorch. So Word and Excel go through Docling, and PDFs through the small `pypdfium2` library, which gives exact page numbers for **text** PDFs. A scanned PDF has no text to read; that needs OCR and is a later choice ([ADR 0020](../adr/0020-multi-format-ingestion.md)).
+
+**The answer changed too.** The context handed to the model now says `Source: Acme service agreement (support, page 2)`, and the citation returned by the API has `page` or `sheet` (only when there is one), which the web app shows.
+
+**Rule to remember.** *A source without a location is a claim you cannot check. Carry the location from the file to the citation, one chunk at a time.*
+
 ---
 
-## Code tour: what changed in 4.1a and 4.1b
+## Code tour: what changed in 4.1a, 4.1b and 4.2
 
 | | Where | What |
 | --- | --- | --- |
@@ -65,6 +84,12 @@ A 🟪RAG answer is only as good as the 🟪chunks it is given. Today's search f
 | 🟢 | `app/rag/rerank.py` | (4.1b) The hosted 🟪reranker call for Voyage and Cohere, parsing, and the "never raise" rule |
 | 🟡 | `app/rag/retrieve.py` | (4.1b) a longer shortlist when a reranker is on, `_rerank`, the floor still first |
 | 🟡 | `app/config.py`, `docker-compose.yml`, `.env.example` | (4.1b) `rerank_provider`, the two keys, the model and timeout; compose now passes `RETRIEVAL_MODE` and the rerank settings through |
+| 🟢 | `app/rag/parse.py` | (4.2) Segments, one reader per format, the sidecar rule |
+| 🟡 | `app/rag/ingest.py` | (4.2) loads every supported file, chunks per segment, stores `page` and `sheet` |
+| 🟡 | `app/rag/retrieve.py`, `app/routes/chat.py` | (4.2) `RetrievedChunk.location`, "page 2" in the context and in the citation |
+| 🟡 | `apps/web/src/components/chat/CitationList.tsx`, `types/index.ts` | (4.2) the web app shows the page or sheet |
+| 🟢 | `sample-data/documents/*.pdf, *.xlsx, *.docx, *.meta.yaml`, `scripts/make_sample_files.py` | (4.2) three invented sample files and the script that regenerates them |
+| 🟢 | `tests/test_parse.py` | (4.2) 11 tests: each format, locations, missing or bad metadata, citations |
 | 🟢 | `tests/test_rerank.py` | (4.1b) 16 tests with a fake provider: requests, parsing, every failure |
 | 🟢 | `tests/test_sparse.py`, `tests/test_hybrid_retrieval.py` | 16 tests, no key or database needed |
 | 🟡 | `justfile` | `just eval-retrieval`, `just eval-hybrid` |
@@ -79,6 +104,8 @@ A 🟪RAG answer is only as good as the 🟪chunks it is given. Today's search f
 - **🟪Reciprocal rank fusion (🟪RRF)**: merging ranked lists by position, `1 / (k + rank)`.
 - **🟪Hybrid search**: dense plus keyword search, merged.
 - **🟪Reranker / 🟪cross-encoder**: a model that reads the question and a 🟪chunk together and scores the fit; slower and more accurate than comparing stored vectors.
+- **Segment**: a run of text from a file together with where it sits (a page or a sheet).
+- **Sidecar file**: a small metadata file next to a document that has no place for its own metadata.
 - **Recall@k, 🟪MRR**: how often the right document is in the top k, and how high the first right one ranks.
 
 ## Check your understanding
@@ -121,6 +148,26 @@ Nothing visible: retrieval keeps the search order and logs a warning. Reranking 
 <details><summary>8. Does the reranker replace the similarity floor?</summary>
 
 No. The floor runs first and decides what is relevant at all; the reranker only decides the order among what passed. An unrelated question still finds nothing to cite.
+</details>
+
+<details><summary>9. Why does a citation need a page or a sheet?</summary>
+
+So a person can check the claim quickly. "Acme service agreement" sends them through the whole file; "page 2" sends them to the clause.
+</details>
+
+<details><summary>10. Why are PDFs not read with 🟦Docling here?</summary>
+
+Docling's PDF reader needs a PyTorch layout model: a multi-gigabyte install and a model download. A light PDF library gives exact pages for text PDFs, which is all this stage needs. Word and Excel still use Docling, because they need no model.
+</details>
+
+<details><summary>11. What would you need to support scanned PDFs or tables inside PDFs?</summary>
+
+OCR and a layout model: the full Docling, or Docling running as its own service. The parser is behind one function, so a PDF-only swap is possible without touching the rest.
+</details>
+
+<details><summary>12. Why does a Word file get no page number?</summary>
+
+A Word file has no fixed pages: where a page ends depends on the viewer's fonts and settings. So we do not invent one; its citation shows no location.
 </details>
 
 ## Further reading

@@ -8,7 +8,7 @@ A fixed question set and one runner, `run_eval.py`, so every later change is mea
 
 | Suite | 🟪Golden set | What is measured | Needs |
 | --- | --- | --- | --- |
-| `retrieval` | `golden/retrieval.json`: 36 answerable and 6 unanswerable questions over the 16 sample documents | 🟪recall@1/3/5, 🟪MRR (a document counts once, at its best rank), and the share of unanswerable questions that return nothing | stack up, documents ingested, `GOOGLE_API_KEY` |
+| `retrieval` | `golden/retrieval.json`: 36 answerable and 6 unanswerable questions over the 16 Markdown sample documents (the three PDF, Word and Excel samples added in Stage 4.2 are not in the golden set yet) | 🟪recall@1/3/5, 🟪MRR (a document counts once, at its best rank), and the share of unanswerable questions that return nothing | stack up, documents ingested, `GOOGLE_API_KEY` |
 | `tools` | `golden/tool_calls.json`: 10 cases | right 🟦MCP tool chosen, right arguments, no task written without confirmation | API and a model |
 | `agent` | `golden/agent.json`: 10 cases | routing, outcome, company chosen, no task written, steps and latency | API and a model |
 | `adversarial` | `adversarial-prompts.json`: 24 attacks and 6 benign 🟪prompts | attack detection rate and false positives of the rule-based guard | nothing (offline) |

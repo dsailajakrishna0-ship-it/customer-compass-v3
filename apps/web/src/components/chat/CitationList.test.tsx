@@ -22,6 +22,20 @@ describe("CitationList", () => {
     );
   });
 
+  it("shows the page of a PDF and the sheet of a spreadsheet when there is one", () => {
+    render(
+      <CitationList
+        citations={[
+          { ...citation, page: 3 },
+          { ...citation, number: 2, sheet: "Deals" },
+        ]}
+      />,
+    );
+    const [pdf, sheet] = screen.getAllByRole("listitem");
+    expect(pdf).toHaveTextContent("(note, page 3, similarity 0.81)");
+    expect(sheet).toHaveTextContent("(note, sheet Deals, similarity 0.81)");
+  });
+
   it("omits the company when there is none", () => {
     render(<CitationList citations={[{ ...citation, companyName: null }]} />);
     expect(screen.getByRole("listitem")).not.toHaveTextContent("·");

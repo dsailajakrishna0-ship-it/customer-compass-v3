@@ -54,7 +54,7 @@ Stages refer to [the roadmap](roadmap.md). "Seed" means it came with V2's final 
 | **🟦FastMCP** (streamable HTTP) | A long-running tool server instead of a new process per chat turn | 2.2 | Planned |
 | **🟦LangGraph** (+ Postgres 🟪checkpointer) | Models the agent steps as a graph, pausable for 🟪human approval | 3.2 | In use |
 | **🟪Hybrid search + 🟪reranker** (Qdrant, 🟦FastEmbed) | Combines keyword and meaning search, then re-orders results | 4.1 | In use (hybrid; reranker optional, off by default) |
-| **🟦Docling** | Reads PDFs, Word and spreadsheets, not only Markdown | 4.2 | Planned |
+| **🟦Docling** (light `docling-slim`) + `pypdfium2` | Reads Word and spreadsheets (Docling) and PDFs (`pypdfium2`), keeping page and sheet for citations | 4.2 | In use |
 | **🟦FastEmbed / 🟦sentence-transformers** | Open-source embeddings that run without an API key | 4.3 | Planned (comparison) |
 | **🟦Langfuse + OpenTelemetry** | Shows every model call and agent step as a trace | 5.1 | Planned |
 | **🟦Ragas or 🟦DeepEval** | Scores answer quality with metrics beyond recall and MRR | 5.2 | Planned |
@@ -72,7 +72,7 @@ Optional comparisons (decided by an ADR, never adopted by default): 🟦Pydantic
 | 1 Model layer | 1.1: pydantic-settings, structlog, `models.yaml`; 1.2: 🟦LiteLLM gateway; 1.4: typed test fake | 1.3: 🟩Ollama and the local/cloud provider switch removed | [Stage 1](stages/01-model-layer.md) (done) |
 | 2 Tools and 🟦MCP | 2.1: native 🟪tool calling with Pydantic schemas; 2.2a: FastMCP over HTTP with a selectable tool server; 2.2b: a Spring Boot (Java) twin of the tools | 2.1: fenced `tool_call` text removed; 2.2a: the stdio subprocess per chat turn removed | [Stage 2](stages/02-tools-and-mcp.md) (in progress) |
 | 3 🟦LangGraph port | 3.1: API-contract tests and internal tests, two named seams; 3.2: the 🟪agent as a LangGraph graph, a Postgres 🟪checkpointer and a real pause for 🟪human approval | 3.2: the hand-written workflow loop | [Stage 3](stages/03-langgraph-port.md) (done) |
-| 4 🟪Retrieval upgrade | 🟪Hybrid search, 🟪reranker, 🟦Docling, open 🟪embeddings (comparison) | Markdown-only ingestion | planned |
+| 4 🟪Retrieval upgrade | 🟪Hybrid search, 🟪reranker, 🟦Docling, open 🟪embeddings (comparison) | Markdown-only ingestion (4.2: now also PDF, Word, Excel) | in progress |
 | 5 Observability and 🟪evals | 🟦Langfuse, OpenTelemetry, 🟦Ragas or DeepEval, 🟪guardrail comparison | log-line tracing | planned |
 | 6 CRM modules and auth | Auth, tickets, contracts, meeting notes | none | planned |
 | 7 Agents and supervisor | Added only if evals show a gain | none | planned |
