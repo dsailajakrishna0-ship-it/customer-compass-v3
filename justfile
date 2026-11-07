@@ -89,6 +89,10 @@ eval-retrieval:
 eval-hybrid:
     RETRIEVAL_MODE=hybrid uv run --project {{api}} python evals/run_eval.py --suites retrieval --check evals/baseline/v2.json
 
+# hybrid search plus the hosted reranker (Stage 4.1b): needs RERANK_PROVIDER, its key, and a fresh ingest
+eval-rerank:
+    RETRIEVAL_MODE=hybrid RERANK_PROVIDER=${RERANK_PROVIDER:-voyage} uv run --project {{api}} python evals/run_eval.py --suites retrieval --check evals/baseline/v2.json
+
 # offline suite only: the rule-based guard against the adversarial prompts (no stack needed)
 eval-offline:
     uv run --project {{api}} python evals/run_eval.py --suites adversarial

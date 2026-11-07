@@ -121,3 +121,72 @@ async def test_a_question_with_no_words_skips_the_keyword_search(fake):
 
 def test_the_default_mode_is_dense_so_nothing_changes_until_it_is_chosen():
     assert get_settings().retrieval_mode == "dense"
+
+
+# ---------------------------------------------------------------- with a reranker (Stage 4.1b)
+
+
+@pytest.fixture
+def reranker(monkeypatch):
+    """Turns reranking on and replaces the provider call. `answer` is the order it returns
+    (positions in the shortlist) or None for a failure; `calls` records what it was sent."""
+    monkeypatch.setenv("RERANK_PROVIDER", "voyage")
+    calls = []
+
+    def install(answer):
+        async def fake(question, texts, top_n):
+            calls.append((question, texts, top_n))
+            return answer
+
+        monkeypatch.setattr(retrieve, "rerank_order", fake)
+        return calls
+
+    return install
+
+
+@pytest.mark.asyncio
+async def test_the_reranker_decides_the_final_order_from_a_longer_shortlist(fake, reranker):
+    dense = [_point(i, 0.9 - i / 100, f"T{i}") for i in range(6)]
+    fake(dense, [], "dense")
+    calls = reranker([5, 1])  # it prefers the 6th and the 2nd chunk
+    chunks = await retrieve.retrieve_relevant_chunks("question", top_k=2)
+    assert [c.document_title for c in chunks] == ["T5", "T1"]
+    [(question, texts, top_n)] = calls
+    assert question == "question" and top_n == 2
+    assert len(texts) == 6 and texts[0] == "T0: text of T0"  # the whole shortlist, with titles
+
+
+@pytest.mark.asyncio
+async def test_without_a_reranker_only_top_k_is_fetched_as_before(fake):
+    client = fake([_point(i, 0.9, f"T{i}") for i in range(6)], [], "dense")
+    await retrieve.retrieve_relevant_chunks("question", top_k=2)
+    assert client.calls[0]["limit"] == 2
+
+
+@pytest.mark.asyncio
+async def test_a_failed_reranker_keeps_the_search_order(fake, reranker):
+    dense = [_point(i, 0.9 - i / 100, f"T{i}") for i in range(6)]
+    fake(dense, [], "dense")
+    reranker(None)
+    chunks = await retrieve.retrieve_relevant_chunks("question", top_k=3)
+    assert [c.document_title for c in chunks] == ["T0", "T1", "T2"]
+
+
+@pytest.mark.asyncio
+async def test_the_similarity_floor_still_applies_before_the_reranker(fake, reranker):
+    fake([_point("a", 0.8, "A"), _point("b", 0.2, "B")], [], "dense")
+    calls = reranker([0])
+    chunks = await retrieve.retrieve_relevant_chunks("question")
+    assert [c.document_title for c in chunks] == ["A"]
+    assert calls == []  # a single candidate needs no reranking
+
+
+@pytest.mark.asyncio
+async def test_hybrid_mode_reranks_the_merged_shortlist(fake, reranker):
+    dense = [_point("a", 0.9, "A"), _point("b", 0.8, "B")]
+    keyword = [_point("b", 5.0, "B"), _point("c", 4.0, "C", vector={"dense": [0.9, 0.1]})]
+    fake(dense, keyword, "hybrid")
+    calls = reranker([2, 0])
+    chunks = await retrieve.retrieve_relevant_chunks("question", top_k=2)
+    assert len(calls[0][1]) == 3  # a, b and c all reached the reranker
+    assert len(chunks) == 2
