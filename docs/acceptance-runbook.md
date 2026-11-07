@@ -185,7 +185,7 @@ All with documents ingested (19 documents, 33 chunks). Mode **Document knowledge
 2. **Safe fallback first (no key):** set `RERANK_PROVIDER=voyage` and leave `VOYAGE_API_KEY` empty, recreate the API, ask **Q-renewal**. Same answer, and `docker compose logs api-py --since 5m | grep -E "rerank_skipped|rerank_failed"` shows the reason. A broken reranker must never break search.
 3. **With a key:** put `VOYAGE_API_KEY=...` in `.env`, recreate, ask **Q-renewal**, then `docker compose logs api-py --since 5m | grep reranked` shows `reranked candidates=… kept=4`.
 4. `just eval-rerank`. Expect "reproduced" or a metric list. Write down the numbers.
-5. Wrong key: `VOYAGE_API_KEY=wrong`, recreate, ask again: the same answer and `rerank_failed … status=401`.
+5. Bad key: set the Voyage key in `.env` to any invalid text (not a real key), recreate, ask again: the same answer and `rerank_failed … status=401`.
 
 **Undo:** remove `RERANK_PROVIDER` and `VOYAGE_API_KEY` from `.env`, recreate the API.
 
