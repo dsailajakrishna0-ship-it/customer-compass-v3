@@ -129,6 +129,10 @@ services:
       GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}  # Google embedding API key (gemini-embedding-001)
       SAMPLE_DATA_DIR: /sample-data/documents
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}  # key for hosted cloud models via OpenRouter
+      RETRIEVAL_MODE: ${RETRIEVAL_MODE:-dense}  # dense or hybrid (Stage 4.1)
+      RERANK_PROVIDER: ${RERANK_PROVIDER:-off}  # off, voyage or cohere (Stage 4.1b)
+      VOYAGE_API_KEY: ${VOYAGE_API_KEY:-}  # only if RERANK_PROVIDER=voyage
+      COHERE_API_KEY: ${COHERE_API_KEY:-}  # only if RERANK_PROVIDER=cohere
       OPENROUTER_MODEL: ${OPENROUTER_MODEL:-}  # empty: the default in apps/api-py/models.yaml
       LLM_TIMEOUT_SECONDS: ${LLM_TIMEOUT_SECONDS:-}  # empty: the default in app/config.py
       LLM_MAX_RETRIES: ${LLM_MAX_RETRIES:-}

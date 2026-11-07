@@ -27,6 +27,7 @@ from qdrant_client.models import (
 from app.config import get_settings
 from app.rag.embeddings import embed_text
 from app.rag.qdrant_store import DENSE, SPARSE, collection_name, get_client
+from app.rag.rerank import rerank_order, reranking_enabled
 from app.rag.sparse import query_vector
 
 # Retrieval: embed the question, then ask Qdrant for the top-k most similar chunks
@@ -194,13 +195,19 @@ async def retrieve_relevant_chunks(
     `retrieval_mode` decides how (Stage 4.1): "dense" asks Qdrant for the closest meanings;
     "hybrid" also asks for the chunks sharing the question's exact words and merges the two
     rankings with reciprocal rank fusion. In both modes a chunk whose meaning-similarity is
-    below MIN_SIMILARITY is dropped, so an unrelated question still finds nothing to cite."""
+    below MIN_SIMILARITY is dropped, so an unrelated question still finds nothing to cite.
+
+    Stage 4.1b: when a reranker is configured (`RERANK_PROVIDER`), the best `retrieval_candidates`
+    chunks are sent to it and its order decides the final `top_k`; if it fails, the search order stays."""
     settings = get_settings()
     question_embedding = await embed_text(question)
+    # With a reranker we keep a longer shortlist for it to choose from; without one, just top_k
+    pool = settings.retrieval_candidates if reranking_enabled() else top_k
 
     if settings.retrieval_mode == "dense":
-        points = await _dense_points(question_embedding, company_id, top_k)
-        return [_chunk(p, p.score) for p in points if p.score >= MIN_SIMILARITY]
+        points = await _dense_points(question_embedding, company_id, max(pool, top_k))
+        shortlist = [_chunk(p, p.score) for p in points if p.score >= MIN_SIMILARITY][:pool]
+        return await _rerank(question, shortlist, top_k)
 
     limit = settings.retrieval_candidates
     dense = await _dense_points(question_embedding, company_id, limit)
@@ -215,8 +222,23 @@ async def retrieve_relevant_chunks(
             )
     order = rrf_fuse([[p.id for p in dense], [p.id for p in keyword]], settings.rrf_k)
     logger.info("hybrid_search dense=%d keyword=%d merged=%d", len(dense), len(keyword), len(order))
-    kept = [i for i in order if similarity[i] >= MIN_SIMILARITY][:top_k]
-    return [_chunk(points_by_id[i], similarity[i]) for i in kept]
+    kept = [i for i in order if similarity[i] >= MIN_SIMILARITY][:pool]
+    return await _rerank(question, [_chunk(points_by_id[i], similarity[i]) for i in kept], top_k)
+
+
+async def _rerank(
+    question: str, shortlist: list[RetrievedChunk], top_k: int
+) -> list[RetrievedChunk]:
+    """Re-orders the shortlist with the reranker when one is configured and answers; otherwise the
+    first `top_k` in the order the search gave them. Never raises because of the reranker."""
+    if not reranking_enabled() or len(shortlist) <= 1:
+        return shortlist[:top_k]
+    texts = [f"{chunk.document_title}: {chunk.content}" for chunk in shortlist]
+    order = await rerank_order(question, texts, top_k)
+    if order is None:
+        return shortlist[:top_k]
+    logger.info("reranked candidates=%d kept=%d", len(shortlist), len(order))
+    return [shortlist[i] for i in order]
 
 
 def build_context(chunks: list[RetrievedChunk]) -> str:

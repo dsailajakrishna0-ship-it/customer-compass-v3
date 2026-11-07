@@ -531,6 +531,27 @@ Mode **Account follow-up agent**. One run takes up to a minute or two on free mo
 
 Reading order: `apps/api-py/tests/README.md`, then `tests/contract/conftest.py` (the two seams and nothing else faked), then the *names* in `tests/contract/test_agent_recommend.py`, then `tests/test_contract_boundary.py`, then `make_llm()` in `app/routes/agent.py`. The [Stage 3 guide](stages/03-langgraph-port.md) explains each step.
 
+### Stage 4.1b: an optional hosted reranker
+
+After the search finds its candidates, a hosted **reranker** can re-order them. It is **off by default** (`RERANK_PROVIDER=off`), and if it is slow, rate-limited or has no key, retrieval silently keeps the search order. **This PR also fixes a bug in the 4.1a steps:** `docker-compose.yml` only passes the variables it lists, so `RETRIEVAL_MODE=hybrid` in `.env` did not reach the API before. It now does.
+
+```bash
+git pull
+docker compose up -d --build api-py            # new code and the new compose variables
+cd apps/api-py && uv run pytest tests/test_rerank.py tests/test_hybrid_retrieval.py -q    # 31 passed, no key or network needed
+```
+
+| # | Do | Expect | What it shows |
+| --- | --- | --- | --- |
+| 1 | `docker compose exec api-py env \| grep -E "RETRIEVAL_MODE\|RERANK_PROVIDER"` | `RETRIEVAL_MODE=dense` and `RERANK_PROVIDER=off` | The settings now reach the container |
+| 2 | Add `RETRIEVAL_MODE=hybrid` to `.env`, `docker compose up -d --force-recreate api-py`, repeat the command above | `RETRIEVAL_MODE=hybrid` | The 4.1a switch really works now. Then run the 4.1a steps 1 to 5 |
+| 3 | Create a free account at <https://www.voyageai.com>, make an API key, and add `RERANK_PROVIDER=voyage` and `VOYAGE_API_KEY=...` to `.env`; recreate the container | No error at startup | The key is read from `.env` and never printed |
+| 4 | Ask the Document Q&A question `What did Maya Chen ask about the renewal of the Premium Operations Plan?`, then `docker compose logs api-py --since 5m \| grep -E "reranked\|rerank_"` | A line `reranked candidates=… kept=4`, and the same cited answer | The reranker ran on the shortlist |
+| 5 | Set `VOYAGE_API_KEY=wrong` (or empty), recreate, ask again | The same answer as before, and a log line `rerank_failed … status=401` (or `rerank_skipped … no_api_key`) | A broken reranker never breaks retrieval |
+| 6 | With the stack up and documents ingested: `just eval-retrieval`, `just eval-hybrid`, `just eval-rerank` | Each says "reproduced", or lists a metric outside ±0.02 | Recall and MRR are not worse with hybrid and with the reranker (the 4.1 exit test) |
+
+**Without a key:** the `pytest` line and steps 1, 2 and 5 with an empty key (it shows the safe fallback). **With a key:** steps 3, 4 and 6. A Voyage free account gives the first 200 million rerank tokens free, so evaluation runs cost nothing. Keep the key out of this repo: it belongs only in `.env`.
+
 ### Stage 4.1a: hybrid search (meaning plus exact words)
 
 Retrieval can now also match a question's exact words (names, ids, abbreviations) and merge that with the meaning search. It is **off by default** (`RETRIEVAL_MODE=dense`), so nothing changes until you switch it on. The collection now stores two vectors per chunk, so you must **ingest once again** after pulling.
@@ -545,7 +566,7 @@ cd apps/api-py && uv run pytest tests/test_sparse.py tests/test_hybrid_retrieval
 | --- | --- | --- | --- |
 | 1 | Web app: click **Ingest documents** | "completed", the same document and chunk counts as before | The collection was recreated with both vectors |
 | 2 | Chat mode **Document Q&A**, ask `What did Maya Chen ask about the renewal of the Premium Operations Plan?` (needs both keys) | The same cited answer as before | Default mode is unchanged |
-| 3 | Put `RETRIEVAL_MODE=hybrid` in `.env`, then `docker compose up -d --force-recreate api-py`, and ask the same question and `What is the capital of France?` | The same cited answer; for France, no sources (the model says it is not in the documents) | Hybrid still finds the right chunk, and the similarity floor still stops unrelated questions |
+| 3 | Put `RETRIEVAL_MODE=hybrid` in `.env`, then `docker compose up -d --force-recreate api-py` (**needs the 4.1b compose fix**), and ask the same question and `What is the capital of France?` | The same cited answer; for France, no sources (the model says it is not in the documents) | Hybrid still finds the right chunk, and the similarity floor still stops unrelated questions |
 | 4 | `docker compose logs api-py --since 5m \| grep hybrid_search` | A line like `hybrid_search dense=20 keyword=12 merged=...` | Both searches ran and were merged |
 | 5 | With the stack up and documents ingested: `just eval-retrieval`, then `just eval-hybrid` (needs `GOOGLE_API_KEY`) | Both end with "reproduced", or list a metric outside ±0.02 | Recall and MRR are not worse in hybrid mode (the exit test for 4.1a) |
 

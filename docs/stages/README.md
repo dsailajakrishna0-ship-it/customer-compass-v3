@@ -14,7 +14,7 @@ The [tech-stack](../tech-stack.md#v3-tech-stack-at-a-glance) lists every tool, w
 | 1 | [Model layer](01-model-layer.md) | Settings, logging and request ids (1.1); gateways, fallback, rate limits (1.2 to 1.4) | Written (1.1 to 1.4) |
 | 2 | [Tools and 🟦MCP](02-tools-and-mcp.md) | 🟪Tool calling and schemas (2.1); MCP over HTTP (2.2) | Written (2.1, 2.2a, 2.2b) |
 | 3 | [🟦LangGraph port](03-langgraph-port.md) | Contract vs internal tests (3.1); 🟪agent graphs, state, checkpoints, 🟪human-in-the-loop (3.2) | Written (3.1, 3.2a, 3.2b) |
-| 4 | [🟪Retrieval upgrade](04-retrieval-upgrade.md) | 🟪Hybrid search (4.1a); 🟪reranking, document parsing, 🟪embeddings follow | In progress: 4.1a written |
+| 4 | [🟪Retrieval upgrade](04-retrieval-upgrade.md) | 🟪Hybrid search (4.1a); 🟪reranking (4.1b); document parsing, 🟪embeddings follow | In progress: 4.1a, 4.1b written |
 | 5 | Observability and 🟪evals | Tracing, metrics beyond recall, 🟪guardrail comparison | Written in Stage 5 |
 | 6 | CRM modules and auth | Authentication, authorization, schema growth | Written in Stage 6 |
 | 7 | Agents and supervisor | Multi-agent routing, when an agent is worth it | Written in Stage 7 |

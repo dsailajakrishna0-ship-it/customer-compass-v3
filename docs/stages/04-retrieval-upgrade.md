@@ -1,7 +1,7 @@
 # Stage 4 — Retrieval upgrade: find the right chunks more often
 
-> **Level:** beginner friendly; read [Stage 3](03-langgraph-port.md) for how the 🟪agent uses 🟪retrieval. **Reading time:** about 10 minutes for what is written so far.
-> **Status:** in progress. **4.1a (🟪hybrid search) is written; 4.1b (🟪reranker), 4.2 (parsing) and 4.3 (🟪embeddings) are added when built.**
+> **Level:** beginner friendly; read [Stage 3](03-langgraph-port.md) for how the 🟪agent uses 🟪retrieval. **Reading time:** about 15 minutes for what is written so far.
+> **Status:** in progress. **4.1a (🟪hybrid search) and 4.1b (🟪reranker) are written; 4.2 (parsing) and 4.3 (🟪embeddings) are added when built.**
 > **Roadmap:** [Stage 4](../roadmap.md#stage-4--retrieval-upgrade) · **Decisions:** [ADR 0019](../adr/0019-hybrid-search-and-reranker.md)
 
 **AI colour code:** 🟪 concept · 🟦 framework or tool · 🟩 data store or service · 🟧 model. Unmarked technical terms are ordinary software. [A to Z list](../ai-terms.md)
@@ -31,9 +31,29 @@ A 🟪RAG answer is only as good as the 🟪chunks it is given. Today's search f
 
 **Rule to remember.** *Meaning finds the neighbourhood; exact words find the street number. Use both, and merge by position, not by score.*
 
+## Concept 2 — The reranker (4.1b)
+
+**The problem.** Search is fast because it never reads the question and a 🟪chunk *together*: dense search compares two stored number-lists, keyword search counts words. So the top few results are good but not always in the best order, and the best chunk can sit at rank 3 behind two near-misses.
+
+**The idea.** Take the best 20 or so candidates and hand them to a 🟪reranker: a second model that reads the question and each chunk together and scores how well they fit. It is slower and costs a call, so it only sees a short list. The final top 4 come from its order.
+
+| Shop idea | Project idea | In the code |
+| --- | --- | --- |
+| The assistant fetches 20 possible folders quickly | **First-stage search** (dense or hybrid) | `retrieve_relevant_chunks` |
+| A specialist reads each folder against your question and ranks them | **🟪Reranker** (a cross-encoder, hosted) | `app/rag/rerank.py` |
+| If the specialist is away, you still get the assistant's order | **Graceful fallback** | `rerank_order` returns `None`, the search order stays |
+
+**It is optional and cannot break 🟪retrieval.** `RERANK_PROVIDER=off` is the default. If it is on but there is no key, the call is slow, rate-limited, or the reply is nonsense, retrieval simply keeps the search order and logs one line (never the key or the provider's reply). That is the same rule production AI services follow for optional retrieval: *an enrichment must never take down the main path*.
+
+**Two providers, one setting.** `voyage` (default model `rerank-2.5-lite`; the first 200 million tokens are free per account) or `cohere` (a trial key is limited to 10 requests a minute and 1,000 calls a month, so an evaluation run could use it up). Both are plain HTTP calls with a 5-second timeout, so there is no extra library.
+
+**The guard is kept.** The similarity floor runs *before* the reranker, so a question with no relevant chunk still reaches the model with nothing to cite. The reranker only re-orders; it never adds a chunk the search did not find.
+
+**Rule to remember.** *Search is wide and fast; the reranker is narrow and careful. Use the cheap one to get a shortlist and the careful one to order it, and never let the careful one be a single point of failure.*
+
 ---
 
-## Code tour: what changed in 4.1a
+## Code tour: what changed in 4.1a and 4.1b
 
 | | Where | What |
 | --- | --- | --- |
@@ -42,9 +62,13 @@ A 🟪RAG answer is only as good as the 🟪chunks it is given. Today's search f
 | 🟡 | `app/rag/ingest.py` | Each chunk stores both vectors |
 | 🟡 | `app/rag/retrieve.py` | `rrf_fuse`, `cosine`, `_keyword_points`; `retrieve_relevant_chunks` handles both modes |
 | 🟡 | `app/config.py` | `retrieval_mode`, `retrieval_candidates`, `rrf_k` |
+| 🟢 | `app/rag/rerank.py` | (4.1b) The hosted 🟪reranker call for Voyage and Cohere, parsing, and the "never raise" rule |
+| 🟡 | `app/rag/retrieve.py` | (4.1b) a longer shortlist when a reranker is on, `_rerank`, the floor still first |
+| 🟡 | `app/config.py`, `docker-compose.yml`, `.env.example` | (4.1b) `rerank_provider`, the two keys, the model and timeout; compose now passes `RETRIEVAL_MODE` and the rerank settings through |
+| 🟢 | `tests/test_rerank.py` | (4.1b) 16 tests with a fake provider: requests, parsing, every failure |
 | 🟢 | `tests/test_sparse.py`, `tests/test_hybrid_retrieval.py` | 16 tests, no key or database needed |
 | 🟡 | `justfile` | `just eval-retrieval`, `just eval-hybrid` |
-| 🟢 | [ADR 0019](../adr/0019-hybrid-search-and-reranker.md) | The decisions, including the 🟪reranker plan for 4.1b |
+| 🟢 | [ADR 0019](../adr/0019-hybrid-search-and-reranker.md) | The decisions, including the reranker plan for 4.1b |
 
 ## Glossary
 
@@ -54,6 +78,7 @@ A 🟪RAG answer is only as good as the 🟪chunks it is given. Today's search f
 - **IDF**: inverse document frequency, the "how rare is this word" half of BM25.
 - **🟪Reciprocal rank fusion (🟪RRF)**: merging ranked lists by position, `1 / (k + rank)`.
 - **🟪Hybrid search**: dense plus keyword search, merged.
+- **🟪Reranker / 🟪cross-encoder**: a model that reads the question and a 🟪chunk together and scores the fit; slower and more accurate than comparing stored vectors.
 - **Recall@k, 🟪MRR**: how often the right document is in the top k, and how high the first right one ranks.
 
 ## Check your understanding
@@ -81,6 +106,21 @@ It has only the dense vector, so 🟪hybrid search cannot use it. Ingest once ag
 <details><summary>5. How do we know hybrid search is no worse?</summary>
 
 `just eval-hybrid` re-runs the 🟪retrieval suite with the mode switched on and compares recall and 🟪MRR with the saved baseline, within the agreed tolerance.
+</details>
+
+<details><summary>6. Why not rerank every chunk in the collection?</summary>
+
+A 🟪cross-encoder reads the question with each chunk, so the cost grows with the number of chunks. It is only affordable on a short list that fast search has already narrowed down.
+</details>
+
+<details><summary>7. What happens if the reranker is down or has no key?</summary>
+
+Nothing visible: retrieval keeps the search order and logs a warning. Reranking is an enrichment, so it must never be able to break the main path.
+</details>
+
+<details><summary>8. Does the reranker replace the similarity floor?</summary>
+
+No. The floor runs first and decides what is relevant at all; the reranker only decides the order among what passed. An unrelated question still finds nothing to cite.
 </details>
 
 ## Further reading

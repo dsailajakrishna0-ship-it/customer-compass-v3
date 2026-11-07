@@ -53,7 +53,7 @@ Stages refer to [the roadmap](roadmap.md). "Seed" means it came with V2's final 
 | **Pydantic** (🟪structured output and tool schemas) | Makes the model answer in a checked shape | 2.1 | Planned |
 | **🟦FastMCP** (streamable HTTP) | A long-running tool server instead of a new process per chat turn | 2.2 | Planned |
 | **🟦LangGraph** (+ Postgres 🟪checkpointer) | Models the agent steps as a graph, pausable for 🟪human approval | 3.2 | In use |
-| **🟪Hybrid search + 🟪reranker** (Qdrant, 🟦FastEmbed) | Combines keyword and meaning search, then re-orders results | 4.1 | In use (hybrid; reranker next) |
+| **🟪Hybrid search + 🟪reranker** (Qdrant, 🟦FastEmbed) | Combines keyword and meaning search, then re-orders results | 4.1 | In use (hybrid; reranker optional, off by default) |
 | **🟦Docling** | Reads PDFs, Word and spreadsheets, not only Markdown | 4.2 | Planned |
 | **🟦FastEmbed / 🟦sentence-transformers** | Open-source embeddings that run without an API key | 4.3 | Planned (comparison) |
 | **🟦Langfuse + OpenTelemetry** | Shows every model call and agent step as a trace | 5.1 | Planned |

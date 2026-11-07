@@ -54,6 +54,12 @@ class Settings(BaseSettings):
     retrieval_mode: Literal["dense", "hybrid"] = "dense"
     retrieval_candidates: int = 20  # chunks fetched by each search before merging
     rrf_k: int = 60  # reciprocal rank fusion constant: larger = flatter blend of the two rankings
+    # Stage 4.1b: an optional hosted reranker that re-orders the candidates (see app/rag/rerank.py)
+    rerank_provider: Literal["off", "voyage", "cohere"] = "off"
+    voyage_api_key: SecretStr = SecretStr("")
+    cohere_api_key: SecretStr = SecretStr("")
+    rerank_model: str | None = None  # None: the provider's default model
+    rerank_timeout_seconds: float = 5.0  # longer than this and the original order is used
     sample_data_dir: Path | None = None
 
     # Embeddings (Google AI Studio)
