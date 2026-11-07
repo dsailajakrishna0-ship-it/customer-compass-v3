@@ -31,6 +31,7 @@ Last updated at Stage 3.2b (merged), commit `139c7f8`, 2026-11-05.
 | 1 Model layer | Yes | Gateway, usage footer, `/llm/models` | J2 | Planned |
 | 2 Tools and MCP | 2.1, 2.2a, 2.2b | `/chat/tools`, `/mcp/servers`, `contracts/mcp-tools.json` | J4 | Planned |
 | 3 LangGraph port | 3.1, 3.2a, 3.2b | No: the 26 contract tests are unchanged | J5 | Planned |
-| 4 and later | No | Unknown | J3, J6 to J8 | Planned |
+| 4 Retrieval upgrade | 4.1a, 4.1b (internal only); 4.2 in review | 4.2 adds optional `page` and `sheet` to `/chat/rag` citations and an ingestion metadata rule (see `api-reference.md`) | J3 | Planned |
+| 5 and later | No | Unknown | J6 to J8 | Planned |
 
 The contract is the 26 tests in `apps/api-py/tests/contract/`, [`api-reference.md`](api-reference.md) and `contracts/mcp-tools.json`.

@@ -15,17 +15,15 @@ import uuid
 from dataclasses import dataclass
 from pathlib import Path
 
-import frontmatter
 from qdrant_client.models import PointStruct
 
 from app.config import get_settings
 from app.db import get_pool
-from app.rag.chunking import chunk_text
+from app.rag.chunking import Chunk, chunk_text
 from app.rag.embeddings import embed_texts
+from app.rag.parse import Segment, is_document, parse_file
 from app.rag.qdrant_store import DENSE, SPARSE, recreate_collection, upsert_chunks
 from app.rag.sparse import document_vector
-
-DOCUMENT_TYPES = {"email", "call", "note", "support", "product"}
 
 
 @dataclass
@@ -34,7 +32,12 @@ class ParsedDocument:
     title: str
     doc_type: str
     company_name: str | None
-    content: str
+    segments: list[Segment]
+
+    @property
+    def content(self) -> str:
+        """The whole text, kept in Postgres as the system of record."""
+        return "\n\n".join(segment.text for segment in self.segments)
 
 
 @dataclass
@@ -62,26 +65,31 @@ def _load_documents() -> list[ParsedDocument]:
     repo_root = dir_path.parents[1]
     documents: list[ParsedDocument] = []
 
-    for file_path in sorted(dir_path.glob("*.md")):
-        post = frontmatter.load(file_path)
-        title = post.get("title")
-        doc_type = post.get("type")
-        if not isinstance(title, str) or doc_type not in DOCUMENT_TYPES:
-            raise ValueError(
-                f"Document {file_path.name} is missing required frontmatter (title, type)."
-            )
-
-        company_name = post.get("company")
+    for file_path in sorted(p for p in dir_path.iterdir() if is_document(p)):
+        parsed = parse_file(file_path)
         documents.append(
             ParsedDocument(
                 source_path=str(file_path.relative_to(repo_root)),
-                title=title,
-                doc_type=doc_type,
-                company_name=company_name if isinstance(company_name, str) else None,
-                content=post.content.strip(),
+                title=parsed.title,
+                doc_type=parsed.doc_type,
+                company_name=parsed.company_name,
+                segments=parsed.segments,
             )
         )
     return documents
+
+
+def chunk_segments(segments: list[Segment]) -> list[tuple[Segment, Chunk]]:
+    """Cuts every segment into chunks, in order. The chunk number runs on across segments, and each
+    chunk is returned with the segment it came from, so it keeps that segment's page or sheet. The
+    character offsets in a chunk are relative to its segment."""
+    chunks: list[tuple[Segment, Chunk]] = []
+    for segment in segments:
+        for chunk in chunk_text(segment.text):
+            chunks.append(
+                (segment, Chunk(len(chunks), chunk.content, chunk.char_start, chunk.char_end))
+            )
+    return chunks
 
 
 async def _resolve_company_id(pool, company_name: str | None) -> int | None:
@@ -126,17 +134,21 @@ async def ingest_documents() -> IngestSummary:
             )
             document_id = doc_row["id"]
 
-            chunks = chunk_text(doc.content)
+            chunks = chunk_segments(doc.segments)
             if len(chunks) == 0:
                 continue
 
-            embeddings = await embed_texts([chunk.content for chunk in chunks])
+            embeddings = await embed_texts([chunk.content for _segment, chunk in chunks])
 
             points = [
                 PointStruct(
                     id=str(uuid.uuid4()),
                     vector={DENSE: embeddings[i], SPARSE: document_vector(chunk.content)},
                     payload={
+                        # page (PDF) and sheet (spreadsheet) are left out when a file has neither,
+                        # so Markdown chunks look exactly as they did before 4.2
+                        **({"page": segment.page} if segment.page is not None else {}),
+                        **({"sheet": segment.sheet} if segment.sheet is not None else {}),
                         "document_id": document_id,
                         "chunk_index": chunk.index,
                         "content": chunk.content,
@@ -149,7 +161,7 @@ async def ingest_documents() -> IngestSummary:
                         "company_name": doc.company_name,
                     },
                 )
-                for i, chunk in enumerate(chunks)
+                for i, (segment, chunk) in enumerate(chunks)
             ]
             await upsert_chunks(points)
             chunks_created += len(points)

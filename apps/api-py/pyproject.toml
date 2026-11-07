@@ -21,10 +21,13 @@ dependencies = [
     "langgraph>=1.2.19,<2",
     "langgraph-checkpoint-postgres>=3.2.0,<4",
     "psycopg-pool>=3.2",
+    "docling-slim[format-docx,format-xlsx]>=2.148,<3",
+    "pypdfium2>=4.30",
 ]
 
 [dependency-groups]
 dev = [
+    "fpdf2>=2.8",
     "mypy>=2.4.0",
     "pytest>=8.3",
     "pytest-asyncio>=0.24",

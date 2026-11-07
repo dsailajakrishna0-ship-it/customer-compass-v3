@@ -136,6 +136,8 @@ document chunks from Qdrant (the vector database), and grounds the answer in the
 }
 ```
 
+A citation also carries `"page": 3` when the chunk comes from a PDF and `"sheet": "Deals"` when it comes from a spreadsheet (Stage 4.2). Both are **omitted**, not null, for Markdown and Word files. This is an additive change: callers that ignore unknown fields are unaffected.
+
 **Response 200 (nothing relevant found)** — no LLM call is made in this case:
 ```json
 {
@@ -295,7 +297,9 @@ shown for reference only. Cached server-side for 5 minutes. If OpenRouter cannot
 
 Runs the full parse → chunk → embed → store pipeline over
 `sample-data/documents` into Qdrant (plus a `documents`/`ingestion_runs` row
-in Postgres).
+in Postgres). Markdown, PDF, Word (`.docx`) and Excel (`.xlsx`) files are read; every file
+other than Markdown needs a small `<name>.meta.yaml` next to it with `title`, `type` and
+optionally `company` (Stage 4.2).
 
 **Response 200**
 ```json

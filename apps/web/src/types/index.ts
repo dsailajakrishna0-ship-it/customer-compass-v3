@@ -51,6 +51,10 @@ export type Citation = {
   companyName: string | null;
   similarity: number;
   snippet: string;
+  /** PDF page the chunk is on; absent for Markdown and Word files (Stage 4.2). */
+  page?: number;
+  /** Spreadsheet sheet the chunk is from; absent for other files (Stage 4.2). */
+  sheet?: string;
 };
 
 /** Structured CRM facts returned by POST /api/v1/chat/crm (Stage 5). Note: camelCase fields, unlike Deal above. */

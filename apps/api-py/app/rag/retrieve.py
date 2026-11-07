@@ -97,6 +97,17 @@ class RetrievedChunk:
     chunk_index: int
     content: str
     similarity: float
+    page: int | None = None  # PDF page the chunk is on (Stage 4.2)
+    sheet: str | None = None  # spreadsheet sheet it is from (Stage 4.2)
+
+    @property
+    def location(self) -> str:
+        """Where in the file the chunk is, for a citation: "page 3", "sheet Deals", or nothing."""
+        if self.page is not None:
+            return f"page {self.page}"
+        if self.sheet is not None:
+            return f"sheet {self.sheet}"
+        return ""
 
 
 def _company_filter(company_id: int | None) -> Filter | None:
@@ -181,6 +192,8 @@ def _chunk(point: ScoredPoint, similarity: float) -> RetrievedChunk:
         chunk_index=payload["chunk_index"],
         content=payload["content"],
         similarity=similarity,
+        page=payload.get("page"),
+        sheet=payload.get("sheet"),
     )
 
 
@@ -244,6 +257,7 @@ async def _rerank(
 def build_context(chunks: list[RetrievedChunk]) -> str:
     """Builds the numbered, citable context block injected into the LLM prompt."""
     return "\n\n".join(
-        f"[{i + 1}] Source: {chunk.document_title} ({chunk.doc_type})\n{chunk.content}"
+        f"[{i + 1}] Source: {chunk.document_title} "
+        f"({chunk.doc_type}{', ' + chunk.location if chunk.location else ''})\n{chunk.content}"
         for i, chunk in enumerate(chunks)
     )

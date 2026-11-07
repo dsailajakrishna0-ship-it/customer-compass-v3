@@ -114,7 +114,7 @@ and the app scopes retrieval to it automatically. Seeded companies:
 **Acme Fabrication** (customer), **Northstar Logistics** (lead), **Harbor &
 Pine** (customer), **Vertex Analytics** (customer), **Golden Valley Foods**
 (lead), **Summit Builders** (former_customer), **Riverside Health Group**
-(customer) — 7 companies total, 16 sample documents, including at least one
+(customer) — 7 companies total, 16 Markdown sample documents (plus 3 PDF, Word and Excel samples since Stage 4.2), including at least one
 `lost` deal (Summit Builders) and one `former_customer` relationship status.
 
 ### Combo 1 — General × Local/Cloud
@@ -530,6 +530,29 @@ Mode **Account follow-up agent**. One run takes up to a minute or two on free mo
 #### C. The code
 
 Reading order: `apps/api-py/tests/README.md`, then `tests/contract/conftest.py` (the two seams and nothing else faked), then the *names* in `tests/contract/test_agent_recommend.py`, then `tests/test_contract_boundary.py`, then `make_llm()` in `app/routes/agent.py`. The [Stage 3 guide](stages/03-langgraph-port.md) explains each step.
+
+### Stage 4.2: PDF, Word and Excel documents, with the page or sheet in the citation
+
+Ingestion now reads `.pdf`, `.docx` and `.xlsx` as well as Markdown, and a citation says where in the file the text is. Three invented sample files were added to `sample-data/documents` (a two-page service agreement PDF, a two-sheet rate card, a data-handling policy). Every file other than Markdown has a small `<name>.meta.yaml` beside it.
+
+```bash
+git pull
+docker compose up -d --build api-py            # new libraries (docling-slim, pypdfium2) and code
+cd apps/api-py && uv run pytest tests/test_parse.py -q     # 11 passed, no key needed
+```
+
+| # | Do | Expect | What it shows |
+| --- | --- | --- | --- |
+| 1 | `cd apps/api-py && uv run python -c "from pathlib import Path; from app.rag.parse import parse_file; [print(n, [(s.page, s.sheet) for s in parse_file(Path('../../sample-data/documents')/n).segments]) for n in ('acme-service-agreement.pdf','northstar-rate-card.xlsx','riverside-data-handling-policy.docx')]"` | `[(1, None), (2, None)]`, then `[(None, 'Rate card'), (None, 'SLA credits')]`, then `[(None, None)]` | Each format is read, with its page or sheet (no key or stack needed) |
+| 2 | Web app: **Ingest documents** | Completed, **19 documents**, 33 chunks (it was 16 and 28) | The new files are ingested |
+| 3 | Document Q&A: `What does Clause 7.3 say about the renewal notice period?` (needs both keys) | An answer mentioning 60 days' notice, with a source line ending **page 2** | A PDF citation names its page |
+| 4 | `Which plan costs 3400 USD a month and how many vehicles does it track?` | Fleet Plus, 250 vehicles, source line ending **sheet Rate card** | An Excel citation names its sheet |
+| 5 | `How often are accounts with access to clinical data reviewed?` | Every quarter, with a source from the Riverside policy and **no** page or sheet | A Word file has neither, by design |
+| 6 | Re-ask one of the existing Markdown questions, for example the Maya Chen renewal question | The same cited answer as before, no page or sheet | Markdown behaves exactly as before |
+| 7 | Rename `acme-service-agreement.meta.yaml` away and click **Ingest documents** | An ingestion failure that names `acme-service-agreement.pdf` and its metadata file; put the file back and ingest again | A missing sidecar gives a clear message, not a crash |
+| 8 | With the stack up and documents ingested: `just eval-retrieval` | "reproduced", or a small move in recall or MRR | The three new documents are extra distractors for the old questions. If it moves, tell me; the baseline should then be re-taken on purpose (ADR 0020) |
+
+**Without a key:** step 1 and the `pytest` line. **With keys:** steps 2 to 8. The sample files can be regenerated with `uv run --project apps/api-py python scripts/make_sample_files.py`.
 
 ### Stage 4.1b: an optional hosted reranker
 

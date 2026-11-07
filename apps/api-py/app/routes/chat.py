@@ -109,6 +109,9 @@ class ChatRequest(BaseModel):
 
 def _citation(i: int, chunk) -> dict:
     return {
+        # page and sheet appear only for files that have them (PDF, spreadsheet), Stage 4.2
+        **({"page": chunk.page} if chunk.page is not None else {}),
+        **({"sheet": chunk.sheet} if chunk.sheet is not None else {}),
         "number": i + 1,
         "documentId": chunk.document_id,
         "title": chunk.document_title,
