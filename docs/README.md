@@ -37,6 +37,7 @@ Start here. The repo is the V3 learning project, seeded from `customer-compass-v
 | --- | --- |
 | [testing-guide.md](testing-guide.md) | Commands to start everything, URLs to open, chat modes and sample questions, curl checks. |
 | [acceptance-runbook.md](acceptance-runbook.md) | One linear walk through every Stage 0 to 4 PR: start, questions to type, expected results, stop or undo. |
+| [smoke-test.md](smoke-test.md) | The quick path (about 30 minutes): the same checks as the runbook, short, with the re-ingest step after every wipe. |
 | [troubleshooting.md](troubleshooting.md) | Known local-startup issues and how to use the chat panel. |
 | [../evals/README.md](../evals/README.md) | The promptfoo evaluation suites. |
 

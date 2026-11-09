@@ -20,7 +20,7 @@ git checkout main && git pull                 # after PR #60 is merged; before t
 cp .env.example .env                          # then edit .env: remove the "# " in front of GOOGLE_API_KEY and OPENROUTER_API_KEY and paste the keys
 ```
 
-Never paste a key into a chat, an issue or a commit. `.env` is git-ignored.
+Never paste a key into a chat, an issue or a commit. `.env` is git-ignored. Short version of this whole runbook: [smoke-test.md](smoke-test.md).
 
 **Start everything** (the commands every part below assumes):
 
