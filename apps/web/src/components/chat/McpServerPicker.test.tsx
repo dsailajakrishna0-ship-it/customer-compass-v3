@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { McpServerPicker } from "./McpServerPicker";
-import { unavailableReason } from "./mcpServerStatus";
+import { unavailableReason, usableChoice } from "./mcpServerStatus";
 import type { McpServerInfo } from "../../types";
 
 const fastmcp: McpServerInfo = { id: "fastmcp", label: "FastMCP (Python)", configured: true, reachable: true };
@@ -39,5 +39,15 @@ describe("McpServerPicker", () => {
     expect(unavailableReason(fastmcp)).toBeNull();
     expect(unavailableReason(spring)).toBe("not configured");
     expect(unavailableReason({ ...fastmcp, reachable: false })).toBe("not reachable");
+  });
+
+  it("keeps a saved choice only while that server can be used", () => {
+    const running = { ...spring, configured: true, reachable: true };
+    const stopped = { ...spring, configured: true, reachable: false };
+    expect(usableChoice("", [fastmcp, running])).toBe("");
+    expect(usableChoice("springboot", [fastmcp, running])).toBe("springboot");
+    expect(usableChoice("springboot", [fastmcp, stopped])).toBe("");
+    expect(usableChoice("springboot", [fastmcp, spring])).toBe("");
+    expect(usableChoice("gone", [fastmcp])).toBe("");
   });
 });
