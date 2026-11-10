@@ -132,6 +132,20 @@ Numbers to send back:
 
 13. `uv run --project apps/api-py python evals/compare_embeddings.py` (the Gemini table), then `just eval-retrieval` and `just eval-hybrid`.
 
+## 5b. Optional reranker (Voyage)
+
+A reranker re-orders the search results: search fetches a short list of candidate chunks, then a second model reads the question with each chunk and scores how well they fit, and the best 4 go to the answering model. It is off by default and can never break search: with no key, a slow reply or an error, the original order is used and the answer is the same. Steps 1 and 2 need no key; steps 3 to 5 need a free Voyage account.
+
+**Needs:** rows A, B, C, D, E, and Part 5 done. Switch the chat mode dropdown to **Document knowledge (RAG)** first. Every `.env` change below needs `docker compose up -d --force-recreate api-py`.
+
+1. **Hybrid search on.** Put `RETRIEVAL_MODE=hybrid` in `.env`, recreate `api-py`, and click **Ingest documents** again if you have not since turning hybrid on. Check: `docker compose exec api-py env | grep -E "RETRIEVAL_MODE|RERANK_PROVIDER"` shows `RETRIEVAL_MODE=hybrid` and `RERANK_PROVIDER=off`.
+2. **Safe fallback, no key.** Set `RERANK_PROVIDER=voyage` in `.env` and leave `VOYAGE_API_KEY` empty, then recreate `api-py`. Ask `What did Maya Chen ask about the renewal of the Premium Operations Plan?`: the answer is the same as before. The reason is in the log: `docker compose logs api-py --since 5m | grep -E "rerank_skipped|rerank_failed"`.
+3. **With a real key.** Get a free key at <https://www.voyageai.com>, put `VOYAGE_API_KEY=<your key>` in `.env` (never paste it into a chat), recreate `api-py`, and ask the same question. Check: `docker compose logs api-py --since 5m | grep reranked` shows `reranked candidates=… kept=4`.
+4. **Eval numbers.** `just eval-rerank` prints "reproduced" or a list of metrics. **Send these numbers back.**
+5. **Bad key.** Change the Voyage key in `.env` to any invalid text (not a real key), recreate `api-py`, and ask again: the same answer, and the log shows `rerank_failed … status=401`.
+
+**Undo:** remove `RERANK_PROVIDER` and `VOYAGE_API_KEY` from `.env` (and `RETRIEVAL_MODE` to go back to plain search), then `docker compose up -d --force-recreate api-py`.
+
 ## 6. Stop and reset
 
 | # | Goal | Command |
@@ -142,4 +156,4 @@ Numbers to send back:
 | 4 | **Wipe everything** | `docker compose down -v`, then start again as in Part 0 and **click Ingest documents again** |
 | 5 | Remove all test settings | Delete `RETRIEVAL_MODE`, `RERANK_PROVIDER`, `VOYAGE_API_KEY`, `EMBEDDING_PROVIDER` from `.env`, then `docker compose up -d --force-recreate api-py` (after a `RETRIEVAL_MODE` or `EMBEDDING_PROVIDER` change, ingest again) |
 
-**Tell me:** which model answered the forced-fallback call, the embedding table, the eval numbers, and any step that did not match. Quote the part and step number, for example "Part 4, step 3".
+**Tell me:** which model answered the forced-fallback call, the embedding table, the eval numbers (including `just eval-rerank`), and any step that did not match. Quote the part and step number, for example "Part 4, step 3".
