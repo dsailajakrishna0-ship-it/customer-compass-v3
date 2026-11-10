@@ -2,7 +2,9 @@ services:
   # Postgres: relational CRM data (companies, deals, tasks, audit log). The schema and demo data
   # are created by Alembic migrations (the `migrate` service below), not by init scripts.
   db:
-    image: postgres:17.11
+    # The Alpine build of the same Postgres 17.11. The Debian image (postgres:17.11) crashed with a
+    # general protection fault on a laptop CPU with AVX-512 (see docs/troubleshooting.md, entry 11).
+    image: postgres:17.11-alpine
     container_name: customer-compass-v3-db
     environment:
       POSTGRES_DB: customer_compass

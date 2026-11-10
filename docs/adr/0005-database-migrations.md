@@ -16,7 +16,7 @@ Use **Alembic** with **SQLAlchemy** (as the engine) and **psycopg 3**, in `apps/
 - `0001` baseline schema, taken from the two V2 files. It leaves out the unused pgvector extension and column, because the plain `postgres` image cannot create the extension.
 - `0002` synthetic demo data (companies, contacts, deals, interactions). It is a migration so a fresh database is built by migrations alone and the tests have their data. Later modules will get seed generators instead.
 - `0003` drops the pgvector column and extension if present. It does nothing on a fresh database, and converges a V2-style database to the same schema (checked by comparing `pg_dump --schema-only` output: 0 differences).
-- `docker-compose.yml`: the `db` service is plain `postgres:17.11`; a one-shot `migrate` service runs `alembic upgrade head` and the API starts only after it succeeds. `just migrate` and `just test-api` apply migrations to the local Postgres.
+- `docker-compose.yml`: the `db` service is plain `postgres:17.11-alpine` (the Debian `postgres:17.11` crashed on some CPUs; see troubleshooting entry 11); a one-shot `migrate` service runs `alembic upgrade head` and the API starts only after it succeeds. `just migrate` and `just test-api` apply migrations to the local Postgres.
 - `tests/test_migrations.py` builds a scratch database from empty, checks the tables and data, checks there is one head, and downgrades to base.
 - `db/init.sql` and `db/002-rag.sql` are removed; they stay in V2 at tag `v2-final`.
 
