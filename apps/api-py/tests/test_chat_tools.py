@@ -7,6 +7,7 @@ import json
 from contextlib import asynccontextmanager
 
 import pytest
+from fastapi import HTTPException
 
 from app.llm.types import GenerationResult, ToolCall
 from app.mcp.client import ToolSpec
@@ -216,3 +217,22 @@ async def test_the_answer_says_which_mcp_server_was_used(world):
     world.replies = [reply("Hello!")]
     out = await ask("hi")
     assert out["mcpServer"] == "fastmcp"
+
+
+@pytest.mark.asyncio
+async def test_a_tool_server_that_cannot_be_reached_gets_a_clear_message(monkeypatch):
+    @asynccontextmanager
+    async def unreachable(_backend=None):
+        raise OSError(-3, "Temporary failure in name resolution")
+        yield  # pragma: no cover
+
+    monkeypatch.setenv("MCP_SPRINGBOOT_URL", "http://mcp-spring:8003/mcp")
+    monkeypatch.setattr(chat, "mcp_session", unreachable)
+    request = chat.ToolsChatRequest(
+        messages=[{"role": "user", "content": "hi"}], mcpServer="springboot"
+    )
+    with pytest.raises(HTTPException) as exc:
+        await chat.tools_chat(request)
+    assert exc.value.status_code == 503
+    assert "Spring Boot (Java) tool server is not reachable" in exc.value.detail
+    assert "just up-java" in exc.value.detail and "Errno" not in exc.value.detail
