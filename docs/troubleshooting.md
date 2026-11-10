@@ -147,3 +147,23 @@ localStorage.clear()
 ```
 (Removing this persistence entirely, or namespacing the storage keys per
 repo, is a possible follow-up — not yet done as of this PR.)
+
+### 11. The database container is "unhealthy" and the log says "terminated by signal 11"
+
+The Debian image `postgres:17.11` crashed with a "general protection fault" in every new database process on
+a laptop with an 11th-gen Intel CPU (AVX-512) after a reboot, so `/health` answered "Database unreachable"
+and a fresh start-up failed during `initdb`. The compose file now uses `postgres:17.11-alpine`, the same
+Postgres version on Alpine, which does not crash. If you pulled this change and your `db` container was
+created from the old image, recreate it. **This removes the local data** (the demo companies come back from
+the migrations; documents need ingesting again):
+
+```bash
+docker compose down -v
+docker compose up -d --build db qdrant api-py
+# then click Ingest documents in the web app (19 documents, 33 chunks), or: just seed
+```
+
+Check which image you run: `docker inspect customer-compass-v3-db --format '{{.Config.Image}}'` should end in
+`-alpine`. Other projects keep their own databases (the Java edition uses `cc-java-db` on port 55432), so
+this wipe does not touch them.
+

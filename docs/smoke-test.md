@@ -17,6 +17,8 @@ Run these from the repository root (`customer-compass-v3`). Each row is a check;
 | E | **Documents ingested:** `curl -s localhost:6333/collections/document_chunks \| python3 -c 'import sys,json; print(json.load(sys.stdin)["result"]["points_count"])'` prints `33` | Click **Ingest documents** in the web app, or `just seed` (19 documents, 33 chunks) |
 | F | **Java tool server** (Part 3's Java half only): `docker ps` lists `customer-compass-v3-mcp-spring` | `just up-java` (3 to 5 minutes the first time), wait 15 seconds, reload the page |
 
+If the `db` container is `unhealthy` and its log says `signal 11`, see [troubleshooting, entry 11](troubleshooting.md): the database image changed to `postgres:17.11-alpine`, and the container must be recreated once (this wipes local data, so ingest again).
+
 Branch: `git checkout main && git pull` once PR #60 is merged; before that, `git checkout feat/4.3-embedding-models`.
 
 ## 0. Set up once (first time only)
