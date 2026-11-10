@@ -55,7 +55,7 @@ Stages refer to [the roadmap](roadmap.md). "Seed" means it came with V2's final 
 | **🟦LangGraph** (+ Postgres 🟪checkpointer) | Models the agent steps as a graph, pausable for 🟪human approval | 3.2 | In use |
 | **🟪Hybrid search + 🟪reranker** (Qdrant, 🟦FastEmbed) | Combines keyword and meaning search, then re-orders results | 4.1 | In use (hybrid; reranker optional, off by default) |
 | **🟦Docling** (light `docling-slim`) + `pypdfium2` | Reads Word and spreadsheets (Docling) and PDFs (`pypdfium2`), keeping page and sheet for citations | 4.2 | In use |
-| **🟦FastEmbed / 🟦sentence-transformers** | Open-source embeddings that run without an API key | 4.3 | Planned (comparison) |
+| **🟦FastEmbed** (optional extra `local-embeddings`) | Open-source embeddings that run on this machine without an API key; a comparison, not the default ([ADR 0021](adr/0021-embedding-models-and-reembedding.md)) | 4.3 | In use (optional) |
 | **🟦Langfuse + OpenTelemetry** | Shows every model call and agent step as a trace | 5.1 | Planned |
 | **🟦Ragas or 🟦DeepEval** | Scores answer quality with metrics beyond recall and MRR | 5.2 | Planned |
 | **🟦NeMo Guardrails, 🟧Llama Guard, 🟦Presidio** | Stronger prompt-injection and personal-data protection | 5.3 | Planned (comparison) |

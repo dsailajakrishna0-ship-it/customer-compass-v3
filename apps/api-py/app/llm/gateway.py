@@ -186,6 +186,14 @@ def _parse_tool_calls(message: Any) -> list[ToolCall]:
     return calls
 
 
+# Special tokens some small models print as plain text instead of making a structured tool call.
+RAW_TOOL_MARKUP_PREFIXES = ("<|tool_call_start|>", "<tool_call>", "<|python_tag|>")
+
+
+def _is_raw_tool_markup(content: str) -> bool:
+    return content.lstrip().startswith(RAW_TOOL_MARKUP_PREFIXES)
+
+
 async def generate(
     system_prompt: str,
     messages: Sequence[Mapping[str, object]],
@@ -231,21 +239,26 @@ async def generate(
         message = response.choices[0].message
         content = message.content or ""
         tool_calls = _parse_tool_calls(message)
-        if content or tool_calls:
+        raw_markup = not tool_calls and _is_raw_tool_markup(content)
+        if (content or tool_calls) and not raw_markup:
             break
         # A model can answer with no text and no tool call (a thinking model may spend every
-        # allowed token on its reasoning, finish_reason "length"). That is a failed attempt, so
-        # the next model in the chain gets the question instead of the user getting a blank.
+        # allowed token on its reasoning, finish_reason "length"), or with its own tool-call
+        # markup as plain text (small models do this when no tool was offered). Both are failed
+        # attempts, so the next model in the chain gets the question instead of the user getting
+        # a blank or raw markup.
         position = first + _answering_index(response, len(remaining))
         log.warning(
-            "llm_empty_response",
+            "llm_raw_tool_markup" if raw_markup else "llm_empty_response",
             model=plan.chain[position].model,
             finish_reason=getattr(response.choices[0], "finish_reason", None),
         )
         first = position + 1
         if first >= len(plan.chain):
             raise LlmUnavailableError(
-                "The model returned an empty response. Try again or pick a different model."
+                "The model returned an unusable reply. Try again or pick a different model."
+                if raw_markup
+                else "The model returned an empty response. Try again or pick a different model."
             )
     latency_ms = round((time.perf_counter() - started) * 1000)
     chain = plan.chain[first:]

@@ -1,8 +1,8 @@
 # Stage 4 — Retrieval upgrade: find the right chunks more often
 
-> **Level:** beginner friendly; read [Stage 3](03-langgraph-port.md) for how the 🟪agent uses 🟪retrieval. **Reading time:** about 20 minutes for what is written so far.
-> **Status:** in progress. **4.1a (🟪hybrid search), 4.1b (🟪reranker) and 4.2 (reading PDF, Word and Excel) are written; 4.3 (🟪embeddings) is added when built.**
-> **Roadmap:** [Stage 4](../roadmap.md#stage-4--retrieval-upgrade) · **Decisions:** [ADR 0019](../adr/0019-hybrid-search-and-reranker.md)
+> **Level:** beginner friendly; read [Stage 3](03-langgraph-port.md) for how the 🟪agent uses 🟪retrieval. **Reading time:** about 25 minutes.
+> **Status:** written. **4.1a (🟪hybrid search), 4.1b (🟪reranker), 4.2 (reading PDF, Word and Excel) and 4.3 (🟪embedding models) are done; Stage 5 is next.**
+> **Roadmap:** [Stage 4](../roadmap.md#stage-4--retrieval-upgrade) · **Decisions:** [ADR 0019](../adr/0019-hybrid-search-and-reranker.md), [ADR 0020](../adr/0020-multi-format-ingestion.md), [ADR 0021](../adr/0021-embedding-models-and-reembedding.md)
 
 **AI colour code:** 🟪 concept · 🟦 framework or tool · 🟩 data store or service · 🟧 model. Unmarked technical terms are ordinary software. [A to Z list](../ai-terms.md)
 
@@ -70,9 +70,30 @@ A 🟪RAG answer is only as good as the 🟪chunks it is given. Today's search f
 
 **Rule to remember.** *A source without a location is a claim you cannot check. Carry the location from the file to the citation, one chunk at a time.*
 
+## Concept 4 — Choosing the 🟧embedding model, and what changes with it (4.3)
+
+**The problem.** The 🟪embedding model decides which 🟪chunks look alike, so it silently decides search quality. Our model, Google's 🟧Gemini embedding, is hosted and free-tier. Is a small open-source model that runs on this machine good enough? And if we ever switch, what happens to the vectors we already stored?
+
+**The idea.** Make the model a setting (`EMBEDDING_PROVIDER`), measure both models on the same questions, and make the index remember which model built it, so a mismatch is caught with a clear message instead of nonsense results.
+
+| Shop idea | Project idea | In the code |
+| --- | --- | --- |
+| Two translators; you test both on the same 42 sentences | **Comparing models on the 🟪golden set** | `evals/compare_embeddings.py` |
+| The filing cabinet has a label: "filed with the 2024 system" | **The index records its model** | collection metadata `embedding_model` |
+| The clerk refuses to look up a 2025 query in a 2024 cabinet | **The mismatch check** | `check_index_model()` in `app/rag/retrieve.py` |
+| Re-file everything under the new system | **Re-embedding = ingest again** | **Ingest documents** rebuilds the collection |
+
+**What we measured.** The open-source model (`bge-small-en-v1.5`, 384 numbers, about 67 MB, no key, about 15 ms a question on a laptop CPU) ranked the golden set well: 🟪recall@3 0.986, 🟪MRR 0.972. The same-corpus Gemini numbers need your key, so the ADR leaves that row to be filled in; the default stays Gemini.
+
+**A lesson that is easy to miss.** Our *similarity floor* (0.45) was tuned for Gemini. For the small model even unrelated questions score 0.64 to 0.77, so the same floor would let everything through. **A similarity threshold belongs to a model, not to the system**: changing the model means re-tuning it, and re-embedding.
+
+**Why a clear error and not an automatic re-embed.** Re-embedding can be slow, and with a paid model, costly. Hiding that behind a search request would be a surprise; a message that says "click Ingest documents" is not.
+
+**Rule to remember.** *Vectors are only meaningful next to vectors from the same model. Record which model made them, check it on every search, and treat a model change as a re-index, not a setting flip.*
+
 ---
 
-## Code tour: what changed in 4.1a, 4.1b and 4.2
+## Code tour: what changed in 4.1a, 4.1b, 4.2 and 4.3
 
 | | Where | What |
 | --- | --- | --- |
@@ -84,6 +105,10 @@ A 🟪RAG answer is only as good as the 🟪chunks it is given. Today's search f
 | 🟢 | `app/rag/rerank.py` | (4.1b) The hosted 🟪reranker call for Voyage and Cohere, parsing, and the "never raise" rule |
 | 🟡 | `app/rag/retrieve.py` | (4.1b) a longer shortlist when a reranker is on, `_rerank`, the floor still first |
 | 🟡 | `app/config.py`, `docker-compose.yml`, `.env.example` | (4.1b) `rerank_provider`, the two keys, the model and timeout; compose now passes `RETRIEVAL_MODE` and the rerank settings through |
+| 🟡 | `app/rag/embeddings.py` | (4.3) `embed_documents`, `embed_query`, a Google path and an optional 🟦FastEmbed path, `embedding_model_id()`, `embedding_dimensions()` |
+| 🟡 | `app/rag/qdrant_store.py`, `app/rag/retrieve.py`, `app/rag/ingest.py` | (4.3) the collection records its model, searches check it, ingestion runs store `provider:model` |
+| 🟢 | `evals/compare_embeddings.py` | (4.3) compares 🟪embedding models on the 🟪golden set, in memory |
+| 🟢 | `tests/test_embedding_models.py` | (4.3) 12 tests: provider switch, mismatch check, comparison maths |
 | 🟢 | `app/rag/parse.py` | (4.2) Segments, one reader per format, the sidecar rule |
 | 🟡 | `app/rag/ingest.py` | (4.2) loads every supported file, chunks per segment, stores `page` and `sheet` |
 | 🟡 | `app/rag/retrieve.py`, `app/routes/chat.py` | (4.2) `RetrievedChunk.location`, "page 2" in the context and in the citation |
@@ -104,6 +129,9 @@ A 🟪RAG answer is only as good as the 🟪chunks it is given. Today's search f
 - **🟪Reciprocal rank fusion (🟪RRF)**: merging ranked lists by position, `1 / (k + rank)`.
 - **🟪Hybrid search**: dense plus keyword search, merged.
 - **🟪Reranker / 🟪cross-encoder**: a model that reads the question and a 🟪chunk together and scores the fit; slower and more accurate than comparing stored vectors.
+- **🟪Embedding provider**: where vectors come from (Google, hosted; or 🟦FastEmbed, on this machine).
+- **Re-embedding**: making all the chunks' vectors again with a new model; here, ingest again.
+- **Similarity floor**: the minimum similarity for a chunk to count; it belongs to one embedding model.
 - **Segment**: a run of text from a file together with where it sits (a page or a sheet).
 - **Sidecar file**: a small metadata file next to a document that has no place for its own metadata.
 - **Recall@k, 🟪MRR**: how often the right document is in the top k, and how high the first right one ranks.
@@ -168,6 +196,26 @@ OCR and a layout model: the full Docling, or Docling running as its own service.
 <details><summary>12. Why does a Word file get no page number?</summary>
 
 A Word file has no fixed pages: where a page ends depends on the viewer's fonts and settings. So we do not invent one; its citation shows no location.
+</details>
+
+<details><summary>13. Why can't you search an index with a different embedding model?</summary>
+
+The numbers only mean something relative to others from the same model; two models can even produce vectors of different lengths. Searching across them gives nonsense or an error.
+</details>
+
+<details><summary>14. What happens when you change the embedding model?</summary>
+
+Searches stop with a message that names both models and says to click Ingest documents, which rebuilds the index with the new model. We do not re-embed automatically, because it can be slow or costly.
+</details>
+
+<details><summary>15. Why did the similarity floor not carry over to the other model?</summary>
+
+Each model spreads its scores over a different range: with the small model even unrelated text scores 0.64 to 0.77. A threshold is tuned per model, so a model change needs it re-tuned.
+</details>
+
+<details><summary>16. Why not just make the free, local model the default?</summary>
+
+We have not measured 🟧Gemini on the same corpus yet, the floor would need re-tuning, and shipping a model inside the image is one more thing to carry and scan. It stays an optional comparison until the numbers say otherwise.
 </details>
 
 ## Further reading

@@ -24,7 +24,7 @@ from qdrant_client.models import (
 )
 
 from app.config import get_settings
-from app.rag.embeddings import EMBEDDING_DIMENSIONS
+from app.rag.embeddings import embedding_dimensions, embedding_model_id
 
 # Vector DB: Qdrant stores chunk embeddings and does nearest-neighbour search
 
@@ -65,11 +65,21 @@ async def recreate_collection() -> None:
     await client.create_collection(
         collection_name=collection_name(),
         # Cosine distance: compares vector direction, so similar meaning scores close to 1
-        vectors_config={DENSE: VectorParams(size=EMBEDDING_DIMENSIONS, distance=Distance.COSINE)},
+        vectors_config={DENSE: VectorParams(size=embedding_dimensions(), distance=Distance.COSINE)},
         # IDF modifier: Qdrant multiplies each word's weight by how rare the word is across all
         # chunks, which together with the term weights from sparse.py gives BM25 scoring
         sparse_vectors_config={SPARSE: SparseVectorParams(modifier=Modifier.IDF)},
+        # which embedding model made the vectors: a changed model is noticed at search time (4.3)
+        metadata={"embedding_model": embedding_model_id()},
     )
+
+
+async def index_embedding_model() -> str | None:
+    """The embedding model recorded when the collection was created, or None if it records none."""
+    info = await get_client().get_collection(collection_name())
+    metadata = info.config.metadata or {}
+    model = metadata.get("embedding_model")
+    return model if isinstance(model, str) else None
 
 
 async def upsert_chunks(points: list[PointStruct]) -> None:

@@ -75,6 +75,7 @@ limits (set through the `AGENT_*` environment variables), the tool code. **The p
 | `test_hybrid_retrieval.py` | other | Retrieval and ingestion |
 | `test_rerank.py` | other | Retrieval and ingestion |
 | `test_parse.py` | other | Retrieval and ingestion |
+| `test_embedding_models.py` | other | Retrieval and ingestion |
 | `test_migrations.py` | other | Database |
 | `test_health.py` | other | Database |
 | `test_ai_terms.py` | other | Repository rules and tooling |
