@@ -58,7 +58,11 @@ def fake(monkeypatch):
     async def embed(_text):
         return [1.0, 0.0]
 
+    async def no_check():
+        return None
+
     monkeypatch.setattr(retrieve, "embed_text", embed)
+    monkeypatch.setattr(retrieve, "check_index_model", no_check)
     retrieve.reset_count_cache()
 
     def install(dense, keyword, mode):

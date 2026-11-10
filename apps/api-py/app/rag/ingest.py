@@ -20,7 +20,7 @@ from qdrant_client.models import PointStruct
 from app.config import get_settings
 from app.db import get_pool
 from app.rag.chunking import Chunk, chunk_text
-from app.rag.embeddings import embed_texts
+from app.rag.embeddings import embed_texts, embedding_model_id
 from app.rag.parse import Segment, is_document, parse_file
 from app.rag.qdrant_store import DENSE, SPARSE, recreate_collection, upsert_chunks
 from app.rag.sparse import document_vector
@@ -107,7 +107,7 @@ async def ingest_documents() -> IngestSummary:
 
     run_row = await pool.fetchrow(
         "INSERT INTO ingestion_runs (embedding_model) VALUES ($1) RETURNING id",
-        get_settings().google_embedding_model,
+        embedding_model_id(),
     )
     ingestion_run_id = run_row["id"]
 
