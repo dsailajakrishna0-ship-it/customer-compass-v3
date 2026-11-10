@@ -178,3 +178,22 @@ print their own tool-call markup as plain text. The gateway now treats such a re
 `llm_raw_tool_markup` and the next model in the chain answers. If every model does it you get "The model
 returned an unusable reply"; pick a larger model in the dropdown. Free models also rate-limit (HTTP 429), so
 "chain unavailable" for a few minutes is normal.
+
+### 11. The database container is "unhealthy" and the log says "terminated by signal 11"
+
+The Debian image `postgres:17.11` crashed with a "general protection fault" in every new database process on
+a laptop with an 11th-gen Intel CPU (AVX-512) after a reboot, so `/health` answered "Database unreachable"
+and a fresh start-up failed during `initdb`. The compose file now uses `postgres:17.11-alpine`, the same
+Postgres version on Alpine, which does not crash. If you pulled this change and your `db` container was
+created from the old image, recreate it. **This removes the local data** (the demo companies come back from
+the migrations; documents need ingesting again):
+
+```bash
+docker compose down -v
+docker compose up -d --build db qdrant api-py
+# then click Ingest documents in the web app (19 documents, 33 chunks), or: just seed
+```
+
+Check which image you run: `docker inspect customer-compass-v3-db --format '{{.Config.Image}}'` should end in
+`-alpine`. Other projects keep their own databases (the Java edition uses `cc-java-db` on port 55432), so
+this wipe does not touch them.
