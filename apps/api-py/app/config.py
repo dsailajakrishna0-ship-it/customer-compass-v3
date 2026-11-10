@@ -65,6 +65,11 @@ class Settings(BaseSettings):
     # Embeddings (Google AI Studio)
     google_api_key: SecretStr = SecretStr("")
     google_embedding_model: str = "gemini-embedding-001"
+    # Stage 4.3: which embedding model turns text into vectors. "google" (default) is the hosted
+    # Gemini model above. "fastembed" is a small open-source model run on this machine, for the
+    # comparison in ADR 0021; it needs the optional extra: `uv sync --extra local-embeddings`.
+    embedding_provider: Literal["google", "fastembed"] = "google"
+    fastembed_model: str = "BAAI/bge-small-en-v1.5"
 
     # Chat models
     openrouter_api_key: SecretStr = SecretStr("")

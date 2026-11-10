@@ -244,11 +244,12 @@ def _git_sha() -> str:
 
 def _environment() -> dict:
     from app.config import get_settings
+    from app.rag.embeddings import embedding_model_id
 
     settings = get_settings()
     return {
         "chat_model": f"openrouter/{settings.default_openrouter_model}",
-        "embedding_model": settings.google_embedding_model,
+        "embedding_model": embedding_model_id(),
         "qdrant_collection": settings.qdrant_collection,
         "guard_mode": settings.guard_mode,
     }

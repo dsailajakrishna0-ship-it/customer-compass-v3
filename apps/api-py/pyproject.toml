@@ -25,6 +25,11 @@ dependencies = [
     "pypdfium2>=4.30",
 ]
 
+[project.optional-dependencies]
+local-embeddings = [
+    "fastembed>=0.7",
+]
+
 [dependency-groups]
 dev = [
     "fpdf2>=2.8",
