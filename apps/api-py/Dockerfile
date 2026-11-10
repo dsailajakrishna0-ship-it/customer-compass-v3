@@ -1,6 +1,12 @@
 # Image: slim Python 3.12 base; uv installs deps, uvicorn serves the FastAPI app on port 8001
 FROM python:3.12-slim
 
+# Pull in the Debian security fix for zlib1g (CVE-2026-76844, CVE-2026-85091) that the base image
+# does not have yet. Remove this layer once the python:3.12-slim tag ships the fixed zlib1g.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends --only-upgrade zlib1g \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install uv (fast Python package manager) — see
 # https://docs.astral.sh/uv/guides/integration/docker/
 COPY --from=ghcr.io/astral-sh/uv:0.12.10 /uv /uvx /bin/

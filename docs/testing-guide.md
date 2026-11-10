@@ -7,6 +7,8 @@ details, see [architecture.md](architecture.md) and
 [api-reference.md](api-reference.md) instead — this doc is for actually
 clicking around and testing.
 
+**Starting your testing from scratch?** Follow the [acceptance runbook](acceptance-runbook.md): every PR of Stages 0 to 4 in build order, with start, questions to type, expected results and stop or undo for each. This guide stays the reference for the details.
+
 ## 1. Commands to start everything
 
 ```bash
@@ -531,6 +533,26 @@ Mode **Account follow-up agent**. One run takes up to a minute or two on free mo
 
 Reading order: `apps/api-py/tests/README.md`, then `tests/contract/conftest.py` (the two seams and nothing else faked), then the *names* in `tests/contract/test_agent_recommend.py`, then `tests/test_contract_boundary.py`, then `make_llm()` in `app/routes/agent.py`. The [Stage 3 guide](stages/03-langgraph-port.md) explains each step.
 
+### Stage 4.3: choosing the embedding model, and noticing a changed one
+
+The embedding model is now a setting (`EMBEDDING_PROVIDER`: `google` is the default, `fastembed` is an open-source option for comparison), the index remembers which model built it, and a search with a different model stops with a clear "re-ingest" message. The open-source model is an **optional install** and is not in the Docker image.
+
+```bash
+git pull
+docker compose up -d --build api-py            # the Docker image still uses Google embeddings
+cd apps/api-py && uv run pytest tests/test_embedding_models.py -q     # 12 passed, no key or model download
+```
+
+| # | Do | Expect | What it shows |
+| --- | --- | --- | --- |
+| 1 | `uv run --project apps/api-py --extra local-embeddings python evals/compare_embeddings.py --models fastembed` (no key; downloads a 67 MB model the first time) | A table with `fastembed:BAAI/bge-small-en-v1.5`, 384 dimensions, recall@1 about 0.79, recall@3 about 0.99, MRR about 0.97, and a **negative** similarity gap | The open-source model ranks well, but its scores cannot separate unrelated questions (ADR 0021) |
+| 2 | `uv run --project apps/api-py python evals/compare_embeddings.py` (needs `GOOGLE_API_KEY`) | The same table with a second column for `google:gemini-embedding-001` (768 dimensions) | The Gemini numbers on the same corpus. **Please send me this table** so I can fill the ADR |
+| 3 | Web app: **Ingest documents**, then ask a Document knowledge (RAG) question | Works as before (needs both keys) | The index now records `google:gemini-embedding-001` |
+| 4 | In `.env` set `EMBEDDING_PROVIDER=fastembed`, recreate the API container, and ask a Document knowledge (RAG) question | A message: the documents were embedded with `google:gemini-embedding-001`, but the model is now `fastembed:...`, **click Ingest documents** (the API container has no FastEmbed package; to see the whole flow run the API outside Docker with `--extra local-embeddings`) | A changed model is noticed instead of returning nonsense |
+| 5 | Remove the line again, recreate the container | The same questions work again, no re-ingest needed | Switching back to the model that built the index is fine |
+
+**Without a key:** the `pytest` line and step 1. **With keys:** steps 2 to 5. The comparison in step 2 is the one thing I could not run myself.
+
 ### Stage 4.2: PDF, Word and Excel documents, with the page or sheet in the citation
 
 Ingestion now reads `.pdf`, `.docx` and `.xlsx` as well as Markdown, and a citation says where in the file the text is. Three invented sample files were added to `sample-data/documents` (a two-page service agreement PDF, a two-sheet rate card, a data-handling policy). Every file other than Markdown has a small `<name>.meta.yaml` beside it.
@@ -545,7 +567,7 @@ cd apps/api-py && uv run pytest tests/test_parse.py -q     # 11 passed, no key n
 | --- | --- | --- | --- |
 | 1 | `cd apps/api-py && uv run python -c "from pathlib import Path; from app.rag.parse import parse_file; [print(n, [(s.page, s.sheet) for s in parse_file(Path('../../sample-data/documents')/n).segments]) for n in ('acme-service-agreement.pdf','northstar-rate-card.xlsx','riverside-data-handling-policy.docx')]"` | `[(1, None), (2, None)]`, then `[(None, 'Rate card'), (None, 'SLA credits')]`, then `[(None, None)]` | Each format is read, with its page or sheet (no key or stack needed) |
 | 2 | Web app: **Ingest documents** | Completed, **19 documents**, 33 chunks (it was 16 and 28) | The new files are ingested |
-| 3 | Document Q&A: `What does Clause 7.3 say about the renewal notice period?` (needs both keys) | An answer mentioning 60 days' notice, with a source line ending **page 2** | A PDF citation names its page |
+| 3 | Document knowledge (RAG): `What does Clause 7.3 say about the renewal notice period?` (needs both keys) | An answer mentioning 60 days' notice, with a source line ending **page 2** | A PDF citation names its page |
 | 4 | `Which plan costs 3400 USD a month and how many vehicles does it track?` | Fleet Plus, 250 vehicles, source line ending **sheet Rate card** | An Excel citation names its sheet |
 | 5 | `How often are accounts with access to clinical data reviewed?` | Every quarter, with a source from the Riverside policy and **no** page or sheet | A Word file has neither, by design |
 | 6 | Re-ask one of the existing Markdown questions, for example the Maya Chen renewal question | The same cited answer as before, no page or sheet | Markdown behaves exactly as before |
@@ -569,7 +591,7 @@ cd apps/api-py && uv run pytest tests/test_rerank.py tests/test_hybrid_retrieval
 | 1 | `docker compose exec api-py env \| grep -E "RETRIEVAL_MODE\|RERANK_PROVIDER"` | `RETRIEVAL_MODE=dense` and `RERANK_PROVIDER=off` | The settings now reach the container |
 | 2 | Add `RETRIEVAL_MODE=hybrid` to `.env`, `docker compose up -d --force-recreate api-py`, repeat the command above | `RETRIEVAL_MODE=hybrid` | The 4.1a switch really works now. Then run the 4.1a steps 1 to 5 |
 | 3 | Create a free account at <https://www.voyageai.com>, make an API key, and add `RERANK_PROVIDER=voyage` and `VOYAGE_API_KEY=...` to `.env`; recreate the container | No error at startup | The key is read from `.env` and never printed |
-| 4 | Ask the Document Q&A question `What did Maya Chen ask about the renewal of the Premium Operations Plan?`, then `docker compose logs api-py --since 5m \| grep -E "reranked\|rerank_"` | A line `reranked candidates=… kept=4`, and the same cited answer | The reranker ran on the shortlist |
+| 4 | Ask the Document knowledge (RAG) question `What did Maya Chen ask about the renewal of the Premium Operations Plan?`, then `docker compose logs api-py --since 5m \| grep -E "reranked\|rerank_"` | A line `reranked candidates=… kept=4`, and the same cited answer | The reranker ran on the shortlist |
 | 5 | Set `VOYAGE_API_KEY=wrong` (or empty), recreate, ask again | The same answer as before, and a log line `rerank_failed … status=401` (or `rerank_skipped … no_api_key`) | A broken reranker never breaks retrieval |
 | 6 | With the stack up and documents ingested: `just eval-retrieval`, `just eval-hybrid`, `just eval-rerank` | Each says "reproduced", or lists a metric outside ±0.02 | Recall and MRR are not worse with hybrid and with the reranker (the 4.1 exit test) |
 
@@ -588,7 +610,7 @@ cd apps/api-py && uv run pytest tests/test_sparse.py tests/test_hybrid_retrieval
 | # | Do | Expect | What it shows |
 | --- | --- | --- | --- |
 | 1 | Web app: click **Ingest documents** | "completed", the same document and chunk counts as before | The collection was recreated with both vectors |
-| 2 | Chat mode **Document Q&A**, ask `What did Maya Chen ask about the renewal of the Premium Operations Plan?` (needs both keys) | The same cited answer as before | Default mode is unchanged |
+| 2 | Chat mode **Document knowledge (RAG)**, ask `What did Maya Chen ask about the renewal of the Premium Operations Plan?` (needs both keys) | The same cited answer as before | Default mode is unchanged |
 | 3 | Put `RETRIEVAL_MODE=hybrid` in `.env`, then `docker compose up -d --force-recreate api-py` (**needs the 4.1b compose fix**), and ask the same question and `What is the capital of France?` | The same cited answer; for France, no sources (the model says it is not in the documents) | Hybrid still finds the right chunk, and the similarity floor still stops unrelated questions |
 | 4 | `docker compose logs api-py --since 5m \| grep hybrid_search` | A line like `hybrid_search dense=20 keyword=12 merged=...` | Both searches ran and were merged |
 | 5 | With the stack up and documents ingested: `just eval-retrieval`, then `just eval-hybrid` (needs `GOOGLE_API_KEY`) | Both end with "reproduced", or list a metric outside ±0.02 | Recall and MRR are not worse in hybrid mode (the exit test for 4.1a) |
