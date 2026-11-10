@@ -148,6 +148,37 @@ localStorage.clear()
 (Removing this persistence entirely, or namespacing the storage keys per
 repo, is a possible follow-up — not yet done as of this PR.)
 
+### 8. I added a key to `.env` but the API says "No model is configured"
+
+Docker reads `.env` only when a container is **created**. `docker compose restart api-py` (and `stop`
+then `start`) keeps the old environment, so the API still has no key and logs `openrouter_key_missing`.
+Recreate the container instead:
+
+```bash
+docker compose up -d --force-recreate api-py
+```
+
+Do this after every `.env` edit (keys, `RETRIEVAL_MODE`, `EMBEDDING_PROVIDER`, `RERANK_PROVIDER`). To check
+what the container sees without printing a key: `docker exec customer-compass-v3-api-py sh -c 'printf %s "$OPENROUTER_API_KEY" | wc -c'`
+(`0` means it is empty).
+
+### 9. Tool-calling mode shows "The Spring Boot (Java) tool server is not reachable"
+
+(Older builds showed `[Errno -3] Temporary failure in name resolution`.) The Java tool server, `mcp-spring`,
+runs only with the `java` compose profile, so by default the name does not exist on the Docker network. Start
+it with `just up-java` (3 to 5 minutes the first time), wait 15 seconds, reload the page; or choose
+**FastMCP (Python)** in the Tool server buttons. The web app greys out a server that is not reachable and
+returns to the default if your saved choice stops being available. Stop it with
+`docker compose --profile java stop mcp-spring`.
+
+### 10. A small free model prints `<|tool_call_start|>` text instead of an answer
+
+Very small models (for example the 2.6B default) were trained to call tools. When no tool is offered they can
+print their own tool-call markup as plain text. The gateway now treats such a reply like an empty one: it logs
+`llm_raw_tool_markup` and the next model in the chain answers. If every model does it you get "The model
+returned an unusable reply"; pick a larger model in the dropdown. Free models also rate-limit (HTTP 429), so
+"chain unavailable" for a few minutes is normal.
+
 ### 11. The database container is "unhealthy" and the log says "terminated by signal 11"
 
 The Debian image `postgres:17.11` crashed with a "general protection fault" in every new database process on
@@ -166,4 +197,3 @@ docker compose up -d --build db qdrant api-py
 Check which image you run: `docker inspect customer-compass-v3-db --format '{{.Config.Image}}'` should end in
 `-alpine`. Other projects keep their own databases (the Java edition uses `cc-java-db` on port 55432), so
 this wipe does not touch them.
-

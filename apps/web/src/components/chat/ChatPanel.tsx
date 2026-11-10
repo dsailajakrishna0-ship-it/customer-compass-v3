@@ -6,6 +6,7 @@ import { MODE_COPY } from "../../context/ChatSessionContext";
 import { ChatModeSelector } from "./ChatModeSelector";
 import { MessageList } from "./MessageList";
 import { ChatInput } from "./ChatInput";
+import { usableChoice } from "./mcpServerStatus";
 import { useEffect } from "react";
 import type { ChatMode } from "../../types";
 
@@ -27,6 +28,12 @@ export function ChatPanel({ ingestStatus, isIngesting, onIngest }: ChatPanelProp
   useEffect(() => {
     if (cloudModels.free.length > 0 && !cloudModel) setCloudModel(cloudModels.free[0].id);
   }, [cloudModels, cloudModel, setCloudModel]);
+
+  // A saved tool-server choice that is not available now (for example the Java server was stopped)
+  // goes back to the default, so the request does not name a server that cannot answer.
+  useEffect(() => {
+    if (mcpServers && mcpServer && usableChoice(mcpServer, mcpServers.servers) === "") setMcpServer("");
+  }, [mcpServers, mcpServer, setMcpServer]);
 
   return (
     <section className="chat-panel">

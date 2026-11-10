@@ -6,6 +6,7 @@ import logging
 from dataclasses import replace
 from typing import Literal
 
+import httpx
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field, field_validator
 
@@ -24,7 +25,7 @@ from app.guardrails.prompt_guard import (
 from app.llm.gateway import generate
 from app.llm.types import ChatMessage, GenerationResult, ToolCall
 from app.mcp.client import call_tool, list_tool_specs, mcp_session
-from app.mcp.registry import UnknownBackendError
+from app.mcp.registry import Backend, UnknownBackendError
 from app.mcp.registry import resolve as resolve_backend
 from app.mcp.schemas import tool_definitions, validate_arguments
 from app.mcp.tools import looks_like_confirmation
@@ -399,9 +400,11 @@ async def tools_chat(body: ToolsChatRequest):
     except UnknownBackendError as error:
         raise HTTPException(status_code=400, detail=str(error)) from error
 
+    connected = False  # becomes True once the tool server has answered
     try:
         async with mcp_session(backend.id) as session:
             tools = tool_definitions(await list_tool_specs(session))
+            connected = True
 
             conversation: list[dict] = [
                 *(dict(m) for m in body.message_dicts[:-1]),
@@ -455,9 +458,23 @@ async def tools_chat(body: ToolsChatRequest):
             }
     except Exception as exc:  # noqa: BLE001
         cause = _root_cause(exc)
+        if not connected and isinstance(cause, OSError | httpx.TransportError):
+            raise HTTPException(status_code=503, detail=_unreachable_message(backend)) from exc
         raise HTTPException(
             status_code=503, detail=str(cause) or "Could not answer using tools."
         ) from exc
+
+
+def _unreachable_message(backend: Backend) -> str:
+    """What to tell the user when the chosen tool server cannot be reached at all (for example the
+    Java server, which only runs with the `java` compose profile)."""
+    hint = (
+        " Start it with `just up-java` (docker compose --profile java up -d mcp-spring), or"
+        " choose another tool server."
+        if backend.id == "springboot"
+        else " Check that the tool server container is running (`docker compose ps`)."
+    )
+    return f"The {backend.label} tool server is not reachable.{hint}"
 
 
 def _root_cause(error: BaseException) -> BaseException:
