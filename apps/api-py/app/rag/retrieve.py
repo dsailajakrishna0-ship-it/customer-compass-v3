@@ -25,8 +25,14 @@ from qdrant_client.models import (
 )
 
 from app.config import get_settings
-from app.rag.embeddings import embed_text
-from app.rag.qdrant_store import DENSE, SPARSE, collection_name, get_client
+from app.rag.embeddings import EmbeddingsUnavailableError, embed_text, embedding_model_id
+from app.rag.qdrant_store import (
+    DENSE,
+    SPARSE,
+    collection_name,
+    get_client,
+    index_embedding_model,
+)
 from app.rag.rerank import rerank_order, reranking_enabled
 from app.rag.sparse import query_vector
 
@@ -84,6 +90,44 @@ async def get_point_count() -> int:
 def reset_count_cache() -> None:
     global _count_cache
     _count_cache = None
+
+
+class EmbeddingModelMismatchError(EmbeddingsUnavailableError):
+    """The documents were embedded with a different model from the one now configured."""
+
+
+_index_model_checked: tuple[float, str] | None = None
+
+
+async def check_index_model() -> None:
+    """Stops a search whose question would be embedded with a different model from the documents.
+
+    Vectors from two models are not comparable (they can even have different lengths), so searching
+    one with the other returns nonsense or an error. The model that built the index is recorded on
+    the collection; if it is not the configured one, the fix is one re-ingest. An index that records
+    no model (made before 4.3) is not checked. The result is cached for `vector_count_cache_seconds`."""
+    global _index_model_checked
+    current = embedding_model_id()
+    now = time.monotonic()
+    ttl = get_settings().vector_count_cache_seconds
+    if (
+        _index_model_checked
+        and _index_model_checked[1] == current
+        and now - _index_model_checked[0] < ttl
+    ):
+        return
+    indexed = await index_embedding_model()
+    if indexed is not None and indexed != current:
+        raise EmbeddingModelMismatchError(
+            f"The documents were embedded with {indexed}, but the embedding model is now {current}. "
+            "Click Ingest documents (or POST /api/v1/documents/ingest) to re-embed them."
+        )
+    _index_model_checked = (now, current)
+
+
+def reset_index_model_check() -> None:
+    global _index_model_checked
+    _index_model_checked = None
 
 
 @dataclass
@@ -213,6 +257,7 @@ async def retrieve_relevant_chunks(
     Stage 4.1b: when a reranker is configured (`RERANK_PROVIDER`), the best `retrieval_candidates`
     chunks are sent to it and its order decides the final `top_k`; if it fails, the search order stays."""
     settings = get_settings()
+    await check_index_model()
     question_embedding = await embed_text(question)
     # With a reranker we keep a longer shortlist for it to choose from; without one, just top_k
     pool = settings.retrieval_candidates if reranking_enabled() else top_k
