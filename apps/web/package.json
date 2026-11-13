@@ -11,11 +11,11 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@vitejs/plugin-react": "^6.2.1",
+    "@vitejs/plugin-react": "^6.3.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-router-dom": "^7.18.5",
-    "vite": "^8.3.6"
+    "vite": "^8.3.7"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -29,7 +29,7 @@
     "globals": "^17.14.0",
     "jsdom": "^31.0.0",
     "typescript": "^7.0.2",
-    "typescript-eslint": "^8.72.1",
+    "typescript-eslint": "^8.72.2",
     "vitest": "^5.1.0"
   }
 }
