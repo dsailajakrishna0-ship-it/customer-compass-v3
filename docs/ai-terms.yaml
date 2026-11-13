@@ -35,6 +35,7 @@ targets:
   - docs/architecture.md
   - docs/stages/README.md
   - docs/stages/*.md
+  - docs/python-extensions.md
   - docs/concepts/*.md
   - evals/README.md
 
@@ -170,6 +171,20 @@ terms:
     ignore_case: true
     meaning: "Combining meaning-based search (embeddings) with keyword search, which often finds more of the right documents than either alone."
     since: "4.1"
+  - id: knowledge-base
+    name: Knowledge base
+    category: concept
+    match: ["knowledge base", "knowledge bases"]
+    ignore_case: true
+    meaning: "A named collection of documents that is indexed and searched on its own. A system can hold several (for example the CRM's documents and another business's handbook) and choose where to look."
+    since: "E1.1"
+  - id: multi-source-rag
+    name: Multi-source RAG
+    category: concept
+    match: ["multi-source RAG", "multi-source retrieval", "federated RAG"]
+    ignore_case: true
+    meaning: "RAG over more than one knowledge base, with a decision about which to search (a router, all of them, or the model's own choice) and a way to merge the results."
+    since: "E1.1"
   - id: agentic-retrieval
     name: Agentic retrieval
     category: concept

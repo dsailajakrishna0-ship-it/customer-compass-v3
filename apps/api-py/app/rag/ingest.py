@@ -60,9 +60,8 @@ def _documents_dir() -> Path:
     return here.parents[4] / "sample-data" / "documents"
 
 
-def _load_documents() -> list[ParsedDocument]:
-    dir_path = _documents_dir()
-    repo_root = dir_path.parents[1]
+def load_documents(dir_path: Path, repo_root: Path) -> list[ParsedDocument]:
+    """Parses every document in a folder, in file-name order. `source_path` is relative to `repo_root`."""
     documents: list[ParsedDocument] = []
 
     for file_path in sorted(p for p in dir_path.iterdir() if is_document(p)):
@@ -77,6 +76,11 @@ def _load_documents() -> list[ParsedDocument]:
             )
         )
     return documents
+
+
+def _load_documents() -> list[ParsedDocument]:
+    dir_path = _documents_dir()
+    return load_documents(dir_path, dir_path.parents[1])
 
 
 def chunk_segments(segments: list[Segment]) -> list[tuple[Segment, Chunk]]:

@@ -33,6 +33,7 @@ from app.rag.qdrant_store import (
     collection_name,
     get_client,
     index_embedding_model,
+    ingest_hint,
 )
 from app.rag.rerank import rerank_order, reranking_enabled
 from app.rag.sparse import query_vector
@@ -63,7 +64,8 @@ MIN_SIMILARITY = 0.45
 
 logger = logging.getLogger("app.rag.retrieve")
 
-_count_cache: tuple[float, int] | None = None
+# Per collection (key: its name), because a knowledge base (ADR 0029) has a collection of its own.
+_count_cache: dict[str, tuple[float, int]] = {}
 
 
 def choose_search_strategy(point_count: int) -> tuple[str, SearchParams]:
@@ -76,28 +78,25 @@ def choose_search_strategy(point_count: int) -> tuple[str, SearchParams]:
 
 async def get_point_count() -> int:
     """Number of points in the collection, cached for `vector_count_cache_seconds`."""
-    global _count_cache
+    name = collection_name()
     now = time.monotonic()
-    if (
-        _count_cache is not None
-        and now - _count_cache[0] < get_settings().vector_count_cache_seconds
-    ):
-        return _count_cache[1]
-    result = await get_client().count(collection_name=collection_name(), exact=False)
-    _count_cache = (now, result.count)
+    cached = _count_cache.get(name)
+    if cached is not None and now - cached[0] < get_settings().vector_count_cache_seconds:
+        return cached[1]
+    result = await get_client().count(collection_name=name, exact=False)
+    _count_cache[name] = (now, result.count)
     return result.count
 
 
 def reset_count_cache() -> None:
-    global _count_cache
-    _count_cache = None
+    _count_cache.clear()
 
 
 class EmbeddingModelMismatchError(EmbeddingsUnavailableError):
     """The documents were embedded with a different model from the one now configured."""
 
 
-_index_model_checked: tuple[float, str] | None = None
+_index_model_checked: dict[str, tuple[float, str]] = {}  # per collection, like the count cache
 
 
 async def check_index_model() -> None:
@@ -107,28 +106,24 @@ async def check_index_model() -> None:
     one with the other returns nonsense or an error. The model that built the index is recorded on
     the collection; if it is not the configured one, the fix is one re-ingest. An index that records
     no model (made before 4.3) is not checked. The result is cached for `vector_count_cache_seconds`."""
-    global _index_model_checked
+    name = collection_name()
     current = embedding_model_id()
     now = time.monotonic()
     ttl = get_settings().vector_count_cache_seconds
-    if (
-        _index_model_checked
-        and _index_model_checked[1] == current
-        and now - _index_model_checked[0] < ttl
-    ):
+    checked = _index_model_checked.get(name)
+    if checked and checked[1] == current and now - checked[0] < ttl:
         return
     indexed = await index_embedding_model()
     if indexed is not None and indexed != current:
         raise EmbeddingModelMismatchError(
             f"The documents were embedded with {indexed}, but the embedding model is now {current}. "
-            "Click Ingest documents (or POST /api/v1/documents/ingest) to re-embed them."
+            f"{ingest_hint()} to re-embed them."
         )
-    _index_model_checked = (now, current)
+    _index_model_checked[name] = (now, current)
 
 
 def reset_index_model_check() -> None:
-    global _index_model_checked
-    _index_model_checked = None
+    _index_model_checked.clear()
 
 
 @dataclass

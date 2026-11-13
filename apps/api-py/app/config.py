@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import Literal
 
 import yaml
-from pydantic import BaseModel, SecretStr, model_validator
+from pydantic import BaseModel, Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Two LiteLLM behaviours we switch off before it is first imported (app/llm/__init__.py imports this
@@ -42,6 +42,34 @@ ImplName = Literal["manual", "frameworks"]
 DEFAULT_MODELS_FILE = Path(__file__).resolve().parent.parent / "models.yaml"
 
 
+class KnowledgeBaseSource(BaseModel):
+    """One extra knowledge base (a Python-edition extension, ADR 0029). The CRM documents are always the
+    knowledge base `crm`; each of these is another corpus with its own Qdrant collection."""
+
+    id: str = Field(pattern=r"^[a-z0-9][a-z0-9-]*$")
+    label: str
+    # What is in it. A router (or a model, in a later slice) reads this to decide whether to search it.
+    description: str
+    # None: sample-data/knowledge-bases/<id> next to the sample documents
+    source_dir: Path | None = None
+
+
+# The one corpus that ships with the repo: a fictional farm-supply handbook, the same eight documents
+# and the same description as the Java edition, so the two editions can be compared later.
+DEFAULT_KNOWLEDGE_BASES = [
+    KnowledgeBaseSource(
+        id="agri-supply",
+        label="Orchard Valley Agri-Supply handbook",
+        description=(
+            "Handbook of a farm-supply business: crop protection products and their re-entry and harvest "
+            "intervals, cold chain for seedlings and biologicals, seed lot shelf life, sprayer calibration, "
+            "delivery windows and pallet rules, organic certification, supply agreement renewals and the "
+            "recall procedure."
+        ),
+    )
+]
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(extra="ignore", env_ignore_empty=True)
 
@@ -51,6 +79,9 @@ class Settings(BaseSettings):
     )
     qdrant_url: str = "http://localhost:6333"
     qdrant_collection: str = "document_chunks"
+    # Extra knowledge bases (ADR 0029): a JSON list in KNOWLEDGE_BASES, for example
+    # [{"id": "agri-supply", "label": "...", "description": "...", "source_dir": null}]
+    knowledge_bases: list[KnowledgeBaseSource] = DEFAULT_KNOWLEDGE_BASES
     vector_index_min_points: int = 10_000
     vector_hnsw_ef: int = 64
     vector_count_cache_seconds: float = 60.0
@@ -143,6 +174,15 @@ class Settings(BaseSettings):
     # Logging
     log_level: str = "INFO"
     log_format: Literal["json", "console"] = "json"
+
+    @model_validator(mode="after")
+    def _knowledge_base_ids_are_usable(self) -> Settings:
+        ids = [kb.id for kb in self.knowledge_bases]
+        if "crm" in ids:
+            raise ValueError('KNOWLEDGE_BASES: the id "crm" is the built-in CRM documents.')
+        if len(set(ids)) != len(ids):
+            raise ValueError("KNOWLEDGE_BASES: every knowledge base needs its own id.")
+        return self
 
     @model_validator(mode="after")
     def _frameworks_retrieval_is_dense_only(self) -> Settings:

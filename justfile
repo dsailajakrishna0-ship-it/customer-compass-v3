@@ -155,6 +155,18 @@ resolve-conflicts *args:
 eval-promptfoo:
     cd evals && npx promptfoo@latest eval -c promptfooconfig.yaml
 
+# the knowledge bases and their chunk counts (Python extension E1). Example: just kb-list
+kb-list:
+    @curl -s localhost:8001/api/v1/knowledge-bases | python3 -m json.tool
+
+# (re)build an extra knowledge base from its folder. Example: just kb-ingest agri-supply
+kb-ingest id:
+    @curl -s -X POST localhost:8001/api/v1/knowledge-bases/{{id}}/ingest | python3 -m json.tool
+
+# search one knowledge base. Example: just kb-search agri-supply "re-entry interval after spraying"
+kb-search id query:
+    @python3 -c 'import json,sys,urllib.request as u; r=u.Request("http://localhost:8001/api/v1/knowledge-bases/"+sys.argv[1]+"/search", json.dumps({"query":sys.argv[2]}).encode(), {"Content-Type":"application/json"}); print(json.dumps(json.load(u.urlopen(r)), indent=2))' {{id}} "{{query}}"
+
 # render docs/diagrams/*.mmd to docs/img/diagrams/*.png (needs Docker; the first run pulls a ~2.4 GB image)
 diagrams:
     for f in docs/diagrams/*.mmd; do n=$(basename "$f" .mmd); docker run --rm --user "$(id -u):$(id -g)" -v "$PWD/docs":/data ghcr.io/mermaid-js/mermaid-cli/mermaid-cli:12.0.0 -p /data/diagrams/mermaid-puppeteer.json -i "/data/diagrams/$n.mmd" -o "/data/img/diagrams/$n.png" -s 2 -b white || exit 1; echo "rendered $n"; done

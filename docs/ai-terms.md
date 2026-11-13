@@ -37,10 +37,12 @@ An idea or method used when building with language models.
 | 🟪 **Hybrid search** | Combining meaning-based search (embeddings) with keyword search, which often finds more of the right documents than either alone. | sub-stage 4.1 |  |
 | 🟪 **Inference** | Running a trained model to get an answer, as opposed to training it. | V2 seed |  |
 | 🟪 **Jailbreak** | A prompt written to push a model past its safety rules. | V2 seed | [V2 record](v2-baseline/part-3-trust-safety/08-prompt-injection-guardrails.md) |
+| 🟪 **Knowledge base** | A named collection of documents that is indexed and searched on its own. A system can hold several (for example the CRM's documents and another business's handbook) and choose where to look. | E1.1 |  |
 | 🟪 **LLM** | Large language model: a program trained on huge amounts of text that predicts likely next words, which lets it answer questions and write text. | V2 seed | [V2 record](v2-baseline/part-1-foundations/02-first-llm-chat.md) |
 | 🟪 **LLM as judge** | Using a second model to grade another model's answers when code cannot score them. | V2 seed |  |
 | 🟪 **LLM gateway** | One front door for calling many model providers the same way, with fallback and retries. | sub-stage 1.2 |  |
 | 🟪 **MRR** | Mean reciprocal rank: how high the first correct result sits (rank 1 scores 1, rank 2 scores 0.5), averaged over all questions. | sub-stage 0.7 | [stage guide](stages/00-foundation.md) |
+| 🟪 **Multi-source RAG** | RAG over more than one knowledge base, with a decision about which to search (a router, all of them, or the model's own choice) and a way to merge the results. | E1.1 |  |
 | 🟪 **Open-weights model** | A model whose trained numbers are published, so you can run it yourself. | V2 seed |  |
 | 🟪 **OpenAI-compatible API** | An API shaped like OpenAI's chat API, which many providers copy, so one client can talk to all of them. | V2 seed |  |
 | 🟪 **PII** | Personally identifiable information: data that identifies a person, such as a name or email address. | sub-stage 5.3 |  |
