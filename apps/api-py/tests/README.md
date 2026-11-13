@@ -65,6 +65,7 @@ limits (set through the `AGENT_*` environment variables), the tool code. **The p
 | `test_no_local_models.py` | other | Model gateway and settings |
 | `test_adversarial_set.py` | other | Guardrails |
 | `test_llm_guard.py` | other | Guardrails |
+| `test_pii_guard.py` | other | Guardrails |
 | `test_output_guard.py` | other | Guardrails |
 | `test_prompt_guard.py` | other | Guardrails |
 | `test_security_audit.py` | other | Guardrails |
@@ -83,6 +84,7 @@ limits (set through the `AGENT_*` environment variables), the tool code. **The p
 | `test_eval_baseline.py` | other | Repository rules and tooling |
 | `test_measure_limits.py` | other | Repository rules and tooling |
 | `test_judged_evals.py` | other | Repository rules and tooling |
+| `test_guard_compare.py` | other | Repository rules and tooling |
 | `test_network_guard.py` | other | Repository rules and tooling |
 | `test_test_hygiene.py` | other | Repository rules and tooling |
 | `test_resolve_conflicts.py` | other | Repository rules and tooling |

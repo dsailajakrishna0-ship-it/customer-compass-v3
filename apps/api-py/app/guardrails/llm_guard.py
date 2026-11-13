@@ -9,9 +9,11 @@ GUARD_MODE: rules (default, no LLM call) | llm (classifier only) | both.
 GUARD_MODEL picks the model that classifies (the default model when unset).
 """
 
+import asyncio
 import logging
 
 from app.config import get_settings
+from app.guardrails import pii
 from app.guardrails.prompt_guard import GuardFinding, scan_and_neutralize
 from app.llm.gateway import generate
 
@@ -44,8 +46,16 @@ async def classify_prompt(text: str) -> bool:
 
 async def guard_input(text: str, mode: str | None = None) -> GuardFinding:
     """Runs the configured guard(s) on user text. The rules result (with
-    neutralized text) is always the base; the classifier only adds a finding."""
+    neutralized text) is always the base; the classifier only adds a finding.
+
+    With PII_MODE on (Stage 5.3) the PII scan runs first, so in `redact` mode neither the rules nor the
+    classifier model ever sees the value."""
     mode = mode or get_settings().guard_mode
+    pii_found = GuardFinding(neutralized_text=text)
+    if get_settings().pii_mode != "off":
+        # Presidio is CPU work (about 20 ms); keep it off the event loop.
+        pii_found = await asyncio.to_thread(pii.scan_pii, text)
+        text = pii_found.neutralized_text
     finding = (
         scan_and_neutralize(text)
         if mode in ("rules", "both")
@@ -58,4 +68,6 @@ async def guard_input(text: str, mode: str | None = None) -> GuardFinding:
                 finding.matched_snippets.append(text[:120])
         except Exception as exc:  # noqa: BLE001 - fail open
             logger.warning("llm guard unavailable, using rules only: %s", exc)
+    finding.matched_patterns[:0] = pii_found.matched_patterns
+    finding.matched_snippets[:0] = pii_found.matched_snippets
     return finding

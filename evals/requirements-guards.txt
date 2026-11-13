@@ -1,0 +1,7 @@
+# Stage 5.3: the guard comparison libraries, pinned. Kept OUT of apps/api-py/uv.lock on purpose (same reason as
+# requirements-judge.txt): they bring large dependency trees (langchain, spaCy) that must not reach a default install.
+# `just eval-guards-record` layers them on the API environment with `uv run --with-requirements`.
+nemoguardrails==0.24.1
+presidio-analyzer==2.2.366
+# the small English spaCy model Presidio uses here (12 MB; the default en_core_web_lg is 400 MB)
+en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl

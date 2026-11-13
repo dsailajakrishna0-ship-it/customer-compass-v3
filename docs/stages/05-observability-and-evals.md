@@ -1,8 +1,8 @@
 # Stage 5 — Observability and evals: see what the system did
 
 > **Level:** beginner friendly; read [Stage 3](03-langgraph-port.md) for the 🟪agent steps this stage makes visible. **Reading time:** about 25 minutes so far (this guide grows with 5.3 to 5.5).
-> **Status:** in progress. **5.1 (tracing) is done; 5.2 (answer-quality 🟪evals) is in review; 5.3 (🟪guardrail comparison), 5.4 and 5.5 are next.**
-> **Roadmap:** [Stage 5](../roadmap.md#stage-5--observability-and-evals) · **Decisions:** [ADR 0022](../adr/0022-tracing-with-opentelemetry-and-langfuse.md), [ADR 0023](../adr/0023-judged-evals-with-deepeval.md)
+> **Status:** in progress. **5.1 (tracing) and 5.2 (answer-quality 🟪evals) are done; 5.3 (🟪guardrail comparison and 🟪PII) is in review; 5.4 and 5.5 are next.**
+> **Roadmap:** [Stage 5](../roadmap.md#stage-5--observability-and-evals) · **Decisions:** [ADR 0022](../adr/0022-tracing-with-opentelemetry-and-langfuse.md), [ADR 0023](../adr/0023-judged-evals-with-deepeval.md), [ADR 0024](../adr/0024-guard-comparison-and-pii.md)
 
 **AI colour code:** 🟪 concept · 🟦 framework or tool · 🟩 data store or service · 🟧 model. Unmarked technical terms are ordinary software. [A to Z list](../ai-terms.md)
 
@@ -109,3 +109,64 @@ The V2 retrieval numbers from `baseline/v2.json` are printed under it, and `just
 | 🟢 | `evals/requirements-judge.txt`, `justfile`, `.github/dependabot.yml`, `ci.yml` | The pinned library, `just eval-judged` and `-record`, a pip Dependabot entry, an offline replay step in CI |
 | 🟡 | `evals/run_eval.py` | The table now starts with the branch and commit |
 | 🟢 | `tests/test_judged_evals.py` | 25 offline tests: cache, replay, retries, parser, table, 🟪golden set (no keys, no DeepEval) |
+
+---
+
+## Concept 3 — Guardrails compared, and a PII guard (5.3)
+
+**The question.** Stage 8 built a guard out of regular expressions: fast, free, predictable, and easy to fool. Before building more, measure it against the well-known alternatives, on a bigger and harder set than the one it was built on.
+
+| Shop idea | Project idea | In the code |
+| --- | --- | --- |
+| A doorman with a list of known troublemakers' faces | **Rules**: patterns for known attack phrases | `app/guardrails/prompt_guard.py` |
+| A second doorman who reads each visitor's intent and gives a thumbs up or down | **🟪LLM classifier**: a model answers SAFE or UNSAFE | `app/guardrails/llm_guard.py` |
+| A security company with a rulebook for violence and theft, not for sweet-talkers | **🟧Llama Guard**: a safety classifier trained on harm categories | measured only |
+| A security *system*: cameras, a rule engine, a control room | **🟦NeMo Guardrails**: a framework that runs rails, here one "self check input" rail | measured only |
+| A shredder at the till for card numbers and ID numbers | **🟦Presidio**: finds personal data by pattern, checksum and a language model | optional, `PII_MODE` |
+
+**How the comparison works.** 74 🟪prompts (44 attacks, 30 normal questions, many of which borrow attack words) and 32 🟪PII texts. Every strategy answers "flag or not" for each text. The table counts how many attacks each one flags (**detection rate**), how many normal questions it flags too (**false positives**) and how long it takes (**latency**). Hosted answers are recorded once in `evals/guards/cache.jsonl` and replayed everywhere else, so the table needs no keys and gives the same numbers every time: the same idea as the judge cache in 5.2.
+
+```
+just eval-guards          # replay: offline, free, no keys, checks every count against the baseline
+just eval-guards-record   # record what is missing (needs OPENROUTER_API_KEY; about a cent)
+```
+
+**What came out** (details and caveats in [ADR 0024](../adr/0024-guard-comparison-and-pii.md)):
+
+| Strategy | Attacks detected (of 44) | False positives (of 30) | Median latency |
+| --- | --- | --- | --- |
+| Our rules | 11 | 4 | 0.03 ms |
+| Our LLM classifier | 25 | 3 | 1.2 s |
+| Rules + classifier | 29 | 5 | 1.2 s |
+| Llama Guard 4 | 10 | 0 | 0.9 s |
+| NeMo Guardrails self-check | 43 | 16 | 0.9 s |
+
+| PII strategy | Texts with PII found (of 20) | False positives (of 12 clean) | Median latency |
+| --- | --- | --- | --- |
+| Our rules | 0 | 0 | none |
+| Presidio, default entities | 19 | 0 | 24 ms |
+| Llama Guard 4 | 10 | 1 | 0.9 s |
+
+**Three lessons.**
+
+1. **Detection and false positives are one trade, not two numbers.** NeMo's rail catches 43 of 44 and also flags 16 of 30 ordinary questions. Llama Guard flags none of the ordinary questions and misses 34 of the 44 attacks. A guard that cries wolf gets switched off; one that never fires protects nothing. Look at both columns every time.
+2. **A tool is a recipe, not a verdict.** The two model-backed rows share one small model. Rewording one policy prompt moved the same model from 27 false positives to 16. The honest reading is "this prompt on this model", and the table pins both.
+3. **Match the tool to the threat.** Llama Guard is good at what it was trained for (harmful content) and wrong for "ignore your instructions". Presidio finds structured personal data that no list of attack phrases ever will. The rules are the only strategy that costs nothing and runs offline, which is why they stay the default.
+
+**The 🟪PII guard.** Off by default. `PII_MODE=detect` flags card numbers, SSNs, IBANs, email addresses and phone numbers in the user's message (in the 🟪guardrail field and the audit log, as a type and a count, never the value); `redact` also replaces each with its type (`<CREDIT_CARD>`) before the rules, the classifier or the answering model see it. It needs Presidio and a small language model installed (not in the default image), and the API refuses to start if it is switched on without them. Names (`PERSON`) are off by default: a CRM is full of legitimate names.
+
+**Rule to remember.** *Measure a guard on attacks and on ordinary questions at the same time, on a set it was not built on, and pin the model and the prompt. A detection rate without a false-positive rate is half a number.*
+
+---
+
+## Code tour: what changed in 5.3
+
+| | Where | What |
+| --- | --- | --- |
+| 🟢 | `evals/guard_compare.py` | The strategies, the verdict cache (record and replay), the metrics, the table and the baseline check; no NeMo, 🟦Presidio or API imports |
+| 🟢 | `evals/compare_guards.py` | The runner (replaces the 8.d script): `just eval-guards` and `just eval-guards-record` |
+| 🟢 | `evals/golden/guards-extra.json`, `evals/guards/cache.jsonl`, `evals/baseline/guards-v1.json` | 44 more 🟪prompts, 32 🟪PII texts, the recorded verdicts, the pinned counts |
+| 🟢 | `evals/requirements-guards.txt`, `justfile`, `.github/dependabot.yml`, `ci.yml` | Pinned 🟦NeMo Guardrails and Presidio outside `uv.lock`, the two recipes, a replay step in CI |
+| 🟢 | `app/guardrails/pii.py` | The optional PII guard: lazy Presidio, `detect` and `redact`, never the value in the audit |
+| 🟡 | `app/guardrails/llm_guard.py`, `app/config.py`, `app/main.py`, `.env.example` | `guard_input` runs the PII scan first when `PII_MODE` is on; `PII_MODE` and `PII_ENTITIES`; the startup check |
+| 🟢 | `tests/test_guard_compare.py`, `tests/test_pii_guard.py` | 31 offline tests: cache, retries, metrics, table, baseline, case sets, the recorded cache; the PII guard with a fake analyzer |

@@ -297,9 +297,7 @@ deterministically.
 **Step 5 — 8.d classifier (opt-in).** Needs `OPENROUTER_API_KEY` (the classifier is a free hosted model; `GUARD_MODEL` picks which).
 
 ```bash
-cd apps/api-py
-PYTHONPATH=. uv run python ../../evals/compare_guards.py          # rules only: recall 10/15, 0 false positives
-PYTHONPATH=. uv run python ../../evals/compare_guards.py --llm    # adds llm and both modes (live run: llm 15/15, both 15/15, 0 false positives)
+just eval-guards          # the 5.3 table, replayed from recorded verdicts (no keys)
 ```
 
 To use it in the app, set `GUARD_MODE=both` in `.env`, then

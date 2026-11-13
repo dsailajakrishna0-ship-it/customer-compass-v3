@@ -31,6 +31,7 @@ One short file per decision, so the reason for a choice is not buried in a long 
 | [0021](0021-embedding-models-and-reembedding.md) | Choosing the embedding model, and re-embedding when it changes | Accepted |
 | [0022](0022-tracing-with-opentelemetry-and-langfuse.md) | Tracing with OpenTelemetry, shown in a self-hosted Langfuse | Accepted |
 | [0023](0023-judged-evals-with-deepeval.md) | Judged answer-quality evals with DeepEval, a pinned judge and a replay cache | Accepted |
+| [0024](0024-guard-comparison-and-pii.md) | Guard comparison (rules, classifier, Llama Guard, NeMo Guardrails) and an optional Presidio PII guard | Accepted |
 
 ## Template
 

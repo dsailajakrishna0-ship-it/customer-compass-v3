@@ -223,13 +223,13 @@ no extra LLM call), `llm` or `both`; `GUARD_PROVIDER`/`GUARD_MODEL` pick the
 classifier model. It is detection-only (flags and audits, does not redact)
 and fails open if the model is unreachable.
 
-`evals/compare_guards.py` measures strategies on the 8.a fixture:
+`evals/compare_guards.py` measures strategies on the 8.a fixture (Stage 5.3 extended it: more cases, Llama Guard, NeMo Guardrails and Presidio; see [the Stage 5 guide](../../stages/05-observability-and-evals.md) for the current table):
 
 ```bash
-cd apps/api-py
-PYTHONPATH=. uv run python ../../evals/compare_guards.py          # rules, offline
-PYTHONPATH=. uv run python ../../evals/compare_guards.py --llm    # + classifier (needs Ollama)
+just eval-guards          # replay the recorded verdicts: offline, free, no keys
 ```
+
+The numbers below are the original 2024-era 15-prompt run, kept as history.
 
 Measured (live run, 2026-10-24, local `qwen2.5:3b` as classifier, 15 attack and
 4 benign prompts):
