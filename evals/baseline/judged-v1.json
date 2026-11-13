@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "date": "2026-11-13",
+  "git_sha": "521c2c4",
+  "judge": {
+    "model": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+    "prompt_version": "deepeval-4.3.4/json-v1"
+  },
+  "metrics": {
+    "cases": 2,
+    "faithfulness": 1.0,
+    "answer_relevancy": 1.0,
+    "context_precision": 1.0,
+    "context_recall": 0.75,
+    "errored_cases": 0
+  }
+}

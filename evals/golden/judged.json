@@ -1,0 +1,14 @@
+[
+  {
+    "id": "ret-01",
+    "question": "What did Maya Chen ask about the renewal of the Premium Operations Plan?",
+    "company": null,
+    "reference": "Maya Chen asked whether the premium tier includes onboarding support for two additional factory floors. She also said budget approval depends on knowing the total cost, so a written pricing breakdown was promised."
+  },
+  {
+    "id": "ret-04",
+    "question": "Does a multi-site discount apply at three or more locations?",
+    "company": null,
+    "reference": "Yes. Accounts with three or more sites get an automatic 10% discount on the combined multi-site total, and each additional site is billed at 70% of the single-site rate."
+  }
+]

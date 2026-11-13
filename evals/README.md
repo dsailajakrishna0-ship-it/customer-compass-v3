@@ -138,3 +138,33 @@ vary with whichever model answers (a limit the V3 🟪evals above avoid by scori
 - Even sequentially, a small free model can produce a degenerate near-empty answer (e.g. just `"[1]"`)
   despite retrieving the correct 🟪chunks: a generation-quality flake, not a retrieval bug. Expect occasional
   single-test flakiness from this; rerun if a failure's citations/similarities look otherwise correct.
+
+## Judged answer quality (sub-stage 5.2)
+
+The suites above are scored by code. Here a second model, the **judge**, reads each answer and the passages it was built from. One runner, `run_judged.py`, using 🟦DeepEval's four metrics ([ADR 0023](../docs/adr/0023-judged-evals-with-deepeval.md)):
+
+| Metric (0 to 1) | Asks |
+| --- | --- |
+| `faithfulness` | is every claim in the answer supported by the 🟪retrieved passages? (catches 🟪hallucination) |
+| `answer_relevancy` | does the answer address the question, without padding? |
+| `context_precision` | were the useful passages ranked above the useless ones? |
+| `context_recall` | do the passages contain what the reference answer needs? |
+
+```bash
+just eval-judged          # replay the recorded judge answers: offline, free, deterministic (this is what CI runs)
+just eval-judged-record   # call the pinned free judge for anything not recorded yet (OPENROUTER_API_KEY)
+```
+
+Both print one table: branch and commit, 🟪judge model, 🟪prompt version, judge calls (fresh vs cached), the four scores next to `baseline/judged-v1.json`, and the V2 retrieval numbers from `baseline/v2.json` underneath. Each run also writes every prompt and raw judge reply to `evals/runs/` (git-ignored). Exit codes: 0 pass, 1 a score moved more than ±0.15 from the baseline, 2 a case could not be scored.
+
+| File | What it holds |
+| --- | --- |
+| `judge.py` | The pinned judge model and prompt version, the cache, the retries, the reply parser, the table (no DeepEval import, unit-tested offline) |
+| `deepeval_adapter.py` | The only file that imports DeepEval: a model class that sends its prompts through the cache |
+| `golden/judged.json` | 5 questions from the retrieval set with hand-written reference answers |
+| `judged/subjects.json` | The recorded answers and snippets from `POST /api/v1/chat/rag` that get judged |
+| `judged/cache.jsonl` | Recorded judge replies, keyed by sha256(model, prompt version, prompt) |
+| `baseline/judged-v1.json` | The judged baseline (new; `v2.json` is not touched) |
+| `requirements-judge.txt` | DeepEval, pinned outside `uv.lock` so the default install stays light |
+
+To re-record after changing the judge, the prompt version, DeepEval or the cases: start the API, run `just eval-judged-record` (free models are rate limited: it paces itself, keeps what it has and says "re-run to resume"), then `python evals/run_judged.py --mode record --save-baseline` through the same `uv run` line once every case is scored.

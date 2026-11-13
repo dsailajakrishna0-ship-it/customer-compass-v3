@@ -1,0 +1,20 @@
+[
+  {
+    "id": "ret-06",
+    "question": "What is the workaround for exporting more than 90 days of history?",
+    "company": null,
+    "reference": "Export in 30-day windows until the background export feature ships; a single export of more than 90 days of history can time out."
+  },
+  {
+    "id": "ret-10",
+    "question": "Do co-packers need to adopt new software for Fleet Visibility?",
+    "company": null,
+    "reference": "No. The integration only needs read access to each carrier's existing tracking feed, with no changes on the co-packer side."
+  },
+  {
+    "id": "ret-12",
+    "question": "Does the support package cover major holidays?",
+    "company": null,
+    "reference": "Yes. Holiday coverage is included in the Retail support package, and the on-call schedule for the holiday season is shared by email."
+  }
+]

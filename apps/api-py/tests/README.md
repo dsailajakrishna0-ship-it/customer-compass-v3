@@ -82,6 +82,7 @@ limits (set through the `AGENT_*` environment variables), the tool code. **The p
 | `test_ai_terms.py` | other | Repository rules and tooling |
 | `test_eval_baseline.py` | other | Repository rules and tooling |
 | `test_measure_limits.py` | other | Repository rules and tooling |
+| `test_judged_evals.py` | other | Repository rules and tooling |
 | `test_network_guard.py` | other | Repository rules and tooling |
 | `test_test_hygiene.py` | other | Repository rules and tooling |
 | `test_resolve_conflicts.py` | other | Repository rules and tooling |

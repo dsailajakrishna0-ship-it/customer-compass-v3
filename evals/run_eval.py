@@ -242,6 +242,21 @@ def _git_sha() -> str:
         return "unknown"
 
 
+def _git_branch() -> str:
+    try:
+        branch = subprocess.run(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            capture_output=True,
+            text=True,
+            check=True,
+            cwd=EVALS,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        return "unknown"
+    # CI checks out a detached HEAD
+    return os.environ.get("GITHUB_HEAD_REF") or branch if branch == "HEAD" else branch
+
+
 def _environment() -> dict:
     from app.config import get_settings
     from app.rag.embeddings import embedding_model_id
@@ -306,6 +321,8 @@ def _error(reply: object) -> str | None:
 
 
 def _print_table(report: dict) -> None:
+    # One table per run, headed by the branch it was taken on (Stage 5.2): paste two side by side to compare
+    print(f"eval run  branch {_git_branch()} @ {report['git_sha']}  ({report['created']})")
     for suite, data in report["suites"].items():
         print(f"\n{suite}")
         for name, value in data["metrics"].items():

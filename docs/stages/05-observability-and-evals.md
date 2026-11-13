@@ -1,8 +1,8 @@
 # Stage 5 — Observability and evals: see what the system did
 
-> **Level:** beginner friendly; read [Stage 3](03-langgraph-port.md) for the 🟪agent steps this stage makes visible. **Reading time:** about 15 minutes so far (this guide grows with 5.2 to 5.5).
-> **Status:** in progress. **5.1 (tracing) is done; 5.2 (answer-quality 🟪evals), 5.3 (🟪guardrail comparison), 5.4 and 5.5 are next.**
-> **Roadmap:** [Stage 5](../roadmap.md#stage-5--observability-and-evals) · **Decisions:** [ADR 0022](../adr/0022-tracing-with-opentelemetry-and-langfuse.md)
+> **Level:** beginner friendly; read [Stage 3](03-langgraph-port.md) for the 🟪agent steps this stage makes visible. **Reading time:** about 25 minutes so far (this guide grows with 5.3 to 5.5).
+> **Status:** in progress. **5.1 (tracing) is done; 5.2 (answer-quality 🟪evals) is in review; 5.3 (🟪guardrail comparison), 5.4 and 5.5 are next.**
+> **Roadmap:** [Stage 5](../roadmap.md#stage-5--observability-and-evals) · **Decisions:** [ADR 0022](../adr/0022-tracing-with-opentelemetry-and-langfuse.md), [ADR 0023](../adr/0023-judged-evals-with-deepeval.md)
 
 **AI colour code:** 🟪 concept · 🟦 framework or tool · 🟩 data store or service · 🟧 model. Unmarked technical terms are ordinary software. [A to Z list](../ai-terms.md)
 
@@ -53,3 +53,59 @@ Until now the only record of a request was one log line and the audit tables. Th
 | 🟡 | `app/config.py`, `app/main.py`, `.env.example` | `TRACING_*` and `LANGFUSE_*` settings; start and stop |
 | 🟡 | `docker-compose.yml` | The optional `observability` profile |
 | 🟢 | `tests/test_tracing.py`, `tests/agent_internals/test_agent_tracing.py` | 34 tests with an in-memory exporter, no 🟦Langfuse needed |
+
+---
+
+## Concept 2 — Judged evals (5.2)
+
+Until now every 🟪eval was scored by code: was the right document ranked first, was the right tool called. Code cannot tell whether an *answer* is good. For that a second model, the **judge**, reads the answer and the passages it was built from.
+
+| Shop idea | Project idea | In the code |
+| --- | --- | --- |
+| A mystery shopper with a checklist, not the till clerk marking their own work | **The 🟪judge model**, deliberately a different model from the one that wrote the answer | `JUDGE_MODEL` in `evals/judge.py` |
+| The checklist itself | **The four metrics** | 🟦DeepEval's `FaithfulnessMetric`, `AnswerRelevancyMetric`, `ContextualPrecisionMetric`, `ContextualRecallMetric` |
+| The shopper's signed score sheets, filed so an auditor can read them again | **The record-and-replay cache** | `evals/judged/cache.jsonl` |
+| The report on the manager's desk each week | **The metrics table, one per branch** | `just eval-judged`, `just eval` |
+
+**The four scores (0 to 1).** *Faithfulness*: every claim in the answer is backed by the 🟪retrieved text (this is the 🟪hallucination check). *Answer relevancy*: the answer addresses the question. *Context precision*: the useful passages were ranked above the useless ones. *Context recall*: the passages hold what a reference answer needs. DeepEval splits the answer into claims, asks the judge a yes/no question about each, and counts. The judge only answers questions; the arithmetic is code.
+
+**Why a judged score can be trusted at all: pins.** A judge is a model, so it can change under you. Three things are pinned: the **🟪judge model**, the **🟪prompt version** (DeepEval writes the prompts, so its version is part of it) and the **questions with reference answers**. Change any of them and every cache key changes, so an old recording can never be mistaken for a new judgement, and a changed score between two branches means the *system* changed.
+
+**Record once, replay for free.** Every judge call is looked up by `sha256(model, prompt version, prompt)`. In **replay** mode (the default, and the only mode CI uses) a missing key *stops the run*; there is no silent fallback to a live call. In **record** mode a missing key is sent to the free 🟩OpenRouter judge once and saved. The second run costs nothing, needs no key and gives identical numbers. CI therefore needs no secrets and cannot flake on a rate limit.
+
+**Free tiers have a daily budget.** OpenRouter's free tier allows 50 requests a day. The first recording had one judge model refused all day (🟧Gemma, a shared upstream pool) and then ran out of daily requests after two cases, so the 🟪golden set holds the two recorded cases and three more wait in `golden/judged-pending.json`. The runner paces itself, stops at once on the daily limit, keeps what it has, and says "re-run to resume". Two cases are a smoke test of the plumbing, not a quality result.
+
+**Why 🟦DeepEval and not 🟦Ragas.** Same metrics. Ragas declares 🟦LangChain, `langchain-community`, `datasets` and `tiktoken` as dependencies (I did not install it to measure); DeepEval takes any model through one small class (where our cache plugs in). Details and the other alternatives: [ADR 0023](../adr/0023-judged-evals-with-deepeval.md). 🟦promptfoo stays for prompt and adversarial checks, which is a different job.
+
+**Kept out of the default install.** DeepEval brings about 80 packages and, inside `uv.lock`, moved `click`, `rich` and `huggingface-hub` for every install. So it lives in `evals/requirements-judge.txt` and `just eval-judged` layers it on for that one command; the API image and `uv sync` do not change.
+
+**The table.** One per run, headed by the branch and commit:
+
+```text
+judged evals  branch feat/5.2-judged-evals @ 521c2c4  [replay]
+judge nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free  prompts deepeval-4.3.4/json-v1  calls 14 (0 fresh)
+
+metric                  baseline  this run    delta
+faithfulness               1.000     1.000   +0.000
+answer_relevancy           1.000     1.000   +0.000
+context_precision          1.000     1.000   +0.000
+context_recall             0.750     0.750   +0.000
+```
+
+The V2 retrieval numbers from `baseline/v2.json` are printed under it, and `just eval` now starts its table with the branch and commit too, so two branches' tables can be put side by side.
+
+**Rule to remember.** *Pin the judge, record its answers, replay them everywhere else. A score you cannot reproduce is an opinion.*
+
+---
+
+## Code tour: what changed in 5.2
+
+| | Where | What |
+| --- | --- | --- |
+| 🟢 | `evals/judge.py` | The pinned judge, cache key, record/replay, retry and daily-limit handling, reply parser, comparison, table |
+| 🟢 | `evals/deepeval_adapter.py` | The only 🟦DeepEval import: a model class that sends 🟪prompts through the cache, plus the four metrics |
+| 🟢 | `evals/run_judged.py` | The runner: records answers from `/chat/rag`, judges them, prints the table, writes the raw per-run JSON |
+| 🟢 | `evals/golden/judged.json`, `judged-pending.json`, `judged/`, `baseline/judged-v1.json` | Cases with reference answers, recorded answers, the judge cache, the new baseline |
+| 🟢 | `evals/requirements-judge.txt`, `justfile`, `.github/dependabot.yml`, `ci.yml` | The pinned library, `just eval-judged` and `-record`, a pip Dependabot entry, an offline replay step in CI |
+| 🟡 | `evals/run_eval.py` | The table now starts with the branch and commit |
+| 🟢 | `tests/test_judged_evals.py` | 25 offline tests: cache, replay, retries, parser, table, 🟪golden set (no keys, no DeepEval) |

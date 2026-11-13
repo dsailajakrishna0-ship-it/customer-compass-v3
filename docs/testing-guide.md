@@ -533,6 +533,27 @@ Mode **Account follow-up agent**. One run takes up to a minute or two on free mo
 
 Reading order: `apps/api-py/tests/README.md`, then `tests/contract/conftest.py` (the two seams and nothing else faked), then the *names* in `tests/contract/test_agent_recommend.py`, then `tests/test_contract_boundary.py`, then `make_llm()` in `app/routes/agent.py`. The [Stage 3 guide](stages/03-langgraph-port.md) explains each step.
 
+### Stage 5.2: judged answer-quality evals
+
+A second model (the judge) scores whether the RAG answers are faithful, relevant and well grounded. Judge answers are recorded, so the normal run is offline and free. Nothing in the app changes.
+
+```bash
+git pull
+cd apps/api-py && uv run pytest tests/test_judged_evals.py -q   # 25 passed, no key, no DeepEval
+cd ../.. && just eval-judged                                    # replays the recording; first run downloads about 80 packages (~15 s)
+```
+
+| # | Do | Expect | What it shows |
+| --- | --- | --- | --- |
+| 1 | `just eval-judged` | A table headed `judged evals  branch <yours> @ <sha>  [replay]`, `calls 14 (0 fresh)`, four scores next to the baseline, deltas `+0.000`, then the V2 retrieval numbers, and a line `raw judge outputs: evals/runs/...` | Numbers come from the recording, not a live model |
+| 2 | Run it again with Wi-Fi off, or `env -u OPENROUTER_API_KEY just eval-judged` | The same numbers | Replay needs no key and no network |
+| 3 | Open the `evals/runs/judged-*.json` file it names | Every prompt DeepEval wrote and every raw judge reply, per call | The raw judge outputs are kept per run |
+| 4 | `just eval-offline` | The usual adversarial table, now starting with `eval run  branch ... @ ...` | `just eval` prints its table per branch |
+| 5 | In `evals/judge.py` change `JUDGE_PROMPT_VERSION` to `x`, run `just eval-judged`, then `git checkout evals/judge.py` | Every case fails with `ReplayMiss ... re-record with just eval-judged-record`, exit code 2 | A changed pin never reuses an old recording |
+| 6 | Optional, needs `OPENROUTER_API_KEY` and the stack up: copy the three cases from `evals/golden/judged-pending.json` into `evals/golden/judged.json`, then `just eval-judged-record` | New answers recorded from `/chat/rag`, new judge calls, a table with 5 cases. On the free tier's daily limit it stops with `daily free-model limit reached` and keeps what it recorded; run it again the next day | How a recording is extended (about 8 requests per case) |
+
+**Without Docker or keys:** steps 1 to 5 only. **Undo:** `git checkout evals/` and delete `evals/runs/`.
+
 ### Stage 5.1: tracing with Langfuse
 
 Every request can now leave a trace (a tree of timed steps with token counts, never the text). It is **off by default**; Langfuse is an optional set of containers. Without it the app behaves exactly as before.
