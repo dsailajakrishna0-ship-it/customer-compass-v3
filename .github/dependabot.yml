@@ -12,6 +12,8 @@ updates:
       python-minor-patch: { update-types: [minor, patch] }
   # Stage 5.2: the judge library, pinned outside uv.lock (see ADR 0023). A bump that changes its prompts
   # fails the replay check in CI: that is the signal to re-record with `just eval-judged-record`.
+  # Stage 5.3 adds requirements-guards.txt (NeMo Guardrails, Presidio) in the same folder; a bump that changes a
+  # verdict fails the replay check: re-record with `just eval-guards-record`.
   - package-ecosystem: pip
     directory: /evals
     schedule: { interval: weekly }

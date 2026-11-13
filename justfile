@@ -102,6 +102,14 @@ eval-judged:
 eval-judged-record:
     uv run --project {{api}} --with-requirements evals/requirements-judge.txt python evals/run_judged.py --mode record --check
 
+# Stage 5.3: the guard comparison table (our rules, our classifier, Llama Guard, NeMo Guardrails, Presidio), replayed from the recorded verdicts (offline, free, no keys)
+eval-guards:
+    uv run --project {{api}} python evals/compare_guards.py --check
+
+# record verdicts missing from the cache (needs OPENROUTER_API_KEY; the paid models cost a few cents in all); NeMo Guardrails and Presidio are layered on, not installed by default
+eval-guards-record:
+    uv run --project {{api}} --with-requirements evals/requirements-guards.txt python evals/compare_guards.py --mode record --check
+
 # offline suite only: the rule-based guard against the adversarial prompts (no stack needed)
 eval-offline:
     uv run --project {{api}} python evals/run_eval.py --suites adversarial

@@ -20,6 +20,7 @@ from fastapi.responses import JSONResponse
 from app.agent.checkpoint import close_checkpointer
 from app.config import get_settings
 from app.db import close_pool, get_pool
+from app.guardrails import pii
 from app.guardrails.audit import ensure_schema_and_purge
 from app.logs import configure_logging
 from app.middleware import REQUEST_ID_HEADER, RequestIdMiddleware
@@ -37,6 +38,7 @@ from app.tracing import configure_tracing, shutdown_tracing
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
+    pii.ensure_available()  # refuses to start when PII_MODE is on and Presidio is missing
     await ensure_schema_and_purge()
     configure_tracing()  # a no-op unless TRACING_ENABLED=true
     yield

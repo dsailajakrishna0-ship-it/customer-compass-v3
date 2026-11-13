@@ -41,7 +41,7 @@ repo findings (R1–R12) and doc findings (D1–D9) are cited below. Decisions a
 | 2 | Tools and 🟦MCP | Done, except the tool-call 🟪eval check that needs an 🟩OpenRouter key |
 | 3 | 🟦LangGraph port | Done (3.1, 3.2a, 3.2b); the live 🟪agent test with keys is the owner's |
 | 4 | 🟪Retrieval upgrade | In progress (4.1 and 4.2 done; 4.3 🟪embeddings in review) |
-| 5 | Observability and evals | In progress (5.1 tracing merged; 5.2 evals in review) |
+| 5 | Observability and evals | In progress (5.1 tracing and 5.2 evals merged; 5.3 🟪guardrail comparison in review) |
 | 6 | New CRM modules and auth | Planned |
 | 7 | Agents and supervisor | Planned |
 | 8 | Product features | Planned |

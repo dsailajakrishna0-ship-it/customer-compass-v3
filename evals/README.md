@@ -168,3 +168,14 @@ Both print one table: branch and commit, 🟪judge model, 🟪prompt version, ju
 | `requirements-judge.txt` | DeepEval, pinned outside `uv.lock` so the default install stays light |
 
 To re-record after changing the judge, the prompt version, DeepEval or the cases: start the API, run `just eval-judged-record` (free models are rate limited: it paces itself, keeps what it has and says "re-run to resume"), then `python evals/run_judged.py --mode record --save-baseline` through the same `uv run` line once every case is scored.
+
+## Guard comparison (sub-stage 5.3)
+
+`compare_guards.py` puts our rule-based guard, our 🟪LLM classifier, 🟧Llama Guard 4 and 🟦NeMo Guardrails side by side on 74 🟪prompts (44 attacks, 30 benign), and our rules, 🟦Presidio and Llama Guard on 32 🟪PII texts. The cases are `adversarial-prompts.json` plus `golden/guards-extra.json`; hosted and library verdicts are recorded in `guards/cache.jsonl`; `baseline/guards-v1.json` pins the counts.
+
+```bash
+just eval-guards          # replay: offline, free, no keys; fails if a count moved
+just eval-guards-record   # record what is missing (OPENROUTER_API_KEY; NeMo Guardrails and Presidio are layered on)
+```
+
+Latency in the table is the rules' live timing and the recorded timing of every other row. Changing a model, a prompt or a library version in `guard_compare.py` changes the cache keys: re-record and save a new baseline on purpose (`python evals/compare_guards.py --save-baseline`). Results and caveats: [ADR 0024](../docs/adr/0024-guard-comparison-and-pii.md).

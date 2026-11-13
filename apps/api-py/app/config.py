@@ -32,6 +32,7 @@ os.environ.setdefault("LITELLM_LOCAL_MODEL_COST_MAP", "True")
 os.environ.setdefault("LITELLM_MODE", "PRODUCTION")
 
 GuardModeName = Literal["rules", "llm", "both"]
+PiiModeName = Literal["off", "detect", "redact"]
 
 # apps/api-py/app/config.py -> apps/api-py/models.yaml (also /app/models.yaml in the image)
 DEFAULT_MODELS_FILE = Path(__file__).resolve().parent.parent / "models.yaml"
@@ -87,6 +88,9 @@ class Settings(BaseSettings):
     guard_mode: GuardModeName = "rules"
     guard_model: str | None = None
     security_audit_retention_days: int = 90
+    # Stage 5.3: optional PII guard on the user's message (needs Presidio; see app/guardrails/pii.py)
+    pii_mode: PiiModeName = "off"
+    pii_entities: str = "CREDIT_CARD,US_SSN,IBAN_CODE,EMAIL_ADDRESS,PHONE_NUMBER"
 
     # Agent limits (Stage 10 workflow)
     agent_max_steps: int = 8
