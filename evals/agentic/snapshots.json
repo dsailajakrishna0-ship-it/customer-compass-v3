@@ -1,0 +1,2650 @@
+{
+ "02618b3133c3e36ed04e961e4307eb84b96404c5d29c7dcb0d6ac639cf5f24f5": {
+  "company": null,
+  "latency_ms": 831,
+  "query": "What did Maya Chen ask about the renewal of the Premium Operations Plan?",
+  "results": [
+   {
+    "chunk_id": "f24df715-ba42-489b-a86a-6cce82449a31",
+    "chunk_index": 0,
+    "company_name": "Acme Fabrication",
+    "content": "Maya Chen (Operations Director at Acme Fabrication) called to discuss renewing\nthe Premium Operations Plan ahead of the October contract date. She asked\nwhether the premium tier includes onboarding support for two additional\nfactory floors that Acme is bringing online next quarter.\n\nWe explained that the Premium Operations Plan includes up to three\nimplementation sessions per year at no extra cost, and that additional\nsessions are billed at the standard consulting rate. Maya said budget approval\ndepends on knowing the total cost before she can commit to the renewal, so we\nagreed to send a writ",
+    "doc_type": "call",
+    "document_id": 1,
+    "document_title": "Renewal planning call with Maya Chen",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.7683997,
+    "source_path": "sample-data/documents/acme-call-renewal.md"
+   },
+   {
+    "chunk_id": "1d3a2ff7-0077-408b-8244-05e720f31468",
+    "chunk_index": 0,
+    "company_name": "Riverside Health Group",
+    "content": "Dr. Sarah Kim (Clinic Director at Riverside Health Group) called to confirm\nrenewal of the Premium Operations Plan and to discuss expanding coverage to\na second clinic location opening next quarter.\n\nWe confirmed the renewal and explained that adding a second location under\nthe same plan only requires a site-license add-on rather than a brand-new\ncontract. Dr. Kim asked whether staff scheduling data from the new location\ncould sync automatically with the existing dashboard from day one; we\nconfirmed it can, as long as the new location is provisioned at least two\nweeks before go-live.",
+    "doc_type": "call",
+    "document_id": 13,
+    "document_title": "Renewal discussion with Dr. Sarah Kim",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.68434185,
+    "source_path": "sample-data/documents/riverside-call-renewal.md"
+   },
+   {
+    "chunk_id": "c49ae0ad-cb09-4ef9-9e5b-4371301bd06e",
+    "chunk_index": 0,
+    "company_name": "Acme Fabrication",
+    "content": "Customer: Maya Chen\nIssue: The \"Export full history\" button on the operations dashboard times out\nfor reports covering more than 90 days of interaction data.\n\nSupport notes: Reproduced the issue. The export times out because it builds\nthe CSV synchronously in the request instead of generating it in the\nbackground. As a workaround, we suggested exporting in 30-day windows until a\nbackground-export feature ships.\n\nMaya accepted the workaround for now but said it is \"not a long-term fix\" for\na team that reviews quarterly history. We scheduled a follow-up call for\nearly September to confirm whethe",
+    "doc_type": "support",
+    "document_id": 4,
+    "document_title": "Dashboard export timeout support conversation",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.63953376,
+    "source_path": "sample-data/documents/acme-support-export-timeout.md"
+   },
+   {
+    "chunk_id": "492f1e44-ce26-4f25-a915-65912330f18e",
+    "chunk_index": 0,
+    "company_name": "Vertex Analytics",
+    "content": "Priya Nandakumar (VP Engineering at Vertex Analytics) called ahead of their\nannual renewal to ask about upgrading from the standard plan to Analytics\nPro. She said her team wants custom dashboards for tracking deployment\nfrequency and incident response time, which the standard plan doesn't\nsupport.\n\nWe confirmed Analytics Pro includes unlimited custom dashboards and a\ndedicated API quota. Priya asked whether the upgrade could be billed\nmid-cycle rather than waiting for the renewal date, and we agreed to send a\nprorated quote.",
+    "doc_type": "call",
+    "document_id": 18,
+    "document_title": "Contract renewal discussion with Priya Nandakumar",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.62174547,
+    "source_path": "sample-data/documents/vertex-call-renewal.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "0aceeb4b9d174abb7c742664701a9d2a90ba9592642b6ae46d473ef8f2367e91": {
+  "company": null,
+  "latency_ms": 1016,
+  "query": "How was the point-of-sale sync issue at Harbor & Pine handled?",
+  "results": [
+   {
+    "chunk_id": "ef7a39bc-7c9b-4a20-8827-e6b0f0698f4b",
+    "chunk_index": 0,
+    "company_name": "Harbor & Pine",
+    "content": "Elena Torres (Owner, Harbor & Pine) joined the quarterly check-in call. She\nsaid she is happy with support response times since switching to the Retail\nsupport package earlier this year, and specifically called out that the team\nresolved a point-of-sale sync issue within a few hours during a busy weekend.\n\nElena confirmed she plans to renew the Retail support package when it comes\nup for renewal and does not need any changes to her current plan. She asked\none question: whether the support package includes coverage during major\nholidays, since Harbor & Pine is a retail business and holidays are",
+    "doc_type": "note",
+    "document_id": 7,
+    "document_title": "Quarterly check-in with Elena Torres",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6893706,
+    "source_path": "sample-data/documents/harborpine-note-checkin.md"
+   },
+   {
+    "chunk_id": "33bd6ce4-2de4-4790-890d-0ed0ee080a1b",
+    "chunk_index": 1,
+    "company_name": "Harbor & Pine",
+    "content": "e includes coverage during major\nholidays, since Harbor & Pine is a retail business and holidays are their\nbusiest and highest-risk period.\n\nWe told her holiday coverage is included and confirmed the on-call schedule\nfor the upcoming holiday season would be shared with her by email.",
+    "doc_type": "note",
+    "document_id": 7,
+    "document_title": "Quarterly check-in with Elena Torres",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6338756,
+    "source_path": "sample-data/documents/harborpine-note-checkin.md"
+   },
+   {
+    "chunk_id": "1d3a2ff7-0077-408b-8244-05e720f31468",
+    "chunk_index": 0,
+    "company_name": "Riverside Health Group",
+    "content": "Dr. Sarah Kim (Clinic Director at Riverside Health Group) called to confirm\nrenewal of the Premium Operations Plan and to discuss expanding coverage to\na second clinic location opening next quarter.\n\nWe confirmed the renewal and explained that adding a second location under\nthe same plan only requires a site-license add-on rather than a brand-new\ncontract. Dr. Kim asked whether staff scheduling data from the new location\ncould sync automatically with the existing dashboard from day one; we\nconfirmed it can, as long as the new location is provisioned at least two\nweeks before go-live.",
+    "doc_type": "call",
+    "document_id": 13,
+    "document_title": "Renewal discussion with Dr. Sarah Kim",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.5566212,
+    "source_path": "sample-data/documents/riverside-call-renewal.md"
+   },
+   {
+    "chunk_id": "88c60d05-4a4d-4a05-b450-d77fc5e2b728",
+    "chunk_index": 1,
+    "company_name": "Acme Fabrication",
+    "content": "depends on knowing the total cost before she can commit to the renewal, so we\nagreed to send a written pricing breakdown.\n\nMaya also mentioned that the dashboard export feature has been slow for her\nteam recently, and asked whether that was a known issue.",
+    "doc_type": "call",
+    "document_id": 1,
+    "document_title": "Renewal planning call with Maya Chen",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.548423,
+    "source_path": "sample-data/documents/acme-call-renewal.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "0cf841047aac49311946bca09f95d5b26b5e5754ec061007e58e430a0b8e7fee": {
+  "company": null,
+  "latency_ms": 777,
+  "query": "How does Fleet Visibility help Golden Valley Foods find out about shipment delays?",
+  "results": [
+   {
+    "chunk_id": "222761bc-ec07-4527-8f01-22da2ae5891e",
+    "chunk_index": 0,
+    "company_name": "Golden Valley Foods",
+    "content": "Carlos Mendez (Operations Manager at Golden Valley Foods) joined a discovery\ncall to evaluate Fleet Visibility for tracking shipment delays across\nseveral third-party co-packers. He explained that right now his team finds\nout about a delay only when a retail customer calls to complain, which is\ntoo late to do anything about it.\n\nWe walked through how Fleet Visibility consolidates delivery status across\nmultiple carriers into one dashboard and can alert operations staff as soon\nas a shipment crosses a delay threshold. Carlos asked whether the\nintegration would require each co-packer to adopt ne",
+    "doc_type": "note",
+    "document_id": 6,
+    "document_title": "Discovery call on supply-chain visibility",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.81990415,
+    "source_path": "sample-data/documents/goldenvalley-note-discovery.md"
+   },
+   {
+    "chunk_id": "561e6580-cd9a-4a65-bc3e-3dbadaa01519",
+    "chunk_index": 0,
+    "company_name": "Golden Valley Foods",
+    "content": "From: Carlos Mendez (Operations Manager, Golden Valley Foods)\nSubject: Fleet Visibility pilot pricing question\n\nHi team,\n\nFollowing up on our discovery call last week. I have a budget approval\nmeeting on Thursday and need pilot pricing for a 90-day trial covering our\nthree busiest co-packer routes before I can get sign-off to move forward.\n\nCould you also confirm whether the pilot pricing rolls into the full\ncontract if we decide to continue afterward, or if it's a separate\none-time cost?\n\nThanks,\nCarlos",
+    "doc_type": "email",
+    "document_id": 5,
+    "document_title": "Fleet Visibility pilot pricing question",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.673543,
+    "source_path": "sample-data/documents/goldenvalley-email-pricing.md"
+   },
+   {
+    "chunk_id": "7c9f183c-1bac-4247-8cb1-e3043b9b0f19",
+    "chunk_index": 1,
+    "company_name": "Northstar Logistics",
+    "content": "n a delivery is delayed beyond a configurable threshold.\n3. The ability to share a read-only status link with the fleet customer\n   directly, to reduce inbound \"where is my shipment\" calls.\n\nJordan asked for a proposal covering the Fleet Visibility rollout, including\nimplementation timeline and whether alerting is included in the base package\nor sold as an add-on.",
+    "doc_type": "note",
+    "document_id": 8,
+    "document_title": "Discovery session with Jordan Brooks",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.70984274,
+    "source_path": "sample-data/documents/northstar-note-discovery.md"
+   },
+   {
+    "chunk_id": "2bc3092c-8bc7-43a5-af72-2aafa341958f",
+    "chunk_index": 0,
+    "company_name": "Northstar Logistics",
+    "content": "Customer: Jordan Brooks (evaluating Fleet Visibility rollout, not yet a\ncustomer)\n\nJordan asked, ahead of signing, whether delay alerts can be configured per\nfleet customer or only globally for the whole account. He said Northstar's\nfleet customers have very different tolerance for what counts as \"delayed\" \u2014\na same-day courier customer cares about 30-minute delays, while a long-haul\nfreight customer only cares about delays over 4 hours.\n\nWe confirmed that alert thresholds are configurable per customer, not just\nglobally, and that this is included in the base Fleet Visibility package with\nno ad",
+    "doc_type": "support",
+    "document_id": 10,
+    "document_title": "Pre-sales support conversation on alerting limits",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6798382,
+    "source_path": "sample-data/documents/northstar-support-alerting.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "1dc9784cfd004fb090f1e36a7e9eeb5b67b618cf55cc28fe20fa1f6191c9fa63": {
+  "company": null,
+  "latency_ms": 728,
+  "query": "Does the platform support configurable data-retention windows?",
+  "results": [
+   {
+    "chunk_id": "db6aba00-c878-42a1-8993-3963446fb94d",
+    "chunk_index": 0,
+    "company_name": "Riverside Health Group",
+    "content": "Customer: James Okafor (IT Director at Riverside Health Group)\n\nJames asked how patient-adjacent operational data (appointment scheduling\nmetadata, not clinical records) is stored and whether retention settings\nmeet their internal compliance requirements. He noted that Riverside's\ncompliance team requires configurable data-retention windows and audit\nlogs for any system touching scheduling data.\n\nWe confirmed that the platform supports configurable retention windows per\naccount and that an audit log of data-access events is available on\nrequest through support. James said he would forward this",
+    "doc_type": "support",
+    "document_id": 16,
+    "document_title": "Data handling and compliance question",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.68249494,
+    "source_path": "sample-data/documents/riverside-support-compliance.md"
+   },
+   {
+    "chunk_id": "52ba7b51-fba7-4393-b4e4-5f7f02254b5f",
+    "chunk_index": 0,
+    "company_name": "Riverside Health Group",
+    "content": "## Riverside Health Group: data handling policy\n\nPatient identifiers must never appear in support tickets or in exported reports. Exports are encrypted and expire after seven days.\n\n### Access reviews\n\nAccounts with access to clinical data are reviewed every quarter. A reviewer who finds an unused account disables it within two business days.",
+    "doc_type": "support",
+    "document_id": 14,
+    "document_title": "Riverside Health Group data handling policy",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.62296855,
+    "source_path": "sample-data/documents/riverside-data-handling-policy.docx"
+   },
+   {
+    "chunk_id": "5c2991c8-9565-4b97-adc1-080063302cc5",
+    "chunk_index": 1,
+    "company_name": "Riverside Health Group",
+    "content": "log of data-access events is available on\nrequest through support. James said he would forward this to Riverside's\ncompliance team and asked for written confirmation he could share\ninternally; we agreed to send a summary document.",
+    "doc_type": "support",
+    "document_id": 16,
+    "document_title": "Data handling and compliance question",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.606278,
+    "source_path": "sample-data/documents/riverside-support-compliance.md"
+   },
+   {
+    "chunk_id": "38890f41-951a-447c-9946-ab726bb5def0",
+    "chunk_index": 0,
+    "company_name": null,
+    "content": "Fleet Visibility is designed for logistics customers who need real-time\ndelivery status across multiple carriers, consolidated into one view for\ntheir customer success or operations team.\n\nBase package includes:\n- A single dashboard showing delivery status per fleet customer, pulled from\n  connected carrier data feeds.\n- Configurable delay alerts, set per fleet customer rather than only at the\n  account level, so different customers can have different delay thresholds.\n- A read-only shareable status link that fleet customers can use to check\n  their own delivery status without calling support.",
+    "doc_type": "product",
+    "document_id": 11,
+    "document_title": "Fleet Visibility rollout package overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.569479,
+    "source_path": "sample-data/documents/product-fleet-visibility.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "218f4ffe71187f94ad620aa0b39c5f1f8341270077d6a025fcae55ed65998151": {
+  "company": null,
+  "latency_ms": 725,
+  "query": "Why does the Export full history button time out?",
+  "results": [
+   {
+    "chunk_id": "c49ae0ad-cb09-4ef9-9e5b-4371301bd06e",
+    "chunk_index": 0,
+    "company_name": "Acme Fabrication",
+    "content": "Customer: Maya Chen\nIssue: The \"Export full history\" button on the operations dashboard times out\nfor reports covering more than 90 days of interaction data.\n\nSupport notes: Reproduced the issue. The export times out because it builds\nthe CSV synchronously in the request instead of generating it in the\nbackground. As a workaround, we suggested exporting in 30-day windows until a\nbackground-export feature ships.\n\nMaya accepted the workaround for now but said it is \"not a long-term fix\" for\na team that reviews quarterly history. We scheduled a follow-up call for\nearly September to confirm whethe",
+    "doc_type": "support",
+    "document_id": 4,
+    "document_title": "Dashboard export timeout support conversation",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.7107544,
+    "source_path": "sample-data/documents/acme-support-export-timeout.md"
+   },
+   {
+    "chunk_id": "78c40b52-b40c-4752-9a05-09ae70cb1e39",
+    "chunk_index": 1,
+    "company_name": "Acme Fabrication",
+    "content": "that reviews quarterly history. We scheduled a follow-up call for\nearly September to confirm whether the background-export fix has shipped, and\nto revisit the pricing breakdown she is waiting on for the renewal.\n\nStatus: Workaround shared. Follow-up scheduled. Engineering ticket opened for\nbackground CSV export.",
+    "doc_type": "support",
+    "document_id": 4,
+    "document_title": "Dashboard export timeout support conversation",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6446208,
+    "source_path": "sample-data/documents/acme-support-export-timeout.md"
+   },
+   {
+    "chunk_id": "c74360b9-55fc-487a-a4c8-5a6d0db3ed79",
+    "chunk_index": 1,
+    "company_name": null,
+    "content": "matic 10% discount on the\n  combined multi-site total.\n- One implementation session can cover multiple sites if they go live within\n  the same 30-day window; otherwise, each site's go-live counts toward the\n  three included sessions per year.\n\nKnown limitation (as of this quarter): exporting more than 90 days of\ninteraction history in one request can time out. The recommended workaround\nis exporting in 30-day windows. A background export feature is in progress.",
+    "doc_type": "product",
+    "document_id": 12,
+    "document_title": "Premium Operations Plan overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.61482763,
+    "source_path": "sample-data/documents/product-premium-operations-plan.md"
+   },
+   {
+    "chunk_id": "8d45e4b5-361a-4b27-9f5d-8bbba9cddea6",
+    "chunk_index": 0,
+    "company_name": "Vertex Analytics",
+    "content": "Customer: Tom Reyes (IT Administrator at Vertex Analytics)\n\nTom reported hitting the default API rate limit (500 requests/minute) while\nrunning a bulk export of historical usage data for a board presentation. The\nexport failed partway through with a 429 response.\n\nWe explained the default limit applies per API key, and that Vertex's plan\nallows requesting a temporary rate-limit increase for scheduled bulk jobs at\nno extra cost \u2014 it just needs 24 hours' notice. Tom said he'd plan future\nexports around that lead time, and asked if there was a way to see his\ncurrent rate-limit usage in real time;",
+    "doc_type": "support",
+    "document_id": 19,
+    "document_title": "API rate limit support ticket",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6214153,
+    "source_path": "sample-data/documents/vertex-support-rate-limit.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "248283005f7c333ae74927c6be4abca3671bda9d615e61915643106dd8e3f0ff": {
+  "company": null,
+  "latency_ms": 723,
+  "query": "What did Dr. Sarah Kim ask about expanding to a second clinic?",
+  "results": [
+   {
+    "chunk_id": "1d3a2ff7-0077-408b-8244-05e720f31468",
+    "chunk_index": 0,
+    "company_name": "Riverside Health Group",
+    "content": "Dr. Sarah Kim (Clinic Director at Riverside Health Group) called to confirm\nrenewal of the Premium Operations Plan and to discuss expanding coverage to\na second clinic location opening next quarter.\n\nWe confirmed the renewal and explained that adding a second location under\nthe same plan only requires a site-license add-on rather than a brand-new\ncontract. Dr. Kim asked whether staff scheduling data from the new location\ncould sync automatically with the existing dashboard from day one; we\nconfirmed it can, as long as the new location is provisioned at least two\nweeks before go-live.",
+    "doc_type": "call",
+    "document_id": 13,
+    "document_title": "Renewal discussion with Dr. Sarah Kim",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.7282183,
+    "source_path": "sample-data/documents/riverside-call-renewal.md"
+   },
+   {
+    "chunk_id": "7b7737a3-b0ba-463a-ba35-79ffbcd84950",
+    "chunk_index": 0,
+    "company_name": "Riverside Health Group",
+    "content": "From: Dr. Sarah Kim (Clinic Director, Riverside Health Group)\nSubject: Positive feedback on uptime\n\nHi team,\n\nJust wanted to pass along that our front-desk staff have noticed the\nscheduling dashboard has had zero unplanned downtime this past quarter,\nwhich is a big improvement over the system we used previously. It's made a\nreal difference during our busiest clinic hours.\n\nSeparately, could someone send me a rough timeline for the second-location\nexpansion we discussed on our last call? I'd like to share it with our\nleadership team before the end of the month.\n\nThanks,\nSarah",
+    "doc_type": "email",
+    "document_id": 15,
+    "document_title": "Positive feedback on uptime",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6761104,
+    "source_path": "sample-data/documents/riverside-email-feedback.md"
+   },
+   {
+    "chunk_id": "ef7a39bc-7c9b-4a20-8827-e6b0f0698f4b",
+    "chunk_index": 0,
+    "company_name": "Harbor & Pine",
+    "content": "Elena Torres (Owner, Harbor & Pine) joined the quarterly check-in call. She\nsaid she is happy with support response times since switching to the Retail\nsupport package earlier this year, and specifically called out that the team\nresolved a point-of-sale sync issue within a few hours during a busy weekend.\n\nElena confirmed she plans to renew the Retail support package when it comes\nup for renewal and does not need any changes to her current plan. She asked\none question: whether the support package includes coverage during major\nholidays, since Harbor & Pine is a retail business and holidays are",
+    "doc_type": "note",
+    "document_id": 7,
+    "document_title": "Quarterly check-in with Elena Torres",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.5815241,
+    "source_path": "sample-data/documents/harborpine-note-checkin.md"
+   },
+   {
+    "chunk_id": "79867e03-fbb2-427f-8b7e-6827220d3e24",
+    "chunk_index": 0,
+    "company_name": "Summit Builders",
+    "content": "Dana Whitfield (then Project Manager at Summit Builders) joined an exit\ninterview call after Summit's Site Ops Suite deal did not close and their\naccount was marked as a former customer. Dana explained that Summit had\nfrozen all new vendor contracts company-wide due to a budget restructuring,\nand that this was unrelated to any dissatisfaction with the product itself.\n\nDana said the team had found the evaluation period useful and would\nconsider revisiting Site Ops Suite once the budget freeze lifts, likely in\na future fiscal year. She asked to stay on the mailing list for product\nupdates in the",
+    "doc_type": "call",
+    "document_id": 17,
+    "document_title": "Exit interview call",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.55504555,
+    "source_path": "sample-data/documents/summit-note-churn.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "27a97deca5fd1f10a4e4fb73b7af3165b024c95d32bc1fec0107806cda190ec5": {
+  "company": null,
+  "latency_ms": 859,
+  "query": "How early must a new location be provisioned for scheduling data to sync from day one?",
+  "results": [
+   {
+    "chunk_id": "1d3a2ff7-0077-408b-8244-05e720f31468",
+    "chunk_index": 0,
+    "company_name": "Riverside Health Group",
+    "content": "Dr. Sarah Kim (Clinic Director at Riverside Health Group) called to confirm\nrenewal of the Premium Operations Plan and to discuss expanding coverage to\na second clinic location opening next quarter.\n\nWe confirmed the renewal and explained that adding a second location under\nthe same plan only requires a site-license add-on rather than a brand-new\ncontract. Dr. Kim asked whether staff scheduling data from the new location\ncould sync automatically with the existing dashboard from day one; we\nconfirmed it can, as long as the new location is provisioned at least two\nweeks before go-live.",
+    "doc_type": "call",
+    "document_id": 13,
+    "document_title": "Renewal discussion with Dr. Sarah Kim",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.62332845,
+    "source_path": "sample-data/documents/riverside-call-renewal.md"
+   },
+   {
+    "chunk_id": "db6aba00-c878-42a1-8993-3963446fb94d",
+    "chunk_index": 0,
+    "company_name": "Riverside Health Group",
+    "content": "Customer: James Okafor (IT Director at Riverside Health Group)\n\nJames asked how patient-adjacent operational data (appointment scheduling\nmetadata, not clinical records) is stored and whether retention settings\nmeet their internal compliance requirements. He noted that Riverside's\ncompliance team requires configurable data-retention windows and audit\nlogs for any system touching scheduling data.\n\nWe confirmed that the platform supports configurable retention windows per\naccount and that an audit log of data-access events is available on\nrequest through support. James said he would forward this",
+    "doc_type": "support",
+    "document_id": 16,
+    "document_title": "Data handling and compliance question",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.58973646,
+    "source_path": "sample-data/documents/riverside-support-compliance.md"
+   },
+   {
+    "chunk_id": "969d14ff-5bb8-4d68-acc0-951ed8af7cd7",
+    "chunk_index": 1,
+    "company_name": "Acme Fabrication",
+    "content": "this by end of next week to include in our budget approval request.\nAlso, please confirm whether existing users need to be re-onboarded on each\nnew site, or whether one implementation session can cover all three.\n\nThanks,\nRavi",
+    "doc_type": "email",
+    "document_id": 2,
+    "document_title": "Volume discount request from Ravi Patel",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.610937,
+    "source_path": "sample-data/documents/acme-email-discount.md"
+   },
+   {
+    "chunk_id": "7b7737a3-b0ba-463a-ba35-79ffbcd84950",
+    "chunk_index": 0,
+    "company_name": "Riverside Health Group",
+    "content": "From: Dr. Sarah Kim (Clinic Director, Riverside Health Group)\nSubject: Positive feedback on uptime\n\nHi team,\n\nJust wanted to pass along that our front-desk staff have noticed the\nscheduling dashboard has had zero unplanned downtime this past quarter,\nwhich is a big improvement over the system we used previously. It's made a\nreal difference during our busiest clinic hours.\n\nSeparately, could someone send me a rough timeline for the second-location\nexpansion we discussed on our last call? I'd like to share it with our\nleadership team before the end of the month.\n\nThanks,\nSarah",
+    "doc_type": "email",
+    "document_id": 15,
+    "document_title": "Positive feedback on uptime",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.5474285,
+    "source_path": "sample-data/documents/riverside-email-feedback.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "293e6100f5183b7e169ab163cad76f845e13a1e3dbc8e055dcbc12fc52c1a84e": {
+  "company": null,
+  "latency_ms": 739,
+  "query": "What did Priya Nandakumar ask about Analytics Pro?",
+  "results": [
+   {
+    "chunk_id": "492f1e44-ce26-4f25-a915-65912330f18e",
+    "chunk_index": 0,
+    "company_name": "Vertex Analytics",
+    "content": "Priya Nandakumar (VP Engineering at Vertex Analytics) called ahead of their\nannual renewal to ask about upgrading from the standard plan to Analytics\nPro. She said her team wants custom dashboards for tracking deployment\nfrequency and incident response time, which the standard plan doesn't\nsupport.\n\nWe confirmed Analytics Pro includes unlimited custom dashboards and a\ndedicated API quota. Priya asked whether the upgrade could be billed\nmid-cycle rather than waiting for the renewal date, and we agreed to send a\nprorated quote.",
+    "doc_type": "call",
+    "document_id": 18,
+    "document_title": "Contract renewal discussion with Priya Nandakumar",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6947926,
+    "source_path": "sample-data/documents/vertex-call-renewal.md"
+   },
+   {
+    "chunk_id": "8d45e4b5-361a-4b27-9f5d-8bbba9cddea6",
+    "chunk_index": 0,
+    "company_name": "Vertex Analytics",
+    "content": "Customer: Tom Reyes (IT Administrator at Vertex Analytics)\n\nTom reported hitting the default API rate limit (500 requests/minute) while\nrunning a bulk export of historical usage data for a board presentation. The\nexport failed partway through with a 429 response.\n\nWe explained the default limit applies per API key, and that Vertex's plan\nallows requesting a temporary rate-limit increase for scheduled bulk jobs at\nno extra cost \u2014 it just needs 24 hours' notice. Tom said he'd plan future\nexports around that lead time, and asked if there was a way to see his\ncurrent rate-limit usage in real time;",
+    "doc_type": "support",
+    "document_id": 19,
+    "document_title": "API rate limit support ticket",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.561839,
+    "source_path": "sample-data/documents/vertex-support-rate-limit.md"
+   },
+   {
+    "chunk_id": "2bc3092c-8bc7-43a5-af72-2aafa341958f",
+    "chunk_index": 0,
+    "company_name": "Northstar Logistics",
+    "content": "Customer: Jordan Brooks (evaluating Fleet Visibility rollout, not yet a\ncustomer)\n\nJordan asked, ahead of signing, whether delay alerts can be configured per\nfleet customer or only globally for the whole account. He said Northstar's\nfleet customers have very different tolerance for what counts as \"delayed\" \u2014\na same-day courier customer cares about 30-minute delays, while a long-haul\nfreight customer only cares about delays over 4 hours.\n\nWe confirmed that alert thresholds are configurable per customer, not just\nglobally, and that this is included in the base Fleet Visibility package with\nno ad",
+    "doc_type": "support",
+    "document_id": 10,
+    "document_title": "Pre-sales support conversation on alerting limits",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.54027486,
+    "source_path": "sample-data/documents/northstar-support-alerting.md"
+   },
+   {
+    "chunk_id": "79867e03-fbb2-427f-8b7e-6827220d3e24",
+    "chunk_index": 0,
+    "company_name": "Summit Builders",
+    "content": "Dana Whitfield (then Project Manager at Summit Builders) joined an exit\ninterview call after Summit's Site Ops Suite deal did not close and their\naccount was marked as a former customer. Dana explained that Summit had\nfrozen all new vendor contracts company-wide due to a budget restructuring,\nand that this was unrelated to any dissatisfaction with the product itself.\n\nDana said the team had found the evaluation period useful and would\nconsider revisiting Site Ops Suite once the budget freeze lifts, likely in\na future fiscal year. She asked to stay on the mailing list for product\nupdates in the",
+    "doc_type": "call",
+    "document_id": 17,
+    "document_title": "Exit interview call",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.5315026,
+    "source_path": "sample-data/documents/summit-note-churn.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "2c9647e002431598aa3175220afb15fe8d24edc7aa3348f2d8c3e7a38b56f99d": {
+  "company": null,
+  "latency_ms": 746,
+  "query": "How much time does Northstar's team spend checking carrier portals by hand?",
+  "results": [
+   {
+    "chunk_id": "951639e7-1b3d-4f6d-b61b-0bd88fa9aea4",
+    "chunk_index": 0,
+    "company_name": "Northstar Logistics",
+    "content": "Attendees: Jordan Brooks (Head of Customer Success, Northstar Logistics)\n\nNorthstar is evaluating our platform to give their customer success team\nreal-time visibility into delivery status for fleet customers. Today their\nreps manually check three separate carrier portals and compile a summary by\nhand each morning, which Jordan estimated takes about two hours per day\nacross the team.\n\nJordan's top priorities, in order:\n1. A single view that shows delivery status per fleet customer.\n2. Alerts when a delivery is delayed beyond a configurable threshold.\n3. The ability to share a read-only status",
+    "doc_type": "note",
+    "document_id": 8,
+    "document_title": "Discovery session with Jordan Brooks",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.66976887,
+    "source_path": "sample-data/documents/northstar-note-discovery.md"
+   },
+   {
+    "chunk_id": "2bc3092c-8bc7-43a5-af72-2aafa341958f",
+    "chunk_index": 0,
+    "company_name": "Northstar Logistics",
+    "content": "Customer: Jordan Brooks (evaluating Fleet Visibility rollout, not yet a\ncustomer)\n\nJordan asked, ahead of signing, whether delay alerts can be configured per\nfleet customer or only globally for the whole account. He said Northstar's\nfleet customers have very different tolerance for what counts as \"delayed\" \u2014\na same-day courier customer cares about 30-minute delays, while a long-haul\nfreight customer only cares about delays over 4 hours.\n\nWe confirmed that alert thresholds are configurable per customer, not just\nglobally, and that this is included in the base Fleet Visibility package with\nno ad",
+    "doc_type": "support",
+    "document_id": 10,
+    "document_title": "Pre-sales support conversation on alerting limits",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6180584,
+    "source_path": "sample-data/documents/northstar-support-alerting.md"
+   },
+   {
+    "chunk_id": "38890f41-951a-447c-9946-ab726bb5def0",
+    "chunk_index": 0,
+    "company_name": null,
+    "content": "Fleet Visibility is designed for logistics customers who need real-time\ndelivery status across multiple carriers, consolidated into one view for\ntheir customer success or operations team.\n\nBase package includes:\n- A single dashboard showing delivery status per fleet customer, pulled from\n  connected carrier data feeds.\n- Configurable delay alerts, set per fleet customer rather than only at the\n  account level, so different customers can have different delay thresholds.\n- A read-only shareable status link that fleet customers can use to check\n  their own delivery status without calling support.",
+    "doc_type": "product",
+    "document_id": 11,
+    "document_title": "Fleet Visibility rollout package overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.5788752,
+    "source_path": "sample-data/documents/product-fleet-visibility.md"
+   },
+   {
+    "chunk_id": "b76047f6-9a22-4c70-8f2e-02325c962554",
+    "chunk_index": 1,
+    "company_name": "Golden Valley Foods",
+    "content": "ses a delay threshold. Carlos asked whether the\nintegration would require each co-packer to adopt new software on their\nside; we confirmed it only requires read access to each carrier's existing\ntracking feed, no co-packer-side changes needed. He said this removes his\nbiggest concern about rollout complexity.",
+    "doc_type": "note",
+    "document_id": 6,
+    "document_title": "Discovery call on supply-chain visibility",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6040802,
+    "source_path": "sample-data/documents/goldenvalley-note-discovery.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "35e58a196a47e5a1b7aa302b340649cccfb14bb7583c9db7d618cad6ef6a289b": {
+  "company": null,
+  "latency_ms": 925,
+  "query": "What is the weather in Chicago today?",
+  "results": [
+   {
+    "chunk_id": "eaa078e5-943e-4db7-a904-db041d42094c",
+    "chunk_index": 1,
+    "company_name": "Northstar Logistics",
+    "content": "stomer, not just\nglobally, and that this is included in the base Fleet Visibility package with\nno add-on required. Jordan said this addresses his main concern and he plans\nto bring a rollout proposal to his leadership team next week.",
+    "doc_type": "support",
+    "document_id": 10,
+    "document_title": "Pre-sales support conversation on alerting limits",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.4640069,
+    "source_path": "sample-data/documents/northstar-support-alerting.md"
+   },
+   {
+    "chunk_id": "88c60d05-4a4d-4a05-b450-d77fc5e2b728",
+    "chunk_index": 1,
+    "company_name": "Acme Fabrication",
+    "content": "depends on knowing the total cost before she can commit to the renewal, so we\nagreed to send a written pricing breakdown.\n\nMaya also mentioned that the dashboard export feature has been slow for her\nteam recently, and asked whether that was a known issue.",
+    "doc_type": "call",
+    "document_id": 1,
+    "document_title": "Renewal planning call with Maya Chen",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.45521855,
+    "source_path": "sample-data/documents/acme-call-renewal.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "37c4f11e46211e1b9bdea38e914ce7b929a697dd4d99a806afa93fa1ea5ef1f9": {
+  "company": null,
+  "latency_ms": 853,
+  "query": "How many implementation sessions are included per year?",
+  "results": [
+   {
+    "chunk_id": "c74360b9-55fc-487a-a4c8-5a6d0db3ed79",
+    "chunk_index": 1,
+    "company_name": null,
+    "content": "matic 10% discount on the\n  combined multi-site total.\n- One implementation session can cover multiple sites if they go live within\n  the same 30-day window; otherwise, each site's go-live counts toward the\n  three included sessions per year.\n\nKnown limitation (as of this quarter): exporting more than 90 days of\ninteraction history in one request can time out. The recommended workaround\nis exporting in 30-day windows. A background export feature is in progress.",
+    "doc_type": "product",
+    "document_id": 12,
+    "document_title": "Premium Operations Plan overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6761234,
+    "source_path": "sample-data/documents/product-premium-operations-plan.md"
+   },
+   {
+    "chunk_id": "acfd868b-328b-45c0-93f1-cb22525f1586",
+    "chunk_index": 0,
+    "company_name": null,
+    "content": "The Premium Operations Plan is designed for manufacturing and industrial\ncustomers running one or more physical sites.\n\nIncluded in the base price for a single site:\n- Full operations dashboard, including interaction history and export tools.\n- Up to three implementation/onboarding sessions per year.\n- Standard support with a next-business-day response target.\n\nMulti-site pricing:\n- Each additional site is billed at 70% of the single-site rate.\n- Accounts with three or more sites receive an automatic 10% discount on the\n  combined multi-site total.\n- One implementation session can cover multip",
+    "doc_type": "product",
+    "document_id": 12,
+    "document_title": "Premium Operations Plan overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6741471,
+    "source_path": "sample-data/documents/product-premium-operations-plan.md"
+   },
+   {
+    "chunk_id": "5cf92c4f-38c6-4c9a-82ca-37299cdf88e6",
+    "chunk_index": 0,
+    "company_name": "Acme Fabrication",
+    "content": "Acme Fabrication: Service agreement summary\r\nSection 1. Support hours. Acme Fabrication's Premium Operations Plan includes support from 07:00 to 19:00\r\non weekdays. Priority 1 incidents, such as a stopped production line, receive a first response within 30\r\nminutes at any hour.\r\nSection 2. Onboarding. Each new factory floor receives two on-site onboarding sessions and a remote\r\ntraining day. Additional floors are priced per floor.",
+    "doc_type": "support",
+    "document_id": 3,
+    "document_title": "Acme Fabrication service agreement summary",
+    "page": 1,
+    "sheet": null,
+    "similarity": 0.6364871,
+    "source_path": "sample-data/documents/acme-service-agreement.pdf"
+   },
+   {
+    "chunk_id": "f24df715-ba42-489b-a86a-6cce82449a31",
+    "chunk_index": 0,
+    "company_name": "Acme Fabrication",
+    "content": "Maya Chen (Operations Director at Acme Fabrication) called to discuss renewing\nthe Premium Operations Plan ahead of the October contract date. She asked\nwhether the premium tier includes onboarding support for two additional\nfactory floors that Acme is bringing online next quarter.\n\nWe explained that the Premium Operations Plan includes up to three\nimplementation sessions per year at no extra cost, and that additional\nsessions are billed at the standard consulting rate. Maya said budget approval\ndepends on knowing the total cost before she can commit to the renewal, so we\nagreed to send a writ",
+    "doc_type": "call",
+    "document_id": 1,
+    "document_title": "Renewal planning call with Maya Chen",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.5851922,
+    "source_path": "sample-data/documents/acme-call-renewal.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "3cb543eaf483a61a3682576362de19fa6c920b4b2423e7fa54f76884af498d2d": {
+  "company": null,
+  "latency_ms": 910,
+  "query": "What pricing breakdown did Ravi Patel request from us?",
+  "results": [
+   {
+    "chunk_id": "b49c6038-ab8d-4814-bc8e-171a1d8d66b7",
+    "chunk_index": 0,
+    "company_name": "Acme Fabrication",
+    "content": "From: Ravi Patel (Procurement Manager, Acme Fabrication)\nSubject: Volume discount request\n\nHi team,\n\nFollowing up on Maya's call earlier this week. As she mentioned, we are\nadding two new factory locations in Q4, which means we would go from one\nsite license to three under the Premium Operations Plan.\n\nCould you send a pricing breakdown that shows:\n1. The current single-site premium rate\n2. The rate per additional site\n3. Whether a multi-site discount applies at three or more locations\n\nWe need this by end of next week to include in our budget approval request.\nAlso, please confirm whether exi",
+    "doc_type": "email",
+    "document_id": 2,
+    "document_title": "Volume discount request from Ravi Patel",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.7259532,
+    "source_path": "sample-data/documents/acme-email-discount.md"
+   },
+   {
+    "chunk_id": "969d14ff-5bb8-4d68-acc0-951ed8af7cd7",
+    "chunk_index": 1,
+    "company_name": "Acme Fabrication",
+    "content": "this by end of next week to include in our budget approval request.\nAlso, please confirm whether existing users need to be re-onboarded on each\nnew site, or whether one implementation session can cover all three.\n\nThanks,\nRavi",
+    "doc_type": "email",
+    "document_id": 2,
+    "document_title": "Volume discount request from Ravi Patel",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6606873,
+    "source_path": "sample-data/documents/acme-email-discount.md"
+   },
+   {
+    "chunk_id": "88c60d05-4a4d-4a05-b450-d77fc5e2b728",
+    "chunk_index": 1,
+    "company_name": "Acme Fabrication",
+    "content": "depends on knowing the total cost before she can commit to the renewal, so we\nagreed to send a written pricing breakdown.\n\nMaya also mentioned that the dashboard export feature has been slow for her\nteam recently, and asked whether that was a known issue.",
+    "doc_type": "call",
+    "document_id": 1,
+    "document_title": "Renewal planning call with Maya Chen",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6552642,
+    "source_path": "sample-data/documents/acme-call-renewal.md"
+   },
+   {
+    "chunk_id": "561e6580-cd9a-4a65-bc3e-3dbadaa01519",
+    "chunk_index": 0,
+    "company_name": "Golden Valley Foods",
+    "content": "From: Carlos Mendez (Operations Manager, Golden Valley Foods)\nSubject: Fleet Visibility pilot pricing question\n\nHi team,\n\nFollowing up on our discovery call last week. I have a budget approval\nmeeting on Thursday and need pilot pricing for a 90-day trial covering our\nthree busiest co-packer routes before I can get sign-off to move forward.\n\nCould you also confirm whether the pilot pricing rolls into the full\ncontract if we decide to continue afterward, or if it's a separate\none-time cost?\n\nThanks,\nCarlos",
+    "doc_type": "email",
+    "document_id": 5,
+    "document_title": "Fleet Visibility pilot pricing question",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6567261,
+    "source_path": "sample-data/documents/goldenvalley-email-pricing.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "3d183b8673f5befa8cd2df1af61062629325c8f1805441b0c5db8a7d53a4e74b": {
+  "company": null,
+  "latency_ms": 791,
+  "query": "What are Jordan Brooks' top priorities for delivery visibility?",
+  "results": [
+   {
+    "chunk_id": "951639e7-1b3d-4f6d-b61b-0bd88fa9aea4",
+    "chunk_index": 0,
+    "company_name": "Northstar Logistics",
+    "content": "Attendees: Jordan Brooks (Head of Customer Success, Northstar Logistics)\n\nNorthstar is evaluating our platform to give their customer success team\nreal-time visibility into delivery status for fleet customers. Today their\nreps manually check three separate carrier portals and compile a summary by\nhand each morning, which Jordan estimated takes about two hours per day\nacross the team.\n\nJordan's top priorities, in order:\n1. A single view that shows delivery status per fleet customer.\n2. Alerts when a delivery is delayed beyond a configurable threshold.\n3. The ability to share a read-only status",
+    "doc_type": "note",
+    "document_id": 8,
+    "document_title": "Discovery session with Jordan Brooks",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.77483785,
+    "source_path": "sample-data/documents/northstar-note-discovery.md"
+   },
+   {
+    "chunk_id": "2bc3092c-8bc7-43a5-af72-2aafa341958f",
+    "chunk_index": 0,
+    "company_name": "Northstar Logistics",
+    "content": "Customer: Jordan Brooks (evaluating Fleet Visibility rollout, not yet a\ncustomer)\n\nJordan asked, ahead of signing, whether delay alerts can be configured per\nfleet customer or only globally for the whole account. He said Northstar's\nfleet customers have very different tolerance for what counts as \"delayed\" \u2014\na same-day courier customer cares about 30-minute delays, while a long-haul\nfreight customer only cares about delays over 4 hours.\n\nWe confirmed that alert thresholds are configurable per customer, not just\nglobally, and that this is included in the base Fleet Visibility package with\nno ad",
+    "doc_type": "support",
+    "document_id": 10,
+    "document_title": "Pre-sales support conversation on alerting limits",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.7482852,
+    "source_path": "sample-data/documents/northstar-support-alerting.md"
+   },
+   {
+    "chunk_id": "7c9f183c-1bac-4247-8cb1-e3043b9b0f19",
+    "chunk_index": 1,
+    "company_name": "Northstar Logistics",
+    "content": "n a delivery is delayed beyond a configurable threshold.\n3. The ability to share a read-only status link with the fleet customer\n   directly, to reduce inbound \"where is my shipment\" calls.\n\nJordan asked for a proposal covering the Fleet Visibility rollout, including\nimplementation timeline and whether alerting is included in the base package\nor sold as an add-on.",
+    "doc_type": "note",
+    "document_id": 8,
+    "document_title": "Discovery session with Jordan Brooks",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.7337997,
+    "source_path": "sample-data/documents/northstar-note-discovery.md"
+   },
+   {
+    "chunk_id": "222761bc-ec07-4527-8f01-22da2ae5891e",
+    "chunk_index": 0,
+    "company_name": "Golden Valley Foods",
+    "content": "Carlos Mendez (Operations Manager at Golden Valley Foods) joined a discovery\ncall to evaluate Fleet Visibility for tracking shipment delays across\nseveral third-party co-packers. He explained that right now his team finds\nout about a delay only when a retail customer calls to complain, which is\ntoo late to do anything about it.\n\nWe walked through how Fleet Visibility consolidates delivery status across\nmultiple carriers into one dashboard and can alert operations staff as soon\nas a shipment crosses a delay threshold. Carlos asked whether the\nintegration would require each co-packer to adopt ne",
+    "doc_type": "note",
+    "document_id": 6,
+    "document_title": "Discovery call on supply-chain visibility",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.67197376,
+    "source_path": "sample-data/documents/goldenvalley-note-discovery.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "427e621267b0f9576b0cdd951249e33d04ad5627ca2673ef95e37c9ca43fa915": {
+  "company": null,
+  "latency_ms": 981,
+  "query": "How can Vertex get a temporary rate-limit increase for bulk jobs?",
+  "results": [
+   {
+    "chunk_id": "8d45e4b5-361a-4b27-9f5d-8bbba9cddea6",
+    "chunk_index": 0,
+    "company_name": "Vertex Analytics",
+    "content": "Customer: Tom Reyes (IT Administrator at Vertex Analytics)\n\nTom reported hitting the default API rate limit (500 requests/minute) while\nrunning a bulk export of historical usage data for a board presentation. The\nexport failed partway through with a 429 response.\n\nWe explained the default limit applies per API key, and that Vertex's plan\nallows requesting a temporary rate-limit increase for scheduled bulk jobs at\nno extra cost \u2014 it just needs 24 hours' notice. Tom said he'd plan future\nexports around that lead time, and asked if there was a way to see his\ncurrent rate-limit usage in real time;",
+    "doc_type": "support",
+    "document_id": 19,
+    "document_title": "API rate limit support ticket",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.7410773,
+    "source_path": "sample-data/documents/vertex-support-rate-limit.md"
+   },
+   {
+    "chunk_id": "8276c760-910f-4cad-9e71-80d0070e3764",
+    "chunk_index": 1,
+    "company_name": "Vertex Analytics",
+    "content": "round that lead time, and asked if there was a way to see his\ncurrent rate-limit usage in real time; we pointed him to the usage panel in\nthe admin dashboard.",
+    "doc_type": "support",
+    "document_id": 19,
+    "document_title": "API rate limit support ticket",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.61113024,
+    "source_path": "sample-data/documents/vertex-support-rate-limit.md"
+   },
+   {
+    "chunk_id": "492f1e44-ce26-4f25-a915-65912330f18e",
+    "chunk_index": 0,
+    "company_name": "Vertex Analytics",
+    "content": "Priya Nandakumar (VP Engineering at Vertex Analytics) called ahead of their\nannual renewal to ask about upgrading from the standard plan to Analytics\nPro. She said her team wants custom dashboards for tracking deployment\nfrequency and incident response time, which the standard plan doesn't\nsupport.\n\nWe confirmed Analytics Pro includes unlimited custom dashboards and a\ndedicated API quota. Priya asked whether the upgrade could be billed\nmid-cycle rather than waiting for the renewal date, and we agreed to send a\nprorated quote.",
+    "doc_type": "call",
+    "document_id": 18,
+    "document_title": "Contract renewal discussion with Priya Nandakumar",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6169807,
+    "source_path": "sample-data/documents/vertex-call-renewal.md"
+   },
+   {
+    "chunk_id": "b49c6038-ab8d-4814-bc8e-171a1d8d66b7",
+    "chunk_index": 0,
+    "company_name": "Acme Fabrication",
+    "content": "From: Ravi Patel (Procurement Manager, Acme Fabrication)\nSubject: Volume discount request\n\nHi team,\n\nFollowing up on Maya's call earlier this week. As she mentioned, we are\nadding two new factory locations in Q4, which means we would go from one\nsite license to three under the Premium Operations Plan.\n\nCould you send a pricing breakdown that shows:\n1. The current single-site premium rate\n2. The rate per additional site\n3. Whether a multi-site discount applies at three or more locations\n\nWe need this by end of next week to include in our budget approval request.\nAlso, please confirm whether exi",
+    "doc_type": "email",
+    "document_id": 2,
+    "document_title": "Volume discount request from Ravi Patel",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.5436837,
+    "source_path": "sample-data/documents/acme-email-discount.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "4c39f849240243e0e2b4e5792b9df523f1e4523e3d19036c5c03ed824dd95ad2": {
+  "company": null,
+  "latency_ms": 762,
+  "query": "Does the premium tier include onboarding support for two more factory floors?",
+  "results": [
+   {
+    "chunk_id": "5cf92c4f-38c6-4c9a-82ca-37299cdf88e6",
+    "chunk_index": 0,
+    "company_name": "Acme Fabrication",
+    "content": "Acme Fabrication: Service agreement summary\r\nSection 1. Support hours. Acme Fabrication's Premium Operations Plan includes support from 07:00 to 19:00\r\non weekdays. Priority 1 incidents, such as a stopped production line, receive a first response within 30\r\nminutes at any hour.\r\nSection 2. Onboarding. Each new factory floor receives two on-site onboarding sessions and a remote\r\ntraining day. Additional floors are priced per floor.",
+    "doc_type": "support",
+    "document_id": 3,
+    "document_title": "Acme Fabrication service agreement summary",
+    "page": 1,
+    "sheet": null,
+    "similarity": 0.6994752,
+    "source_path": "sample-data/documents/acme-service-agreement.pdf"
+   },
+   {
+    "chunk_id": "acfd868b-328b-45c0-93f1-cb22525f1586",
+    "chunk_index": 0,
+    "company_name": null,
+    "content": "The Premium Operations Plan is designed for manufacturing and industrial\ncustomers running one or more physical sites.\n\nIncluded in the base price for a single site:\n- Full operations dashboard, including interaction history and export tools.\n- Up to three implementation/onboarding sessions per year.\n- Standard support with a next-business-day response target.\n\nMulti-site pricing:\n- Each additional site is billed at 70% of the single-site rate.\n- Accounts with three or more sites receive an automatic 10% discount on the\n  combined multi-site total.\n- One implementation session can cover multip",
+    "doc_type": "product",
+    "document_id": 12,
+    "document_title": "Premium Operations Plan overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.7978507,
+    "source_path": "sample-data/documents/product-premium-operations-plan.md"
+   },
+   {
+    "chunk_id": "f24df715-ba42-489b-a86a-6cce82449a31",
+    "chunk_index": 0,
+    "company_name": "Acme Fabrication",
+    "content": "Maya Chen (Operations Director at Acme Fabrication) called to discuss renewing\nthe Premium Operations Plan ahead of the October contract date. She asked\nwhether the premium tier includes onboarding support for two additional\nfactory floors that Acme is bringing online next quarter.\n\nWe explained that the Premium Operations Plan includes up to three\nimplementation sessions per year at no extra cost, and that additional\nsessions are billed at the standard consulting rate. Maya said budget approval\ndepends on knowing the total cost before she can commit to the renewal, so we\nagreed to send a writ",
+    "doc_type": "call",
+    "document_id": 1,
+    "document_title": "Renewal planning call with Maya Chen",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6632151,
+    "source_path": "sample-data/documents/acme-call-renewal.md"
+   },
+   {
+    "chunk_id": "b49c6038-ab8d-4814-bc8e-171a1d8d66b7",
+    "chunk_index": 0,
+    "company_name": "Acme Fabrication",
+    "content": "From: Ravi Patel (Procurement Manager, Acme Fabrication)\nSubject: Volume discount request\n\nHi team,\n\nFollowing up on Maya's call earlier this week. As she mentioned, we are\nadding two new factory locations in Q4, which means we would go from one\nsite license to three under the Premium Operations Plan.\n\nCould you send a pricing breakdown that shows:\n1. The current single-site premium rate\n2. The rate per additional site\n3. Whether a multi-site discount applies at three or more locations\n\nWe need this by end of next week to include in our budget approval request.\nAlso, please confirm whether exi",
+    "doc_type": "email",
+    "document_id": 2,
+    "document_title": "Volume discount request from Ravi Patel",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.64687407,
+    "source_path": "sample-data/documents/acme-email-discount.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "4da38f6c7c9f6dacbc782b90df0565777bc2e22eb8d5de5f5d5bb770a4ddc11a": {
+  "company": null,
+  "latency_ms": 1010,
+  "query": "What delay thresholds do Northstar's fleet customers care about?",
+  "results": [
+   {
+    "chunk_id": "2bc3092c-8bc7-43a5-af72-2aafa341958f",
+    "chunk_index": 0,
+    "company_name": "Northstar Logistics",
+    "content": "Customer: Jordan Brooks (evaluating Fleet Visibility rollout, not yet a\ncustomer)\n\nJordan asked, ahead of signing, whether delay alerts can be configured per\nfleet customer or only globally for the whole account. He said Northstar's\nfleet customers have very different tolerance for what counts as \"delayed\" \u2014\na same-day courier customer cares about 30-minute delays, while a long-haul\nfreight customer only cares about delays over 4 hours.\n\nWe confirmed that alert thresholds are configurable per customer, not just\nglobally, and that this is included in the base Fleet Visibility package with\nno ad",
+    "doc_type": "support",
+    "document_id": 10,
+    "document_title": "Pre-sales support conversation on alerting limits",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.75323355,
+    "source_path": "sample-data/documents/northstar-support-alerting.md"
+   },
+   {
+    "chunk_id": "951639e7-1b3d-4f6d-b61b-0bd88fa9aea4",
+    "chunk_index": 0,
+    "company_name": "Northstar Logistics",
+    "content": "Attendees: Jordan Brooks (Head of Customer Success, Northstar Logistics)\n\nNorthstar is evaluating our platform to give their customer success team\nreal-time visibility into delivery status for fleet customers. Today their\nreps manually check three separate carrier portals and compile a summary by\nhand each morning, which Jordan estimated takes about two hours per day\nacross the team.\n\nJordan's top priorities, in order:\n1. A single view that shows delivery status per fleet customer.\n2. Alerts when a delivery is delayed beyond a configurable threshold.\n3. The ability to share a read-only status",
+    "doc_type": "note",
+    "document_id": 8,
+    "document_title": "Discovery session with Jordan Brooks",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6889926,
+    "source_path": "sample-data/documents/northstar-note-discovery.md"
+   },
+   {
+    "chunk_id": "222761bc-ec07-4527-8f01-22da2ae5891e",
+    "chunk_index": 0,
+    "company_name": "Golden Valley Foods",
+    "content": "Carlos Mendez (Operations Manager at Golden Valley Foods) joined a discovery\ncall to evaluate Fleet Visibility for tracking shipment delays across\nseveral third-party co-packers. He explained that right now his team finds\nout about a delay only when a retail customer calls to complain, which is\ntoo late to do anything about it.\n\nWe walked through how Fleet Visibility consolidates delivery status across\nmultiple carriers into one dashboard and can alert operations staff as soon\nas a shipment crosses a delay threshold. Carlos asked whether the\nintegration would require each co-packer to adopt ne",
+    "doc_type": "note",
+    "document_id": 6,
+    "document_title": "Discovery call on supply-chain visibility",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.67703784,
+    "source_path": "sample-data/documents/goldenvalley-note-discovery.md"
+   },
+   {
+    "chunk_id": "38890f41-951a-447c-9946-ab726bb5def0",
+    "chunk_index": 0,
+    "company_name": null,
+    "content": "Fleet Visibility is designed for logistics customers who need real-time\ndelivery status across multiple carriers, consolidated into one view for\ntheir customer success or operations team.\n\nBase package includes:\n- A single dashboard showing delivery status per fleet customer, pulled from\n  connected carrier data feeds.\n- Configurable delay alerts, set per fleet customer rather than only at the\n  account level, so different customers can have different delay thresholds.\n- A read-only shareable status link that fleet customers can use to check\n  their own delivery status without calling support.",
+    "doc_type": "product",
+    "document_id": 11,
+    "document_title": "Fleet Visibility rollout package overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6459789,
+    "source_path": "sample-data/documents/product-fleet-visibility.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "544eee28befcb691b93f51bdc9ffa49138dc59de075c14ef78b043e265496753": {
+  "company": null,
+  "latency_ms": 900,
+  "query": "What is our refund policy?",
+  "results": [
+   {
+    "chunk_id": "c74360b9-55fc-487a-a4c8-5a6d0db3ed79",
+    "chunk_index": 1,
+    "company_name": null,
+    "content": "matic 10% discount on the\n  combined multi-site total.\n- One implementation session can cover multiple sites if they go live within\n  the same 30-day window; otherwise, each site's go-live counts toward the\n  three included sessions per year.\n\nKnown limitation (as of this quarter): exporting more than 90 days of\ninteraction history in one request can time out. The recommended workaround\nis exporting in 30-day windows. A background export feature is in progress.",
+    "doc_type": "product",
+    "document_id": 12,
+    "document_title": "Premium Operations Plan overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.53600127,
+    "source_path": "sample-data/documents/product-premium-operations-plan.md"
+   },
+   {
+    "chunk_id": "52ba7b51-fba7-4393-b4e4-5f7f02254b5f",
+    "chunk_index": 0,
+    "company_name": "Riverside Health Group",
+    "content": "## Riverside Health Group: data handling policy\n\nPatient identifiers must never appear in support tickets or in exported reports. Exports are encrypted and expire after seven days.\n\n### Access reviews\n\nAccounts with access to clinical data are reviewed every quarter. A reviewer who finds an unused account disables it within two business days.",
+    "doc_type": "support",
+    "document_id": 14,
+    "document_title": "Riverside Health Group data handling policy",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.48501027,
+    "source_path": "sample-data/documents/riverside-data-handling-policy.docx"
+   },
+   {
+    "chunk_id": "78c40b52-b40c-4752-9a05-09ae70cb1e39",
+    "chunk_index": 1,
+    "company_name": "Acme Fabrication",
+    "content": "that reviews quarterly history. We scheduled a follow-up call for\nearly September to confirm whether the background-export fix has shipped, and\nto revisit the pricing breakdown she is waiting on for the renewal.\n\nStatus: Workaround shared. Follow-up scheduled. Engineering ticket opened for\nbackground CSV export.",
+    "doc_type": "support",
+    "document_id": 4,
+    "document_title": "Dashboard export timeout support conversation",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.51207083,
+    "source_path": "sample-data/documents/acme-support-export-timeout.md"
+   },
+   {
+    "chunk_id": "eaa078e5-943e-4db7-a904-db041d42094c",
+    "chunk_index": 1,
+    "company_name": "Northstar Logistics",
+    "content": "stomer, not just\nglobally, and that this is included in the base Fleet Visibility package with\nno add-on required. Jordan said this addresses his main concern and he plans\nto bring a rollout proposal to his leadership team next week.",
+    "doc_type": "support",
+    "document_id": 10,
+    "document_title": "Pre-sales support conversation on alerting limits",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.509328,
+    "source_path": "sample-data/documents/northstar-support-alerting.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "5ec0bcad0c750ec2952a06870acf0b674ae574c96c7fc661306177c2f50fe7f2": {
+  "company": "Acme Fabrication",
+  "latency_ms": 887,
+  "query": "What is the export problem and its workaround?",
+  "results": [
+   {
+    "chunk_id": "c49ae0ad-cb09-4ef9-9e5b-4371301bd06e",
+    "chunk_index": 0,
+    "company_name": "Acme Fabrication",
+    "content": "Customer: Maya Chen\nIssue: The \"Export full history\" button on the operations dashboard times out\nfor reports covering more than 90 days of interaction data.\n\nSupport notes: Reproduced the issue. The export times out because it builds\nthe CSV synchronously in the request instead of generating it in the\nbackground. As a workaround, we suggested exporting in 30-day windows until a\nbackground-export feature ships.\n\nMaya accepted the workaround for now but said it is \"not a long-term fix\" for\na team that reviews quarterly history. We scheduled a follow-up call for\nearly September to confirm whethe",
+    "doc_type": "support",
+    "document_id": 4,
+    "document_title": "Dashboard export timeout support conversation",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.64614046,
+    "source_path": "sample-data/documents/acme-support-export-timeout.md"
+   },
+   {
+    "chunk_id": "78c40b52-b40c-4752-9a05-09ae70cb1e39",
+    "chunk_index": 1,
+    "company_name": "Acme Fabrication",
+    "content": "that reviews quarterly history. We scheduled a follow-up call for\nearly September to confirm whether the background-export fix has shipped, and\nto revisit the pricing breakdown she is waiting on for the renewal.\n\nStatus: Workaround shared. Follow-up scheduled. Engineering ticket opened for\nbackground CSV export.",
+    "doc_type": "support",
+    "document_id": 4,
+    "document_title": "Dashboard export timeout support conversation",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6278937,
+    "source_path": "sample-data/documents/acme-support-export-timeout.md"
+   },
+   {
+    "chunk_id": "c74360b9-55fc-487a-a4c8-5a6d0db3ed79",
+    "chunk_index": 1,
+    "company_name": null,
+    "content": "matic 10% discount on the\n  combined multi-site total.\n- One implementation session can cover multiple sites if they go live within\n  the same 30-day window; otherwise, each site's go-live counts toward the\n  three included sessions per year.\n\nKnown limitation (as of this quarter): exporting more than 90 days of\ninteraction history in one request can time out. The recommended workaround\nis exporting in 30-day windows. A background export feature is in progress.",
+    "doc_type": "product",
+    "document_id": 12,
+    "document_title": "Premium Operations Plan overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.60022193,
+    "source_path": "sample-data/documents/product-premium-operations-plan.md"
+   },
+   {
+    "chunk_id": "88c60d05-4a4d-4a05-b450-d77fc5e2b728",
+    "chunk_index": 1,
+    "company_name": "Acme Fabrication",
+    "content": "depends on knowing the total cost before she can commit to the renewal, so we\nagreed to send a written pricing breakdown.\n\nMaya also mentioned that the dashboard export feature has been slow for her\nteam recently, and asked whether that was a known issue.",
+    "doc_type": "call",
+    "document_id": 1,
+    "document_title": "Renewal planning call with Maya Chen",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.58506024,
+    "source_path": "sample-data/documents/acme-call-renewal.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "5f85bb6ac42ce9e3568c711e51649aa594e8fa3b8e278987995d99438de3c620": {
+  "company": null,
+  "latency_ms": 847,
+  "query": "What is the default API rate limit?",
+  "results": [
+   {
+    "chunk_id": "8d45e4b5-361a-4b27-9f5d-8bbba9cddea6",
+    "chunk_index": 0,
+    "company_name": "Vertex Analytics",
+    "content": "Customer: Tom Reyes (IT Administrator at Vertex Analytics)\n\nTom reported hitting the default API rate limit (500 requests/minute) while\nrunning a bulk export of historical usage data for a board presentation. The\nexport failed partway through with a 429 response.\n\nWe explained the default limit applies per API key, and that Vertex's plan\nallows requesting a temporary rate-limit increase for scheduled bulk jobs at\nno extra cost \u2014 it just needs 24 hours' notice. Tom said he'd plan future\nexports around that lead time, and asked if there was a way to see his\ncurrent rate-limit usage in real time;",
+    "doc_type": "support",
+    "document_id": 19,
+    "document_title": "API rate limit support ticket",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.66326827,
+    "source_path": "sample-data/documents/vertex-support-rate-limit.md"
+   },
+   {
+    "chunk_id": "8276c760-910f-4cad-9e71-80d0070e3764",
+    "chunk_index": 1,
+    "company_name": "Vertex Analytics",
+    "content": "round that lead time, and asked if there was a way to see his\ncurrent rate-limit usage in real time; we pointed him to the usage panel in\nthe admin dashboard.",
+    "doc_type": "support",
+    "document_id": 19,
+    "document_title": "API rate limit support ticket",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6335178,
+    "source_path": "sample-data/documents/vertex-support-rate-limit.md"
+   },
+   {
+    "chunk_id": "492f1e44-ce26-4f25-a915-65912330f18e",
+    "chunk_index": 0,
+    "company_name": "Vertex Analytics",
+    "content": "Priya Nandakumar (VP Engineering at Vertex Analytics) called ahead of their\nannual renewal to ask about upgrading from the standard plan to Analytics\nPro. She said her team wants custom dashboards for tracking deployment\nfrequency and incident response time, which the standard plan doesn't\nsupport.\n\nWe confirmed Analytics Pro includes unlimited custom dashboards and a\ndedicated API quota. Priya asked whether the upgrade could be billed\nmid-cycle rather than waiting for the renewal date, and we agreed to send a\nprorated quote.",
+    "doc_type": "call",
+    "document_id": 18,
+    "document_title": "Contract renewal discussion with Priya Nandakumar",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.5305133,
+    "source_path": "sample-data/documents/vertex-call-renewal.md"
+   },
+   {
+    "chunk_id": "88c64d99-5c34-4094-8e62-e85ebad62058",
+    "chunk_index": 0,
+    "company_name": "Northstar Logistics",
+    "content": "Sheet: Rate card\n\n| Plan             |   Monthly price (USD) |   Tracked vehicles | Alert channels         |\n|------------------|-----------------------|--------------------|------------------------|\n| Essentials       |                  1200 |                 50 | Email                  |\n| Fleet Plus       |                  3400 |                250 | Email and SMS          |\n| Fleet Enterprise |                  9800 |               1000 | Email, SMS and webhook |",
+    "doc_type": "product",
+    "document_id": 9,
+    "document_title": "Northstar Logistics rate card and SLA credits",
+    "page": null,
+    "sheet": "Rate card",
+    "similarity": 0.5712985,
+    "source_path": "sample-data/documents/northstar-rate-card.xlsx"
+   }
+  ],
+  "top_k": 4
+ },
+ "6c763a0c09d3b988372c91907962aee26e617d3ecfc45d163e102a9c9fa08d5c": {
+  "company": null,
+  "latency_ms": 792,
+  "query": "How long is a typical Fleet Visibility rollout?",
+  "results": [
+   {
+    "chunk_id": "e6e1e40c-9ab0-48b8-bc8a-65492eb715ab",
+    "chunk_index": 1,
+    "company_name": null,
+    "content": "atus link that fleet customers can use to check\n  their own delivery status without calling support.\n\nTypical rollout timeline is four to six weeks: two weeks for carrier feed\nintegration, one to two weeks for configuring per-customer alert thresholds,\nand one to two weeks for user acceptance testing before go-live.\n\nAlerting is included in the base package at no additional cost.",
+    "doc_type": "product",
+    "document_id": 11,
+    "document_title": "Fleet Visibility rollout package overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.7235879,
+    "source_path": "sample-data/documents/product-fleet-visibility.md"
+   },
+   {
+    "chunk_id": "38890f41-951a-447c-9946-ab726bb5def0",
+    "chunk_index": 0,
+    "company_name": null,
+    "content": "Fleet Visibility is designed for logistics customers who need real-time\ndelivery status across multiple carriers, consolidated into one view for\ntheir customer success or operations team.\n\nBase package includes:\n- A single dashboard showing delivery status per fleet customer, pulled from\n  connected carrier data feeds.\n- Configurable delay alerts, set per fleet customer rather than only at the\n  account level, so different customers can have different delay thresholds.\n- A read-only shareable status link that fleet customers can use to check\n  their own delivery status without calling support.",
+    "doc_type": "product",
+    "document_id": 11,
+    "document_title": "Fleet Visibility rollout package overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.74179006,
+    "source_path": "sample-data/documents/product-fleet-visibility.md"
+   },
+   {
+    "chunk_id": "7c9f183c-1bac-4247-8cb1-e3043b9b0f19",
+    "chunk_index": 1,
+    "company_name": "Northstar Logistics",
+    "content": "n a delivery is delayed beyond a configurable threshold.\n3. The ability to share a read-only status link with the fleet customer\n   directly, to reduce inbound \"where is my shipment\" calls.\n\nJordan asked for a proposal covering the Fleet Visibility rollout, including\nimplementation timeline and whether alerting is included in the base package\nor sold as an add-on.",
+    "doc_type": "note",
+    "document_id": 8,
+    "document_title": "Discovery session with Jordan Brooks",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.7146853,
+    "source_path": "sample-data/documents/northstar-note-discovery.md"
+   },
+   {
+    "chunk_id": "222761bc-ec07-4527-8f01-22da2ae5891e",
+    "chunk_index": 0,
+    "company_name": "Golden Valley Foods",
+    "content": "Carlos Mendez (Operations Manager at Golden Valley Foods) joined a discovery\ncall to evaluate Fleet Visibility for tracking shipment delays across\nseveral third-party co-packers. He explained that right now his team finds\nout about a delay only when a retail customer calls to complain, which is\ntoo late to do anything about it.\n\nWe walked through how Fleet Visibility consolidates delivery status across\nmultiple carriers into one dashboard and can alert operations staff as soon\nas a shipment crosses a delay threshold. Carlos asked whether the\nintegration would require each co-packer to adopt ne",
+    "doc_type": "note",
+    "document_id": 6,
+    "document_title": "Discovery call on supply-chain visibility",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.69681686,
+    "source_path": "sample-data/documents/goldenvalley-note-discovery.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "6f7018494a3f11793304ca679b010fa19a180795d744568bd9d3852f16e36f38": {
+  "company": null,
+  "latency_ms": 802,
+  "query": "Will the pilot pricing roll into the full contract?",
+  "results": [
+   {
+    "chunk_id": "561e6580-cd9a-4a65-bc3e-3dbadaa01519",
+    "chunk_index": 0,
+    "company_name": "Golden Valley Foods",
+    "content": "From: Carlos Mendez (Operations Manager, Golden Valley Foods)\nSubject: Fleet Visibility pilot pricing question\n\nHi team,\n\nFollowing up on our discovery call last week. I have a budget approval\nmeeting on Thursday and need pilot pricing for a 90-day trial covering our\nthree busiest co-packer routes before I can get sign-off to move forward.\n\nCould you also confirm whether the pilot pricing rolls into the full\ncontract if we decide to continue afterward, or if it's a separate\none-time cost?\n\nThanks,\nCarlos",
+    "doc_type": "email",
+    "document_id": 5,
+    "document_title": "Fleet Visibility pilot pricing question",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.7037174,
+    "source_path": "sample-data/documents/goldenvalley-email-pricing.md"
+   },
+   {
+    "chunk_id": "acfd868b-328b-45c0-93f1-cb22525f1586",
+    "chunk_index": 0,
+    "company_name": null,
+    "content": "The Premium Operations Plan is designed for manufacturing and industrial\ncustomers running one or more physical sites.\n\nIncluded in the base price for a single site:\n- Full operations dashboard, including interaction history and export tools.\n- Up to three implementation/onboarding sessions per year.\n- Standard support with a next-business-day response target.\n\nMulti-site pricing:\n- Each additional site is billed at 70% of the single-site rate.\n- Accounts with three or more sites receive an automatic 10% discount on the\n  combined multi-site total.\n- One implementation session can cover multip",
+    "doc_type": "product",
+    "document_id": 12,
+    "document_title": "Premium Operations Plan overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6011448,
+    "source_path": "sample-data/documents/product-premium-operations-plan.md"
+   },
+   {
+    "chunk_id": "f24df715-ba42-489b-a86a-6cce82449a31",
+    "chunk_index": 0,
+    "company_name": "Acme Fabrication",
+    "content": "Maya Chen (Operations Director at Acme Fabrication) called to discuss renewing\nthe Premium Operations Plan ahead of the October contract date. She asked\nwhether the premium tier includes onboarding support for two additional\nfactory floors that Acme is bringing online next quarter.\n\nWe explained that the Premium Operations Plan includes up to three\nimplementation sessions per year at no extra cost, and that additional\nsessions are billed at the standard consulting rate. Maya said budget approval\ndepends on knowing the total cost before she can commit to the renewal, so we\nagreed to send a writ",
+    "doc_type": "call",
+    "document_id": 1,
+    "document_title": "Renewal planning call with Maya Chen",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.59920096,
+    "source_path": "sample-data/documents/acme-call-renewal.md"
+   },
+   {
+    "chunk_id": "88c60d05-4a4d-4a05-b450-d77fc5e2b728",
+    "chunk_index": 1,
+    "company_name": "Acme Fabrication",
+    "content": "depends on knowing the total cost before she can commit to the renewal, so we\nagreed to send a written pricing breakdown.\n\nMaya also mentioned that the dashboard export feature has been slow for her\nteam recently, and asked whether that was a known issue.",
+    "doc_type": "call",
+    "document_id": 1,
+    "document_title": "Renewal planning call with Maya Chen",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.5952683,
+    "source_path": "sample-data/documents/acme-call-renewal.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "746622a5b8e63dc37dee73a58947616ee764f01120c667800b0af6b5732a24bd": {
+  "company": null,
+  "latency_ms": 784,
+  "query": "Can the Analytics Pro upgrade be billed mid-cycle?",
+  "results": [
+   {
+    "chunk_id": "492f1e44-ce26-4f25-a915-65912330f18e",
+    "chunk_index": 0,
+    "company_name": "Vertex Analytics",
+    "content": "Priya Nandakumar (VP Engineering at Vertex Analytics) called ahead of their\nannual renewal to ask about upgrading from the standard plan to Analytics\nPro. She said her team wants custom dashboards for tracking deployment\nfrequency and incident response time, which the standard plan doesn't\nsupport.\n\nWe confirmed Analytics Pro includes unlimited custom dashboards and a\ndedicated API quota. Priya asked whether the upgrade could be billed\nmid-cycle rather than waiting for the renewal date, and we agreed to send a\nprorated quote.",
+    "doc_type": "call",
+    "document_id": 18,
+    "document_title": "Contract renewal discussion with Priya Nandakumar",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.72891283,
+    "source_path": "sample-data/documents/vertex-call-renewal.md"
+   },
+   {
+    "chunk_id": "969d14ff-5bb8-4d68-acc0-951ed8af7cd7",
+    "chunk_index": 1,
+    "company_name": "Acme Fabrication",
+    "content": "this by end of next week to include in our budget approval request.\nAlso, please confirm whether existing users need to be re-onboarded on each\nnew site, or whether one implementation session can cover all three.\n\nThanks,\nRavi",
+    "doc_type": "email",
+    "document_id": 2,
+    "document_title": "Volume discount request from Ravi Patel",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.590538,
+    "source_path": "sample-data/documents/acme-email-discount.md"
+   },
+   {
+    "chunk_id": "8d45e4b5-361a-4b27-9f5d-8bbba9cddea6",
+    "chunk_index": 0,
+    "company_name": "Vertex Analytics",
+    "content": "Customer: Tom Reyes (IT Administrator at Vertex Analytics)\n\nTom reported hitting the default API rate limit (500 requests/minute) while\nrunning a bulk export of historical usage data for a board presentation. The\nexport failed partway through with a 429 response.\n\nWe explained the default limit applies per API key, and that Vertex's plan\nallows requesting a temporary rate-limit increase for scheduled bulk jobs at\nno extra cost \u2014 it just needs 24 hours' notice. Tom said he'd plan future\nexports around that lead time, and asked if there was a way to see his\ncurrent rate-limit usage in real time;",
+    "doc_type": "support",
+    "document_id": 19,
+    "document_title": "API rate limit support ticket",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.59989285,
+    "source_path": "sample-data/documents/vertex-support-rate-limit.md"
+   },
+   {
+    "chunk_id": "c74360b9-55fc-487a-a4c8-5a6d0db3ed79",
+    "chunk_index": 1,
+    "company_name": null,
+    "content": "matic 10% discount on the\n  combined multi-site total.\n- One implementation session can cover multiple sites if they go live within\n  the same 30-day window; otherwise, each site's go-live counts toward the\n  three included sessions per year.\n\nKnown limitation (as of this quarter): exporting more than 90 days of\ninteraction history in one request can time out. The recommended workaround\nis exporting in 30-day windows. A background export feature is in progress.",
+    "doc_type": "product",
+    "document_id": 12,
+    "document_title": "Premium Operations Plan overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6186944,
+    "source_path": "sample-data/documents/product-premium-operations-plan.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "7b4cf9eeb997255f862ade28a7406087b188c73d9ed948ccd8b47f9e5045a90d": {
+  "company": null,
+  "latency_ms": 775,
+  "query": "Chicago weather forecast today",
+  "results": [
+   {
+    "chunk_id": "c74360b9-55fc-487a-a4c8-5a6d0db3ed79",
+    "chunk_index": 1,
+    "company_name": null,
+    "content": "matic 10% discount on the\n  combined multi-site total.\n- One implementation session can cover multiple sites if they go live within\n  the same 30-day window; otherwise, each site's go-live counts toward the\n  three included sessions per year.\n\nKnown limitation (as of this quarter): exporting more than 90 days of\ninteraction history in one request can time out. The recommended workaround\nis exporting in 30-day windows. A background export feature is in progress.",
+    "doc_type": "product",
+    "document_id": 12,
+    "document_title": "Premium Operations Plan overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.45959896,
+    "source_path": "sample-data/documents/product-premium-operations-plan.md"
+   },
+   {
+    "chunk_id": "eaa078e5-943e-4db7-a904-db041d42094c",
+    "chunk_index": 1,
+    "company_name": "Northstar Logistics",
+    "content": "stomer, not just\nglobally, and that this is included in the base Fleet Visibility package with\nno add-on required. Jordan said this addresses his main concern and he plans\nto bring a rollout proposal to his leadership team next week.",
+    "doc_type": "support",
+    "document_id": 10,
+    "document_title": "Pre-sales support conversation on alerting limits",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.45215404,
+    "source_path": "sample-data/documents/northstar-support-alerting.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "7c4090854c17d5185e780ebeced25bfddcf9d8bec0509387f8e5aa40614e6ea6": {
+  "company": null,
+  "latency_ms": 838,
+  "query": "Might Summit Builders revisit Site Ops Suite later?",
+  "results": [
+   {
+    "chunk_id": "79867e03-fbb2-427f-8b7e-6827220d3e24",
+    "chunk_index": 0,
+    "company_name": "Summit Builders",
+    "content": "Dana Whitfield (then Project Manager at Summit Builders) joined an exit\ninterview call after Summit's Site Ops Suite deal did not close and their\naccount was marked as a former customer. Dana explained that Summit had\nfrozen all new vendor contracts company-wide due to a budget restructuring,\nand that this was unrelated to any dissatisfaction with the product itself.\n\nDana said the team had found the evaluation period useful and would\nconsider revisiting Site Ops Suite once the budget freeze lifts, likely in\na future fiscal year. She asked to stay on the mailing list for product\nupdates in the",
+    "doc_type": "call",
+    "document_id": 17,
+    "document_title": "Exit interview call",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.7555501,
+    "source_path": "sample-data/documents/summit-note-churn.md"
+   },
+   {
+    "chunk_id": "c74360b9-55fc-487a-a4c8-5a6d0db3ed79",
+    "chunk_index": 1,
+    "company_name": null,
+    "content": "matic 10% discount on the\n  combined multi-site total.\n- One implementation session can cover multiple sites if they go live within\n  the same 30-day window; otherwise, each site's go-live counts toward the\n  three included sessions per year.\n\nKnown limitation (as of this quarter): exporting more than 90 days of\ninteraction history in one request can time out. The recommended workaround\nis exporting in 30-day windows. A background export feature is in progress.",
+    "doc_type": "product",
+    "document_id": 12,
+    "document_title": "Premium Operations Plan overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.5997027,
+    "source_path": "sample-data/documents/product-premium-operations-plan.md"
+   },
+   {
+    "chunk_id": "78c40b52-b40c-4752-9a05-09ae70cb1e39",
+    "chunk_index": 1,
+    "company_name": "Acme Fabrication",
+    "content": "that reviews quarterly history. We scheduled a follow-up call for\nearly September to confirm whether the background-export fix has shipped, and\nto revisit the pricing breakdown she is waiting on for the renewal.\n\nStatus: Workaround shared. Follow-up scheduled. Engineering ticket opened for\nbackground CSV export.",
+    "doc_type": "support",
+    "document_id": 4,
+    "document_title": "Dashboard export timeout support conversation",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.5830514,
+    "source_path": "sample-data/documents/acme-support-export-timeout.md"
+   },
+   {
+    "chunk_id": "969d14ff-5bb8-4d68-acc0-951ed8af7cd7",
+    "chunk_index": 1,
+    "company_name": "Acme Fabrication",
+    "content": "this by end of next week to include in our budget approval request.\nAlso, please confirm whether existing users need to be re-onboarded on each\nnew site, or whether one implementation session can cover all three.\n\nThanks,\nRavi",
+    "doc_type": "email",
+    "document_id": 2,
+    "document_title": "Volume discount request from Ravi Patel",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.5970588,
+    "source_path": "sample-data/documents/acme-email-discount.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "7cbc9697f6c224e3dc10b3d939c6ac26bfe0fbfb73aeb0d56692c750ea0b3e06": {
+  "company": null,
+  "latency_ms": 715,
+  "query": "Is an audit log of data-access events available?",
+  "results": [
+   {
+    "chunk_id": "5c2991c8-9565-4b97-adc1-080063302cc5",
+    "chunk_index": 1,
+    "company_name": "Riverside Health Group",
+    "content": "log of data-access events is available on\nrequest through support. James said he would forward this to Riverside's\ncompliance team and asked for written confirmation he could share\ninternally; we agreed to send a summary document.",
+    "doc_type": "support",
+    "document_id": 16,
+    "document_title": "Data handling and compliance question",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.7167028,
+    "source_path": "sample-data/documents/riverside-support-compliance.md"
+   },
+   {
+    "chunk_id": "db6aba00-c878-42a1-8993-3963446fb94d",
+    "chunk_index": 0,
+    "company_name": "Riverside Health Group",
+    "content": "Customer: James Okafor (IT Director at Riverside Health Group)\n\nJames asked how patient-adjacent operational data (appointment scheduling\nmetadata, not clinical records) is stored and whether retention settings\nmeet their internal compliance requirements. He noted that Riverside's\ncompliance team requires configurable data-retention windows and audit\nlogs for any system touching scheduling data.\n\nWe confirmed that the platform supports configurable retention windows per\naccount and that an audit log of data-access events is available on\nrequest through support. James said he would forward this",
+    "doc_type": "support",
+    "document_id": 16,
+    "document_title": "Data handling and compliance question",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6016958,
+    "source_path": "sample-data/documents/riverside-support-compliance.md"
+   },
+   {
+    "chunk_id": "52ba7b51-fba7-4393-b4e4-5f7f02254b5f",
+    "chunk_index": 0,
+    "company_name": "Riverside Health Group",
+    "content": "## Riverside Health Group: data handling policy\n\nPatient identifiers must never appear in support tickets or in exported reports. Exports are encrypted and expire after seven days.\n\n### Access reviews\n\nAccounts with access to clinical data are reviewed every quarter. A reviewer who finds an unused account disables it within two business days.",
+    "doc_type": "support",
+    "document_id": 14,
+    "document_title": "Riverside Health Group data handling policy",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.59219563,
+    "source_path": "sample-data/documents/riverside-data-handling-policy.docx"
+   },
+   {
+    "chunk_id": "8d45e4b5-361a-4b27-9f5d-8bbba9cddea6",
+    "chunk_index": 0,
+    "company_name": "Vertex Analytics",
+    "content": "Customer: Tom Reyes (IT Administrator at Vertex Analytics)\n\nTom reported hitting the default API rate limit (500 requests/minute) while\nrunning a bulk export of historical usage data for a board presentation. The\nexport failed partway through with a 429 response.\n\nWe explained the default limit applies per API key, and that Vertex's plan\nallows requesting a temporary rate-limit increase for scheduled bulk jobs at\nno extra cost \u2014 it just needs 24 hours' notice. Tom said he'd plan future\nexports around that lead time, and asked if there was a way to see his\ncurrent rate-limit usage in real time;",
+    "doc_type": "support",
+    "document_id": 19,
+    "document_title": "API rate limit support ticket",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.5633532,
+    "source_path": "sample-data/documents/vertex-support-rate-limit.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "847bd7aff2581466a4794d89d1d92c4da42db4de5d449e33df1d88a176e18ca0": {
+  "company": null,
+  "latency_ms": 795,
+  "query": "What does the base Fleet Visibility package include?",
+  "results": [
+   {
+    "chunk_id": "eaa078e5-943e-4db7-a904-db041d42094c",
+    "chunk_index": 1,
+    "company_name": "Northstar Logistics",
+    "content": "stomer, not just\nglobally, and that this is included in the base Fleet Visibility package with\nno add-on required. Jordan said this addresses his main concern and he plans\nto bring a rollout proposal to his leadership team next week.",
+    "doc_type": "support",
+    "document_id": 10,
+    "document_title": "Pre-sales support conversation on alerting limits",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.7075964,
+    "source_path": "sample-data/documents/northstar-support-alerting.md"
+   },
+   {
+    "chunk_id": "38890f41-951a-447c-9946-ab726bb5def0",
+    "chunk_index": 0,
+    "company_name": null,
+    "content": "Fleet Visibility is designed for logistics customers who need real-time\ndelivery status across multiple carriers, consolidated into one view for\ntheir customer success or operations team.\n\nBase package includes:\n- A single dashboard showing delivery status per fleet customer, pulled from\n  connected carrier data feeds.\n- Configurable delay alerts, set per fleet customer rather than only at the\n  account level, so different customers can have different delay thresholds.\n- A read-only shareable status link that fleet customers can use to check\n  their own delivery status without calling support.",
+    "doc_type": "product",
+    "document_id": 11,
+    "document_title": "Fleet Visibility rollout package overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.80566716,
+    "source_path": "sample-data/documents/product-fleet-visibility.md"
+   },
+   {
+    "chunk_id": "7c9f183c-1bac-4247-8cb1-e3043b9b0f19",
+    "chunk_index": 1,
+    "company_name": "Northstar Logistics",
+    "content": "n a delivery is delayed beyond a configurable threshold.\n3. The ability to share a read-only status link with the fleet customer\n   directly, to reduce inbound \"where is my shipment\" calls.\n\nJordan asked for a proposal covering the Fleet Visibility rollout, including\nimplementation timeline and whether alerting is included in the base package\nor sold as an add-on.",
+    "doc_type": "note",
+    "document_id": 8,
+    "document_title": "Discovery session with Jordan Brooks",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.69408184,
+    "source_path": "sample-data/documents/northstar-note-discovery.md"
+   },
+   {
+    "chunk_id": "2bc3092c-8bc7-43a5-af72-2aafa341958f",
+    "chunk_index": 0,
+    "company_name": "Northstar Logistics",
+    "content": "Customer: Jordan Brooks (evaluating Fleet Visibility rollout, not yet a\ncustomer)\n\nJordan asked, ahead of signing, whether delay alerts can be configured per\nfleet customer or only globally for the whole account. He said Northstar's\nfleet customers have very different tolerance for what counts as \"delayed\" \u2014\na same-day courier customer cares about 30-minute delays, while a long-haul\nfreight customer only cares about delays over 4 hours.\n\nWe confirmed that alert thresholds are configurable per customer, not just\nglobally, and that this is included in the base Fleet Visibility package with\nno ad",
+    "doc_type": "support",
+    "document_id": 10,
+    "document_title": "Pre-sales support conversation on alerting limits",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.64451516,
+    "source_path": "sample-data/documents/northstar-support-alerting.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "8a9e795317fdc710808b4533cd29102a559e914574870c909382de448f1cff6d": {
+  "company": null,
+  "latency_ms": 783,
+  "query": "Can delay alerts be configured per fleet customer?",
+  "results": [
+   {
+    "chunk_id": "2bc3092c-8bc7-43a5-af72-2aafa341958f",
+    "chunk_index": 0,
+    "company_name": "Northstar Logistics",
+    "content": "Customer: Jordan Brooks (evaluating Fleet Visibility rollout, not yet a\ncustomer)\n\nJordan asked, ahead of signing, whether delay alerts can be configured per\nfleet customer or only globally for the whole account. He said Northstar's\nfleet customers have very different tolerance for what counts as \"delayed\" \u2014\na same-day courier customer cares about 30-minute delays, while a long-haul\nfreight customer only cares about delays over 4 hours.\n\nWe confirmed that alert thresholds are configurable per customer, not just\nglobally, and that this is included in the base Fleet Visibility package with\nno ad",
+    "doc_type": "support",
+    "document_id": 10,
+    "document_title": "Pre-sales support conversation on alerting limits",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.781014,
+    "source_path": "sample-data/documents/northstar-support-alerting.md"
+   },
+   {
+    "chunk_id": "38890f41-951a-447c-9946-ab726bb5def0",
+    "chunk_index": 0,
+    "company_name": null,
+    "content": "Fleet Visibility is designed for logistics customers who need real-time\ndelivery status across multiple carriers, consolidated into one view for\ntheir customer success or operations team.\n\nBase package includes:\n- A single dashboard showing delivery status per fleet customer, pulled from\n  connected carrier data feeds.\n- Configurable delay alerts, set per fleet customer rather than only at the\n  account level, so different customers can have different delay thresholds.\n- A read-only shareable status link that fleet customers can use to check\n  their own delivery status without calling support.",
+    "doc_type": "product",
+    "document_id": 11,
+    "document_title": "Fleet Visibility rollout package overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.7307951,
+    "source_path": "sample-data/documents/product-fleet-visibility.md"
+   },
+   {
+    "chunk_id": "e6e1e40c-9ab0-48b8-bc8a-65492eb715ab",
+    "chunk_index": 1,
+    "company_name": null,
+    "content": "atus link that fleet customers can use to check\n  their own delivery status without calling support.\n\nTypical rollout timeline is four to six weeks: two weeks for carrier feed\nintegration, one to two weeks for configuring per-customer alert thresholds,\nand one to two weeks for user acceptance testing before go-live.\n\nAlerting is included in the base package at no additional cost.",
+    "doc_type": "product",
+    "document_id": 11,
+    "document_title": "Fleet Visibility rollout package overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.73741966,
+    "source_path": "sample-data/documents/product-fleet-visibility.md"
+   },
+   {
+    "chunk_id": "222761bc-ec07-4527-8f01-22da2ae5891e",
+    "chunk_index": 0,
+    "company_name": "Golden Valley Foods",
+    "content": "Carlos Mendez (Operations Manager at Golden Valley Foods) joined a discovery\ncall to evaluate Fleet Visibility for tracking shipment delays across\nseveral third-party co-packers. He explained that right now his team finds\nout about a delay only when a retail customer calls to complain, which is\ntoo late to do anything about it.\n\nWe walked through how Fleet Visibility consolidates delivery status across\nmultiple carriers into one dashboard and can alert operations staff as soon\nas a shipment crosses a delay threshold. Carlos asked whether the\nintegration would require each co-packer to adopt ne",
+    "doc_type": "note",
+    "document_id": 6,
+    "document_title": "Discovery call on supply-chain visibility",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.68091196,
+    "source_path": "sample-data/documents/goldenvalley-note-discovery.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "95b8eabcc31d3c47890d040823f326e143ff2f17c45a2d9a5b9eb3433c540704": {
+  "company": "Riverside Health Group",
+  "latency_ms": 722,
+  "query": "What compliance question came up?",
+  "results": [
+   {
+    "chunk_id": "5c2991c8-9565-4b97-adc1-080063302cc5",
+    "chunk_index": 1,
+    "company_name": "Riverside Health Group",
+    "content": "log of data-access events is available on\nrequest through support. James said he would forward this to Riverside's\ncompliance team and asked for written confirmation he could share\ninternally; we agreed to send a summary document.",
+    "doc_type": "support",
+    "document_id": 16,
+    "document_title": "Data handling and compliance question",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.64487135,
+    "source_path": "sample-data/documents/riverside-support-compliance.md"
+   },
+   {
+    "chunk_id": "db6aba00-c878-42a1-8993-3963446fb94d",
+    "chunk_index": 0,
+    "company_name": "Riverside Health Group",
+    "content": "Customer: James Okafor (IT Director at Riverside Health Group)\n\nJames asked how patient-adjacent operational data (appointment scheduling\nmetadata, not clinical records) is stored and whether retention settings\nmeet their internal compliance requirements. He noted that Riverside's\ncompliance team requires configurable data-retention windows and audit\nlogs for any system touching scheduling data.\n\nWe confirmed that the platform supports configurable retention windows per\naccount and that an audit log of data-access events is available on\nrequest through support. James said he would forward this",
+    "doc_type": "support",
+    "document_id": 16,
+    "document_title": "Data handling and compliance question",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.62480813,
+    "source_path": "sample-data/documents/riverside-support-compliance.md"
+   },
+   {
+    "chunk_id": "acfd868b-328b-45c0-93f1-cb22525f1586",
+    "chunk_index": 0,
+    "company_name": null,
+    "content": "The Premium Operations Plan is designed for manufacturing and industrial\ncustomers running one or more physical sites.\n\nIncluded in the base price for a single site:\n- Full operations dashboard, including interaction history and export tools.\n- Up to three implementation/onboarding sessions per year.\n- Standard support with a next-business-day response target.\n\nMulti-site pricing:\n- Each additional site is billed at 70% of the single-site rate.\n- Accounts with three or more sites receive an automatic 10% discount on the\n  combined multi-site total.\n- One implementation session can cover multip",
+    "doc_type": "product",
+    "document_id": 12,
+    "document_title": "Premium Operations Plan overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.48571026,
+    "source_path": "sample-data/documents/product-premium-operations-plan.md"
+   },
+   {
+    "chunk_id": "1d3a2ff7-0077-408b-8244-05e720f31468",
+    "chunk_index": 0,
+    "company_name": "Riverside Health Group",
+    "content": "Dr. Sarah Kim (Clinic Director at Riverside Health Group) called to confirm\nrenewal of the Premium Operations Plan and to discuss expanding coverage to\na second clinic location opening next quarter.\n\nWe confirmed the renewal and explained that adding a second location under\nthe same plan only requires a site-license add-on rather than a brand-new\ncontract. Dr. Kim asked whether staff scheduling data from the new location\ncould sync automatically with the existing dashboard from day one; we\nconfirmed it can, as long as the new location is provisioned at least two\nweeks before go-live.",
+    "doc_type": "call",
+    "document_id": 13,
+    "document_title": "Renewal discussion with Dr. Sarah Kim",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.5787597,
+    "source_path": "sample-data/documents/riverside-call-renewal.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "95ea0c73a4aa5b32b9f25651676997e10039d807c236999877a2a82bf47934fc": {
+  "company": null,
+  "latency_ms": 737,
+  "query": "How many employees does Acme Fabrication have?",
+  "results": [
+   {
+    "chunk_id": "5cf92c4f-38c6-4c9a-82ca-37299cdf88e6",
+    "chunk_index": 0,
+    "company_name": "Acme Fabrication",
+    "content": "Acme Fabrication: Service agreement summary\r\nSection 1. Support hours. Acme Fabrication's Premium Operations Plan includes support from 07:00 to 19:00\r\non weekdays. Priority 1 incidents, such as a stopped production line, receive a first response within 30\r\nminutes at any hour.\r\nSection 2. Onboarding. Each new factory floor receives two on-site onboarding sessions and a remote\r\ntraining day. Additional floors are priced per floor.",
+    "doc_type": "support",
+    "document_id": 3,
+    "document_title": "Acme Fabrication service agreement summary",
+    "page": 1,
+    "sheet": null,
+    "similarity": 0.63992405,
+    "source_path": "sample-data/documents/acme-service-agreement.pdf"
+   },
+   {
+    "chunk_id": "b49c6038-ab8d-4814-bc8e-171a1d8d66b7",
+    "chunk_index": 0,
+    "company_name": "Acme Fabrication",
+    "content": "From: Ravi Patel (Procurement Manager, Acme Fabrication)\nSubject: Volume discount request\n\nHi team,\n\nFollowing up on Maya's call earlier this week. As she mentioned, we are\nadding two new factory locations in Q4, which means we would go from one\nsite license to three under the Premium Operations Plan.\n\nCould you send a pricing breakdown that shows:\n1. The current single-site premium rate\n2. The rate per additional site\n3. Whether a multi-site discount applies at three or more locations\n\nWe need this by end of next week to include in our budget approval request.\nAlso, please confirm whether exi",
+    "doc_type": "email",
+    "document_id": 2,
+    "document_title": "Volume discount request from Ravi Patel",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.56868285,
+    "source_path": "sample-data/documents/acme-email-discount.md"
+   },
+   {
+    "chunk_id": "f24df715-ba42-489b-a86a-6cce82449a31",
+    "chunk_index": 0,
+    "company_name": "Acme Fabrication",
+    "content": "Maya Chen (Operations Director at Acme Fabrication) called to discuss renewing\nthe Premium Operations Plan ahead of the October contract date. She asked\nwhether the premium tier includes onboarding support for two additional\nfactory floors that Acme is bringing online next quarter.\n\nWe explained that the Premium Operations Plan includes up to three\nimplementation sessions per year at no extra cost, and that additional\nsessions are billed at the standard consulting rate. Maya said budget approval\ndepends on knowing the total cost before she can commit to the renewal, so we\nagreed to send a writ",
+    "doc_type": "call",
+    "document_id": 1,
+    "document_title": "Renewal planning call with Maya Chen",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.5513277,
+    "source_path": "sample-data/documents/acme-call-renewal.md"
+   },
+   {
+    "chunk_id": "cb7c797e-7a4e-436d-bbc9-6342e1c64c6f",
+    "chunk_index": 1,
+    "company_name": "Acme Fabrication",
+    "content": "Section 7. Renewal and termination\r\nClause 7.3. The agreement renews automatically on 1 October for twelve months. Either party may end it\r\nwith 60 days' written notice before the renewal date. Clause 7.4. A price change for the renewal term must be\r\nsent to the customer at least 90 days before the renewal date.\r\nSection 8. Invoicing. Invoice INV-4821 for the Q3 onboarding block is under review by Acme's finance team;\r\npayment terms are 30 days from the corrected invoice.",
+    "doc_type": "support",
+    "document_id": 3,
+    "document_title": "Acme Fabrication service agreement summary",
+    "page": 2,
+    "sheet": null,
+    "similarity": 0.49933577,
+    "source_path": "sample-data/documents/acme-service-agreement.pdf"
+   }
+  ],
+  "top_k": 4
+ },
+ "97639640f2efc587cb62360b6c60efda9dc086743da8ef869aa7778b77c68691": {
+  "company": null,
+  "latency_ms": 711,
+  "query": "Who is the CEO of Vertex Analytics?",
+  "results": [
+   {
+    "chunk_id": "8d45e4b5-361a-4b27-9f5d-8bbba9cddea6",
+    "chunk_index": 0,
+    "company_name": "Vertex Analytics",
+    "content": "Customer: Tom Reyes (IT Administrator at Vertex Analytics)\n\nTom reported hitting the default API rate limit (500 requests/minute) while\nrunning a bulk export of historical usage data for a board presentation. The\nexport failed partway through with a 429 response.\n\nWe explained the default limit applies per API key, and that Vertex's plan\nallows requesting a temporary rate-limit increase for scheduled bulk jobs at\nno extra cost \u2014 it just needs 24 hours' notice. Tom said he'd plan future\nexports around that lead time, and asked if there was a way to see his\ncurrent rate-limit usage in real time;",
+    "doc_type": "support",
+    "document_id": 19,
+    "document_title": "API rate limit support ticket",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.5858755,
+    "source_path": "sample-data/documents/vertex-support-rate-limit.md"
+   },
+   {
+    "chunk_id": "492f1e44-ce26-4f25-a915-65912330f18e",
+    "chunk_index": 0,
+    "company_name": "Vertex Analytics",
+    "content": "Priya Nandakumar (VP Engineering at Vertex Analytics) called ahead of their\nannual renewal to ask about upgrading from the standard plan to Analytics\nPro. She said her team wants custom dashboards for tracking deployment\nfrequency and incident response time, which the standard plan doesn't\nsupport.\n\nWe confirmed Analytics Pro includes unlimited custom dashboards and a\ndedicated API quota. Priya asked whether the upgrade could be billed\nmid-cycle rather than waiting for the renewal date, and we agreed to send a\nprorated quote.",
+    "doc_type": "call",
+    "document_id": 18,
+    "document_title": "Contract renewal discussion with Priya Nandakumar",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.57721245,
+    "source_path": "sample-data/documents/vertex-call-renewal.md"
+   },
+   {
+    "chunk_id": "38890f41-951a-447c-9946-ab726bb5def0",
+    "chunk_index": 0,
+    "company_name": null,
+    "content": "Fleet Visibility is designed for logistics customers who need real-time\ndelivery status across multiple carriers, consolidated into one view for\ntheir customer success or operations team.\n\nBase package includes:\n- A single dashboard showing delivery status per fleet customer, pulled from\n  connected carrier data feeds.\n- Configurable delay alerts, set per fleet customer rather than only at the\n  account level, so different customers can have different delay thresholds.\n- A read-only shareable status link that fleet customers can use to check\n  their own delivery status without calling support.",
+    "doc_type": "product",
+    "document_id": 11,
+    "document_title": "Fleet Visibility rollout package overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.46066368,
+    "source_path": "sample-data/documents/product-fleet-visibility.md"
+   },
+   {
+    "chunk_id": "951639e7-1b3d-4f6d-b61b-0bd88fa9aea4",
+    "chunk_index": 0,
+    "company_name": "Northstar Logistics",
+    "content": "Attendees: Jordan Brooks (Head of Customer Success, Northstar Logistics)\n\nNorthstar is evaluating our platform to give their customer success team\nreal-time visibility into delivery status for fleet customers. Today their\nreps manually check three separate carrier portals and compile a summary by\nhand each morning, which Jordan estimated takes about two hours per day\nacross the team.\n\nJordan's top priorities, in order:\n1. A single view that shows delivery status per fleet customer.\n2. Alerts when a delivery is delayed beyond a configurable threshold.\n3. The ability to share a read-only status",
+    "doc_type": "note",
+    "document_id": 8,
+    "document_title": "Discovery session with Jordan Brooks",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.4667388,
+    "source_path": "sample-data/documents/northstar-note-discovery.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "a09805fefa91c47ff20c248e5e8eb3a729b42c06da94ca4f3ae7de1db481fcf0": {
+  "company": null,
+  "latency_ms": 770,
+  "query": "Which programming language is the platform written in?",
+  "results": [
+   {
+    "chunk_id": "db6aba00-c878-42a1-8993-3963446fb94d",
+    "chunk_index": 0,
+    "company_name": "Riverside Health Group",
+    "content": "Customer: James Okafor (IT Director at Riverside Health Group)\n\nJames asked how patient-adjacent operational data (appointment scheduling\nmetadata, not clinical records) is stored and whether retention settings\nmeet their internal compliance requirements. He noted that Riverside's\ncompliance team requires configurable data-retention windows and audit\nlogs for any system touching scheduling data.\n\nWe confirmed that the platform supports configurable retention windows per\naccount and that an audit log of data-access events is available on\nrequest through support. James said he would forward this",
+    "doc_type": "support",
+    "document_id": 16,
+    "document_title": "Data handling and compliance question",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.5319841,
+    "source_path": "sample-data/documents/riverside-support-compliance.md"
+   },
+   {
+    "chunk_id": "5c2991c8-9565-4b97-adc1-080063302cc5",
+    "chunk_index": 1,
+    "company_name": "Riverside Health Group",
+    "content": "log of data-access events is available on\nrequest through support. James said he would forward this to Riverside's\ncompliance team and asked for written confirmation he could share\ninternally; we agreed to send a summary document.",
+    "doc_type": "support",
+    "document_id": 16,
+    "document_title": "Data handling and compliance question",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.5072218,
+    "source_path": "sample-data/documents/riverside-support-compliance.md"
+   },
+   {
+    "chunk_id": "c74360b9-55fc-487a-a4c8-5a6d0db3ed79",
+    "chunk_index": 1,
+    "company_name": null,
+    "content": "matic 10% discount on the\n  combined multi-site total.\n- One implementation session can cover multiple sites if they go live within\n  the same 30-day window; otherwise, each site's go-live counts toward the\n  three included sessions per year.\n\nKnown limitation (as of this quarter): exporting more than 90 days of\ninteraction history in one request can time out. The recommended workaround\nis exporting in 30-day windows. A background export feature is in progress.",
+    "doc_type": "product",
+    "document_id": 12,
+    "document_title": "Premium Operations Plan overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.5038551,
+    "source_path": "sample-data/documents/product-premium-operations-plan.md"
+   },
+   {
+    "chunk_id": "acfd868b-328b-45c0-93f1-cb22525f1586",
+    "chunk_index": 0,
+    "company_name": null,
+    "content": "The Premium Operations Plan is designed for manufacturing and industrial\ncustomers running one or more physical sites.\n\nIncluded in the base price for a single site:\n- Full operations dashboard, including interaction history and export tools.\n- Up to three implementation/onboarding sessions per year.\n- Standard support with a next-business-day response target.\n\nMulti-site pricing:\n- Each additional site is billed at 70% of the single-site rate.\n- Accounts with three or more sites receive an automatic 10% discount on the\n  combined multi-site total.\n- One implementation session can cover multip",
+    "doc_type": "product",
+    "document_id": 12,
+    "document_title": "Premium Operations Plan overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.5285456,
+    "source_path": "sample-data/documents/product-premium-operations-plan.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "ac2f7cf9ed857633cf3dccceaf36becb4c542ea12811db0bc16bf08d151c704b": {
+  "company": null,
+  "latency_ms": 779,
+  "query": "Does a multi-site discount apply at three or more locations?",
+  "results": [
+   {
+    "chunk_id": "b49c6038-ab8d-4814-bc8e-171a1d8d66b7",
+    "chunk_index": 0,
+    "company_name": "Acme Fabrication",
+    "content": "From: Ravi Patel (Procurement Manager, Acme Fabrication)\nSubject: Volume discount request\n\nHi team,\n\nFollowing up on Maya's call earlier this week. As she mentioned, we are\nadding two new factory locations in Q4, which means we would go from one\nsite license to three under the Premium Operations Plan.\n\nCould you send a pricing breakdown that shows:\n1. The current single-site premium rate\n2. The rate per additional site\n3. Whether a multi-site discount applies at three or more locations\n\nWe need this by end of next week to include in our budget approval request.\nAlso, please confirm whether exi",
+    "doc_type": "email",
+    "document_id": 2,
+    "document_title": "Volume discount request from Ravi Patel",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6599366,
+    "source_path": "sample-data/documents/acme-email-discount.md"
+   },
+   {
+    "chunk_id": "c74360b9-55fc-487a-a4c8-5a6d0db3ed79",
+    "chunk_index": 1,
+    "company_name": null,
+    "content": "matic 10% discount on the\n  combined multi-site total.\n- One implementation session can cover multiple sites if they go live within\n  the same 30-day window; otherwise, each site's go-live counts toward the\n  three included sessions per year.\n\nKnown limitation (as of this quarter): exporting more than 90 days of\ninteraction history in one request can time out. The recommended workaround\nis exporting in 30-day windows. A background export feature is in progress.",
+    "doc_type": "product",
+    "document_id": 12,
+    "document_title": "Premium Operations Plan overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6812855,
+    "source_path": "sample-data/documents/product-premium-operations-plan.md"
+   },
+   {
+    "chunk_id": "acfd868b-328b-45c0-93f1-cb22525f1586",
+    "chunk_index": 0,
+    "company_name": null,
+    "content": "The Premium Operations Plan is designed for manufacturing and industrial\ncustomers running one or more physical sites.\n\nIncluded in the base price for a single site:\n- Full operations dashboard, including interaction history and export tools.\n- Up to three implementation/onboarding sessions per year.\n- Standard support with a next-business-day response target.\n\nMulti-site pricing:\n- Each additional site is billed at 70% of the single-site rate.\n- Accounts with three or more sites receive an automatic 10% discount on the\n  combined multi-site total.\n- One implementation session can cover multip",
+    "doc_type": "product",
+    "document_id": 12,
+    "document_title": "Premium Operations Plan overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6510031,
+    "source_path": "sample-data/documents/product-premium-operations-plan.md"
+   },
+   {
+    "chunk_id": "969d14ff-5bb8-4d68-acc0-951ed8af7cd7",
+    "chunk_index": 1,
+    "company_name": "Acme Fabrication",
+    "content": "this by end of next week to include in our budget approval request.\nAlso, please confirm whether existing users need to be re-onboarded on each\nnew site, or whether one implementation session can cover all three.\n\nThanks,\nRavi",
+    "doc_type": "email",
+    "document_id": 2,
+    "document_title": "Volume discount request from Ravi Patel",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6454421,
+    "source_path": "sample-data/documents/acme-email-discount.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "b255ddb02c7731ee80d52d83c0f8c4f67007a5d43855cd1cc51546eb9ee2b69c": {
+  "company": null,
+  "latency_ms": 856,
+  "query": "What pilot did Carlos Mendez ask pricing for?",
+  "results": [
+   {
+    "chunk_id": "561e6580-cd9a-4a65-bc3e-3dbadaa01519",
+    "chunk_index": 0,
+    "company_name": "Golden Valley Foods",
+    "content": "From: Carlos Mendez (Operations Manager, Golden Valley Foods)\nSubject: Fleet Visibility pilot pricing question\n\nHi team,\n\nFollowing up on our discovery call last week. I have a budget approval\nmeeting on Thursday and need pilot pricing for a 90-day trial covering our\nthree busiest co-packer routes before I can get sign-off to move forward.\n\nCould you also confirm whether the pilot pricing rolls into the full\ncontract if we decide to continue afterward, or if it's a separate\none-time cost?\n\nThanks,\nCarlos",
+    "doc_type": "email",
+    "document_id": 5,
+    "document_title": "Fleet Visibility pilot pricing question",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.716365,
+    "source_path": "sample-data/documents/goldenvalley-email-pricing.md"
+   },
+   {
+    "chunk_id": "222761bc-ec07-4527-8f01-22da2ae5891e",
+    "chunk_index": 0,
+    "company_name": "Golden Valley Foods",
+    "content": "Carlos Mendez (Operations Manager at Golden Valley Foods) joined a discovery\ncall to evaluate Fleet Visibility for tracking shipment delays across\nseveral third-party co-packers. He explained that right now his team finds\nout about a delay only when a retail customer calls to complain, which is\ntoo late to do anything about it.\n\nWe walked through how Fleet Visibility consolidates delivery status across\nmultiple carriers into one dashboard and can alert operations staff as soon\nas a shipment crosses a delay threshold. Carlos asked whether the\nintegration would require each co-packer to adopt ne",
+    "doc_type": "note",
+    "document_id": 6,
+    "document_title": "Discovery call on supply-chain visibility",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.5787009,
+    "source_path": "sample-data/documents/goldenvalley-note-discovery.md"
+   },
+   {
+    "chunk_id": "88c60d05-4a4d-4a05-b450-d77fc5e2b728",
+    "chunk_index": 1,
+    "company_name": "Acme Fabrication",
+    "content": "depends on knowing the total cost before she can commit to the renewal, so we\nagreed to send a written pricing breakdown.\n\nMaya also mentioned that the dashboard export feature has been slow for her\nteam recently, and asked whether that was a known issue.",
+    "doc_type": "call",
+    "document_id": 1,
+    "document_title": "Renewal planning call with Maya Chen",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.58684015,
+    "source_path": "sample-data/documents/acme-call-renewal.md"
+   },
+   {
+    "chunk_id": "492f1e44-ce26-4f25-a915-65912330f18e",
+    "chunk_index": 0,
+    "company_name": "Vertex Analytics",
+    "content": "Priya Nandakumar (VP Engineering at Vertex Analytics) called ahead of their\nannual renewal to ask about upgrading from the standard plan to Analytics\nPro. She said her team wants custom dashboards for tracking deployment\nfrequency and incident response time, which the standard plan doesn't\nsupport.\n\nWe confirmed Analytics Pro includes unlimited custom dashboards and a\ndedicated API quota. Priya asked whether the upgrade could be billed\nmid-cycle rather than waiting for the renewal date, and we agreed to send a\nprorated quote.",
+    "doc_type": "call",
+    "document_id": 18,
+    "document_title": "Contract renewal discussion with Priya Nandakumar",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.56339496,
+    "source_path": "sample-data/documents/vertex-call-renewal.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "b36d881f38fe8cfd222e091d5772805d46ffc8c4c2fba40d22098d5cdbf88f1b": {
+  "company": null,
+  "latency_ms": 750,
+  "query": "Do co-packers need to adopt new software for Fleet Visibility?",
+  "results": [
+   {
+    "chunk_id": "222761bc-ec07-4527-8f01-22da2ae5891e",
+    "chunk_index": 0,
+    "company_name": "Golden Valley Foods",
+    "content": "Carlos Mendez (Operations Manager at Golden Valley Foods) joined a discovery\ncall to evaluate Fleet Visibility for tracking shipment delays across\nseveral third-party co-packers. He explained that right now his team finds\nout about a delay only when a retail customer calls to complain, which is\ntoo late to do anything about it.\n\nWe walked through how Fleet Visibility consolidates delivery status across\nmultiple carriers into one dashboard and can alert operations staff as soon\nas a shipment crosses a delay threshold. Carlos asked whether the\nintegration would require each co-packer to adopt ne",
+    "doc_type": "note",
+    "document_id": 6,
+    "document_title": "Discovery call on supply-chain visibility",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.74628747,
+    "source_path": "sample-data/documents/goldenvalley-note-discovery.md"
+   },
+   {
+    "chunk_id": "b76047f6-9a22-4c70-8f2e-02325c962554",
+    "chunk_index": 1,
+    "company_name": "Golden Valley Foods",
+    "content": "ses a delay threshold. Carlos asked whether the\nintegration would require each co-packer to adopt new software on their\nside; we confirmed it only requires read access to each carrier's existing\ntracking feed, no co-packer-side changes needed. He said this removes his\nbiggest concern about rollout complexity.",
+    "doc_type": "note",
+    "document_id": 6,
+    "document_title": "Discovery call on supply-chain visibility",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.67524374,
+    "source_path": "sample-data/documents/goldenvalley-note-discovery.md"
+   },
+   {
+    "chunk_id": "38890f41-951a-447c-9946-ab726bb5def0",
+    "chunk_index": 0,
+    "company_name": null,
+    "content": "Fleet Visibility is designed for logistics customers who need real-time\ndelivery status across multiple carriers, consolidated into one view for\ntheir customer success or operations team.\n\nBase package includes:\n- A single dashboard showing delivery status per fleet customer, pulled from\n  connected carrier data feeds.\n- Configurable delay alerts, set per fleet customer rather than only at the\n  account level, so different customers can have different delay thresholds.\n- A read-only shareable status link that fleet customers can use to check\n  their own delivery status without calling support.",
+    "doc_type": "product",
+    "document_id": 11,
+    "document_title": "Fleet Visibility rollout package overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.67960346,
+    "source_path": "sample-data/documents/product-fleet-visibility.md"
+   },
+   {
+    "chunk_id": "561e6580-cd9a-4a65-bc3e-3dbadaa01519",
+    "chunk_index": 0,
+    "company_name": "Golden Valley Foods",
+    "content": "From: Carlos Mendez (Operations Manager, Golden Valley Foods)\nSubject: Fleet Visibility pilot pricing question\n\nHi team,\n\nFollowing up on our discovery call last week. I have a budget approval\nmeeting on Thursday and need pilot pricing for a 90-day trial covering our\nthree busiest co-packer routes before I can get sign-off to move forward.\n\nCould you also confirm whether the pilot pricing rolls into the full\ncontract if we decide to continue afterward, or if it's a separate\none-time cost?\n\nThanks,\nCarlos",
+    "doc_type": "email",
+    "document_id": 5,
+    "document_title": "Fleet Visibility pilot pricing question",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.650519,
+    "source_path": "sample-data/documents/goldenvalley-email-pricing.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "b7df3bbfd90bba40c20fabc456ec3a9ed40b1939dba300160c49ea5645aa60bb": {
+  "company": "Northstar Logistics",
+  "latency_ms": 970,
+  "query": "What did they ask about alerts?",
+  "results": [
+   {
+    "chunk_id": "2bc3092c-8bc7-43a5-af72-2aafa341958f",
+    "chunk_index": 0,
+    "company_name": "Northstar Logistics",
+    "content": "Customer: Jordan Brooks (evaluating Fleet Visibility rollout, not yet a\ncustomer)\n\nJordan asked, ahead of signing, whether delay alerts can be configured per\nfleet customer or only globally for the whole account. He said Northstar's\nfleet customers have very different tolerance for what counts as \"delayed\" \u2014\na same-day courier customer cares about 30-minute delays, while a long-haul\nfreight customer only cares about delays over 4 hours.\n\nWe confirmed that alert thresholds are configurable per customer, not just\nglobally, and that this is included in the base Fleet Visibility package with\nno ad",
+    "doc_type": "support",
+    "document_id": 10,
+    "document_title": "Pre-sales support conversation on alerting limits",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6581018,
+    "source_path": "sample-data/documents/northstar-support-alerting.md"
+   },
+   {
+    "chunk_id": "951639e7-1b3d-4f6d-b61b-0bd88fa9aea4",
+    "chunk_index": 0,
+    "company_name": "Northstar Logistics",
+    "content": "Attendees: Jordan Brooks (Head of Customer Success, Northstar Logistics)\n\nNorthstar is evaluating our platform to give their customer success team\nreal-time visibility into delivery status for fleet customers. Today their\nreps manually check three separate carrier portals and compile a summary by\nhand each morning, which Jordan estimated takes about two hours per day\nacross the team.\n\nJordan's top priorities, in order:\n1. A single view that shows delivery status per fleet customer.\n2. Alerts when a delivery is delayed beyond a configurable threshold.\n3. The ability to share a read-only status",
+    "doc_type": "note",
+    "document_id": 8,
+    "document_title": "Discovery session with Jordan Brooks",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.5469808,
+    "source_path": "sample-data/documents/northstar-note-discovery.md"
+   },
+   {
+    "chunk_id": "38890f41-951a-447c-9946-ab726bb5def0",
+    "chunk_index": 0,
+    "company_name": null,
+    "content": "Fleet Visibility is designed for logistics customers who need real-time\ndelivery status across multiple carriers, consolidated into one view for\ntheir customer success or operations team.\n\nBase package includes:\n- A single dashboard showing delivery status per fleet customer, pulled from\n  connected carrier data feeds.\n- Configurable delay alerts, set per fleet customer rather than only at the\n  account level, so different customers can have different delay thresholds.\n- A read-only shareable status link that fleet customers can use to check\n  their own delivery status without calling support.",
+    "doc_type": "product",
+    "document_id": 11,
+    "document_title": "Fleet Visibility rollout package overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.55456907,
+    "source_path": "sample-data/documents/product-fleet-visibility.md"
+   },
+   {
+    "chunk_id": "c74360b9-55fc-487a-a4c8-5a6d0db3ed79",
+    "chunk_index": 1,
+    "company_name": null,
+    "content": "matic 10% discount on the\n  combined multi-site total.\n- One implementation session can cover multiple sites if they go live within\n  the same 30-day window; otherwise, each site's go-live counts toward the\n  three included sessions per year.\n\nKnown limitation (as of this quarter): exporting more than 90 days of\ninteraction history in one request can time out. The recommended workaround\nis exporting in 30-day windows. A background export feature is in progress.",
+    "doc_type": "product",
+    "document_id": 12,
+    "document_title": "Premium Operations Plan overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.522424,
+    "source_path": "sample-data/documents/product-premium-operations-plan.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "b90dbc055cb59b686abd57b0766c19a79781026e426b47f2be38876cd65f52a1": {
+  "company": null,
+  "latency_ms": 724,
+  "query": "Why did Summit Builders leave?",
+  "results": [
+   {
+    "chunk_id": "79867e03-fbb2-427f-8b7e-6827220d3e24",
+    "chunk_index": 0,
+    "company_name": "Summit Builders",
+    "content": "Dana Whitfield (then Project Manager at Summit Builders) joined an exit\ninterview call after Summit's Site Ops Suite deal did not close and their\naccount was marked as a former customer. Dana explained that Summit had\nfrozen all new vendor contracts company-wide due to a budget restructuring,\nand that this was unrelated to any dissatisfaction with the product itself.\n\nDana said the team had found the evaluation period useful and would\nconsider revisiting Site Ops Suite once the budget freeze lifts, likely in\na future fiscal year. She asked to stay on the mailing list for product\nupdates in the",
+    "doc_type": "call",
+    "document_id": 17,
+    "document_title": "Exit interview call",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6724469,
+    "source_path": "sample-data/documents/summit-note-churn.md"
+   },
+   {
+    "chunk_id": "5bb2f6de-382c-430c-ad01-d24370d53990",
+    "chunk_index": 1,
+    "company_name": "Summit Builders",
+    "content": "ts, likely in\na future fiscal year. She asked to stay on the mailing list for product\nupdates in the meantime.",
+    "doc_type": "call",
+    "document_id": 17,
+    "document_title": "Exit interview call",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.54641294,
+    "source_path": "sample-data/documents/summit-note-churn.md"
+   },
+   {
+    "chunk_id": "eaa078e5-943e-4db7-a904-db041d42094c",
+    "chunk_index": 1,
+    "company_name": "Northstar Logistics",
+    "content": "stomer, not just\nglobally, and that this is included in the base Fleet Visibility package with\nno add-on required. Jordan said this addresses his main concern and he plans\nto bring a rollout proposal to his leadership team next week.",
+    "doc_type": "support",
+    "document_id": 10,
+    "document_title": "Pre-sales support conversation on alerting limits",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.52857995,
+    "source_path": "sample-data/documents/northstar-support-alerting.md"
+   },
+   {
+    "chunk_id": "5c2991c8-9565-4b97-adc1-080063302cc5",
+    "chunk_index": 1,
+    "company_name": "Riverside Health Group",
+    "content": "log of data-access events is available on\nrequest through support. James said he would forward this to Riverside's\ncompliance team and asked for written confirmation he could share\ninternally; we agreed to send a summary document.",
+    "doc_type": "support",
+    "document_id": 16,
+    "document_title": "Data handling and compliance question",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.50966585,
+    "source_path": "sample-data/documents/riverside-support-compliance.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "b92b8c25403a5a47d801afe1fba40929266eb104f6e67c76dedb310e17471ec7": {
+  "company": null,
+  "latency_ms": 796,
+  "query": "Is Elena Torres planning to renew the Retail support package?",
+  "results": [
+   {
+    "chunk_id": "ef7a39bc-7c9b-4a20-8827-e6b0f0698f4b",
+    "chunk_index": 0,
+    "company_name": "Harbor & Pine",
+    "content": "Elena Torres (Owner, Harbor & Pine) joined the quarterly check-in call. She\nsaid she is happy with support response times since switching to the Retail\nsupport package earlier this year, and specifically called out that the team\nresolved a point-of-sale sync issue within a few hours during a busy weekend.\n\nElena confirmed she plans to renew the Retail support package when it comes\nup for renewal and does not need any changes to her current plan. She asked\none question: whether the support package includes coverage during major\nholidays, since Harbor & Pine is a retail business and holidays are",
+    "doc_type": "note",
+    "document_id": 7,
+    "document_title": "Quarterly check-in with Elena Torres",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.71772224,
+    "source_path": "sample-data/documents/harborpine-note-checkin.md"
+   },
+   {
+    "chunk_id": "33bd6ce4-2de4-4790-890d-0ed0ee080a1b",
+    "chunk_index": 1,
+    "company_name": "Harbor & Pine",
+    "content": "e includes coverage during major\nholidays, since Harbor & Pine is a retail business and holidays are their\nbusiest and highest-risk period.\n\nWe told her holiday coverage is included and confirmed the on-call schedule\nfor the upcoming holiday season would be shared with her by email.",
+    "doc_type": "note",
+    "document_id": 7,
+    "document_title": "Quarterly check-in with Elena Torres",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.5884434,
+    "source_path": "sample-data/documents/harborpine-note-checkin.md"
+   },
+   {
+    "chunk_id": "eaa078e5-943e-4db7-a904-db041d42094c",
+    "chunk_index": 1,
+    "company_name": "Northstar Logistics",
+    "content": "stomer, not just\nglobally, and that this is included in the base Fleet Visibility package with\nno add-on required. Jordan said this addresses his main concern and he plans\nto bring a rollout proposal to his leadership team next week.",
+    "doc_type": "support",
+    "document_id": 10,
+    "document_title": "Pre-sales support conversation on alerting limits",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.5755078,
+    "source_path": "sample-data/documents/northstar-support-alerting.md"
+   },
+   {
+    "chunk_id": "7c9f183c-1bac-4247-8cb1-e3043b9b0f19",
+    "chunk_index": 1,
+    "company_name": "Northstar Logistics",
+    "content": "n a delivery is delayed beyond a configurable threshold.\n3. The ability to share a read-only status link with the fleet customer\n   directly, to reduce inbound \"where is my shipment\" calls.\n\nJordan asked for a proposal covering the Fleet Visibility rollout, including\nimplementation timeline and whether alerting is included in the base package\nor sold as an add-on.",
+    "doc_type": "note",
+    "document_id": 8,
+    "document_title": "Discovery session with Jordan Brooks",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.54879737,
+    "source_path": "sample-data/documents/northstar-note-discovery.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "c9373277b09468d68b0aaa4c86419f535c5a9fc4dc61f9c3ec6fd4f3aec4235b": {
+  "company": null,
+  "latency_ms": 986,
+  "query": "What discount did Harbor & Pine negotiate on hardware?",
+  "results": [
+   {
+    "chunk_id": "ef7a39bc-7c9b-4a20-8827-e6b0f0698f4b",
+    "chunk_index": 0,
+    "company_name": "Harbor & Pine",
+    "content": "Elena Torres (Owner, Harbor & Pine) joined the quarterly check-in call. She\nsaid she is happy with support response times since switching to the Retail\nsupport package earlier this year, and specifically called out that the team\nresolved a point-of-sale sync issue within a few hours during a busy weekend.\n\nElena confirmed she plans to renew the Retail support package when it comes\nup for renewal and does not need any changes to her current plan. She asked\none question: whether the support package includes coverage during major\nholidays, since Harbor & Pine is a retail business and holidays are",
+    "doc_type": "note",
+    "document_id": 7,
+    "document_title": "Quarterly check-in with Elena Torres",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6179967,
+    "source_path": "sample-data/documents/harborpine-note-checkin.md"
+   },
+   {
+    "chunk_id": "33bd6ce4-2de4-4790-890d-0ed0ee080a1b",
+    "chunk_index": 1,
+    "company_name": "Harbor & Pine",
+    "content": "e includes coverage during major\nholidays, since Harbor & Pine is a retail business and holidays are their\nbusiest and highest-risk period.\n\nWe told her holiday coverage is included and confirmed the on-call schedule\nfor the upcoming holiday season would be shared with her by email.",
+    "doc_type": "note",
+    "document_id": 7,
+    "document_title": "Quarterly check-in with Elena Torres",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6001194,
+    "source_path": "sample-data/documents/harborpine-note-checkin.md"
+   },
+   {
+    "chunk_id": "b49c6038-ab8d-4814-bc8e-171a1d8d66b7",
+    "chunk_index": 0,
+    "company_name": "Acme Fabrication",
+    "content": "From: Ravi Patel (Procurement Manager, Acme Fabrication)\nSubject: Volume discount request\n\nHi team,\n\nFollowing up on Maya's call earlier this week. As she mentioned, we are\nadding two new factory locations in Q4, which means we would go from one\nsite license to three under the Premium Operations Plan.\n\nCould you send a pricing breakdown that shows:\n1. The current single-site premium rate\n2. The rate per additional site\n3. Whether a multi-site discount applies at three or more locations\n\nWe need this by end of next week to include in our budget approval request.\nAlso, please confirm whether exi",
+    "doc_type": "email",
+    "document_id": 2,
+    "document_title": "Volume discount request from Ravi Patel",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.61478937,
+    "source_path": "sample-data/documents/acme-email-discount.md"
+   },
+   {
+    "chunk_id": "561e6580-cd9a-4a65-bc3e-3dbadaa01519",
+    "chunk_index": 0,
+    "company_name": "Golden Valley Foods",
+    "content": "From: Carlos Mendez (Operations Manager, Golden Valley Foods)\nSubject: Fleet Visibility pilot pricing question\n\nHi team,\n\nFollowing up on our discovery call last week. I have a budget approval\nmeeting on Thursday and need pilot pricing for a 90-day trial covering our\nthree busiest co-packer routes before I can get sign-off to move forward.\n\nCould you also confirm whether the pilot pricing rolls into the full\ncontract if we decide to continue afterward, or if it's a separate\none-time cost?\n\nThanks,\nCarlos",
+    "doc_type": "email",
+    "document_id": 5,
+    "document_title": "Fleet Visibility pilot pricing question",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.55831915,
+    "source_path": "sample-data/documents/goldenvalley-email-pricing.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "c9f8534766926de7a8fd8afe5f82a5c5d0c54d703da86c3dbeb89d36e506aae3": {
+  "company": null,
+  "latency_ms": 1057,
+  "query": "How is each additional site priced on the Premium Operations Plan?",
+  "results": [
+   {
+    "chunk_id": "acfd868b-328b-45c0-93f1-cb22525f1586",
+    "chunk_index": 0,
+    "company_name": null,
+    "content": "The Premium Operations Plan is designed for manufacturing and industrial\ncustomers running one or more physical sites.\n\nIncluded in the base price for a single site:\n- Full operations dashboard, including interaction history and export tools.\n- Up to three implementation/onboarding sessions per year.\n- Standard support with a next-business-day response target.\n\nMulti-site pricing:\n- Each additional site is billed at 70% of the single-site rate.\n- Accounts with three or more sites receive an automatic 10% discount on the\n  combined multi-site total.\n- One implementation session can cover multip",
+    "doc_type": "product",
+    "document_id": 12,
+    "document_title": "Premium Operations Plan overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.816202,
+    "source_path": "sample-data/documents/product-premium-operations-plan.md"
+   },
+   {
+    "chunk_id": "1d3a2ff7-0077-408b-8244-05e720f31468",
+    "chunk_index": 0,
+    "company_name": "Riverside Health Group",
+    "content": "Dr. Sarah Kim (Clinic Director at Riverside Health Group) called to confirm\nrenewal of the Premium Operations Plan and to discuss expanding coverage to\na second clinic location opening next quarter.\n\nWe confirmed the renewal and explained that adding a second location under\nthe same plan only requires a site-license add-on rather than a brand-new\ncontract. Dr. Kim asked whether staff scheduling data from the new location\ncould sync automatically with the existing dashboard from day one; we\nconfirmed it can, as long as the new location is provisioned at least two\nweeks before go-live.",
+    "doc_type": "call",
+    "document_id": 13,
+    "document_title": "Renewal discussion with Dr. Sarah Kim",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6731542,
+    "source_path": "sample-data/documents/riverside-call-renewal.md"
+   },
+   {
+    "chunk_id": "b49c6038-ab8d-4814-bc8e-171a1d8d66b7",
+    "chunk_index": 0,
+    "company_name": "Acme Fabrication",
+    "content": "From: Ravi Patel (Procurement Manager, Acme Fabrication)\nSubject: Volume discount request\n\nHi team,\n\nFollowing up on Maya's call earlier this week. As she mentioned, we are\nadding two new factory locations in Q4, which means we would go from one\nsite license to three under the Premium Operations Plan.\n\nCould you send a pricing breakdown that shows:\n1. The current single-site premium rate\n2. The rate per additional site\n3. Whether a multi-site discount applies at three or more locations\n\nWe need this by end of next week to include in our budget approval request.\nAlso, please confirm whether exi",
+    "doc_type": "email",
+    "document_id": 2,
+    "document_title": "Volume discount request from Ravi Patel",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.66566646,
+    "source_path": "sample-data/documents/acme-email-discount.md"
+   },
+   {
+    "chunk_id": "5cf92c4f-38c6-4c9a-82ca-37299cdf88e6",
+    "chunk_index": 0,
+    "company_name": "Acme Fabrication",
+    "content": "Acme Fabrication: Service agreement summary\r\nSection 1. Support hours. Acme Fabrication's Premium Operations Plan includes support from 07:00 to 19:00\r\non weekdays. Priority 1 incidents, such as a stopped production line, receive a first response within 30\r\nminutes at any hour.\r\nSection 2. Onboarding. Each new factory floor receives two on-site onboarding sessions and a remote\r\ntraining day. Additional floors are priced per floor.",
+    "doc_type": "support",
+    "document_id": 3,
+    "document_title": "Acme Fabrication service agreement summary",
+    "page": 1,
+    "sheet": null,
+    "similarity": 0.6294656,
+    "source_path": "sample-data/documents/acme-service-agreement.pdf"
+   }
+  ],
+  "top_k": 4
+ },
+ "ce4be5b8eeb743d70d952cafa2599e0b8e7777054d7fb0ff78f9c4680e5df34c": {
+  "company": null,
+  "latency_ms": 799,
+  "query": "What feedback did Riverside give about uptime?",
+  "results": [
+   {
+    "chunk_id": "7b7737a3-b0ba-463a-ba35-79ffbcd84950",
+    "chunk_index": 0,
+    "company_name": "Riverside Health Group",
+    "content": "From: Dr. Sarah Kim (Clinic Director, Riverside Health Group)\nSubject: Positive feedback on uptime\n\nHi team,\n\nJust wanted to pass along that our front-desk staff have noticed the\nscheduling dashboard has had zero unplanned downtime this past quarter,\nwhich is a big improvement over the system we used previously. It's made a\nreal difference during our busiest clinic hours.\n\nSeparately, could someone send me a rough timeline for the second-location\nexpansion we discussed on our last call? I'd like to share it with our\nleadership team before the end of the month.\n\nThanks,\nSarah",
+    "doc_type": "email",
+    "document_id": 15,
+    "document_title": "Positive feedback on uptime",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.68061864,
+    "source_path": "sample-data/documents/riverside-email-feedback.md"
+   },
+   {
+    "chunk_id": "db6aba00-c878-42a1-8993-3963446fb94d",
+    "chunk_index": 0,
+    "company_name": "Riverside Health Group",
+    "content": "Customer: James Okafor (IT Director at Riverside Health Group)\n\nJames asked how patient-adjacent operational data (appointment scheduling\nmetadata, not clinical records) is stored and whether retention settings\nmeet their internal compliance requirements. He noted that Riverside's\ncompliance team requires configurable data-retention windows and audit\nlogs for any system touching scheduling data.\n\nWe confirmed that the platform supports configurable retention windows per\naccount and that an audit log of data-access events is available on\nrequest through support. James said he would forward this",
+    "doc_type": "support",
+    "document_id": 16,
+    "document_title": "Data handling and compliance question",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.64423156,
+    "source_path": "sample-data/documents/riverside-support-compliance.md"
+   },
+   {
+    "chunk_id": "a8c148ac-a0d2-48b2-812a-998316fda9e7",
+    "chunk_index": 1,
+    "company_name": "Northstar Logistics",
+    "content": "Sheet: SLA credits\n\n| Monthly uptime   | Service credit           |\n|------------------|--------------------------|\n| 99.9% or higher  | None                     |\n| 99.0% to 99.9%   | 10% of the monthly price |\n| Below 99.0%      | 25% of the monthly price |",
+    "doc_type": "product",
+    "document_id": 9,
+    "document_title": "Northstar Logistics rate card and SLA credits",
+    "page": null,
+    "sheet": "SLA credits",
+    "similarity": 0.61199826,
+    "source_path": "sample-data/documents/northstar-rate-card.xlsx"
+   },
+   {
+    "chunk_id": "5c2991c8-9565-4b97-adc1-080063302cc5",
+    "chunk_index": 1,
+    "company_name": "Riverside Health Group",
+    "content": "log of data-access events is available on\nrequest through support. James said he would forward this to Riverside's\ncompliance team and asked for written confirmation he could share\ninternally; we agreed to send a summary document.",
+    "doc_type": "support",
+    "document_id": 16,
+    "document_title": "Data handling and compliance question",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.64573157,
+    "source_path": "sample-data/documents/riverside-support-compliance.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "d314c51b47f490620478ecdb5f0d7cc070b0b588cbac70c6b13ca276607803db": {
+  "company": null,
+  "latency_ms": 852,
+  "query": "Does the support package cover major holidays?",
+  "results": [
+   {
+    "chunk_id": "33bd6ce4-2de4-4790-890d-0ed0ee080a1b",
+    "chunk_index": 1,
+    "company_name": "Harbor & Pine",
+    "content": "e includes coverage during major\nholidays, since Harbor & Pine is a retail business and holidays are their\nbusiest and highest-risk period.\n\nWe told her holiday coverage is included and confirmed the on-call schedule\nfor the upcoming holiday season would be shared with her by email.",
+    "doc_type": "note",
+    "document_id": 7,
+    "document_title": "Quarterly check-in with Elena Torres",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.7100977,
+    "source_path": "sample-data/documents/harborpine-note-checkin.md"
+   },
+   {
+    "chunk_id": "ef7a39bc-7c9b-4a20-8827-e6b0f0698f4b",
+    "chunk_index": 0,
+    "company_name": "Harbor & Pine",
+    "content": "Elena Torres (Owner, Harbor & Pine) joined the quarterly check-in call. She\nsaid she is happy with support response times since switching to the Retail\nsupport package earlier this year, and specifically called out that the team\nresolved a point-of-sale sync issue within a few hours during a busy weekend.\n\nElena confirmed she plans to renew the Retail support package when it comes\nup for renewal and does not need any changes to her current plan. She asked\none question: whether the support package includes coverage during major\nholidays, since Harbor & Pine is a retail business and holidays are",
+    "doc_type": "note",
+    "document_id": 7,
+    "document_title": "Quarterly check-in with Elena Torres",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.65196264,
+    "source_path": "sample-data/documents/harborpine-note-checkin.md"
+   },
+   {
+    "chunk_id": "acfd868b-328b-45c0-93f1-cb22525f1586",
+    "chunk_index": 0,
+    "company_name": null,
+    "content": "The Premium Operations Plan is designed for manufacturing and industrial\ncustomers running one or more physical sites.\n\nIncluded in the base price for a single site:\n- Full operations dashboard, including interaction history and export tools.\n- Up to three implementation/onboarding sessions per year.\n- Standard support with a next-business-day response target.\n\nMulti-site pricing:\n- Each additional site is billed at 70% of the single-site rate.\n- Accounts with three or more sites receive an automatic 10% discount on the\n  combined multi-site total.\n- One implementation session can cover multip",
+    "doc_type": "product",
+    "document_id": 12,
+    "document_title": "Premium Operations Plan overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.5975363,
+    "source_path": "sample-data/documents/product-premium-operations-plan.md"
+   },
+   {
+    "chunk_id": "e6e1e40c-9ab0-48b8-bc8a-65492eb715ab",
+    "chunk_index": 1,
+    "company_name": null,
+    "content": "atus link that fleet customers can use to check\n  their own delivery status without calling support.\n\nTypical rollout timeline is four to six weeks: two weeks for carrier feed\nintegration, one to two weeks for configuring per-customer alert thresholds,\nand one to two weeks for user acceptance testing before go-live.\n\nAlerting is included in the base package at no additional cost.",
+    "doc_type": "product",
+    "document_id": 11,
+    "document_title": "Fleet Visibility rollout package overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.5644989,
+    "source_path": "sample-data/documents/product-fleet-visibility.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "dc9f20e30126b4dc62623617dc7113f01cabf53ee081123a0bd6e953f68bbdc4": {
+  "company": null,
+  "latency_ms": 822,
+  "query": "Platform language written in",
+  "results": [
+   {
+    "chunk_id": "5bb2f6de-382c-430c-ad01-d24370d53990",
+    "chunk_index": 1,
+    "company_name": "Summit Builders",
+    "content": "ts, likely in\na future fiscal year. She asked to stay on the mailing list for product\nupdates in the meantime.",
+    "doc_type": "call",
+    "document_id": 17,
+    "document_title": "Exit interview call",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.5198187,
+    "source_path": "sample-data/documents/summit-note-churn.md"
+   },
+   {
+    "chunk_id": "5c2991c8-9565-4b97-adc1-080063302cc5",
+    "chunk_index": 1,
+    "company_name": "Riverside Health Group",
+    "content": "log of data-access events is available on\nrequest through support. James said he would forward this to Riverside's\ncompliance team and asked for written confirmation he could share\ninternally; we agreed to send a summary document.",
+    "doc_type": "support",
+    "document_id": 16,
+    "document_title": "Data handling and compliance question",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.50021946,
+    "source_path": "sample-data/documents/riverside-support-compliance.md"
+   },
+   {
+    "chunk_id": "db6aba00-c878-42a1-8993-3963446fb94d",
+    "chunk_index": 0,
+    "company_name": "Riverside Health Group",
+    "content": "Customer: James Okafor (IT Director at Riverside Health Group)\n\nJames asked how patient-adjacent operational data (appointment scheduling\nmetadata, not clinical records) is stored and whether retention settings\nmeet their internal compliance requirements. He noted that Riverside's\ncompliance team requires configurable data-retention windows and audit\nlogs for any system touching scheduling data.\n\nWe confirmed that the platform supports configurable retention windows per\naccount and that an audit log of data-access events is available on\nrequest through support. James said he would forward this",
+    "doc_type": "support",
+    "document_id": 16,
+    "document_title": "Data handling and compliance question",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.50240844,
+    "source_path": "sample-data/documents/riverside-support-compliance.md"
+   },
+   {
+    "chunk_id": "cb7c797e-7a4e-436d-bbc9-6342e1c64c6f",
+    "chunk_index": 1,
+    "company_name": "Acme Fabrication",
+    "content": "Section 7. Renewal and termination\r\nClause 7.3. The agreement renews automatically on 1 October for twelve months. Either party may end it\r\nwith 60 days' written notice before the renewal date. Clause 7.4. A price change for the renewal term must be\r\nsent to the customer at least 90 days before the renewal date.\r\nSection 8. Invoicing. Invoice INV-4821 for the Q3 onboarding block is under review by Acme's finance team;\r\npayment terms are 30 days from the corrected invoice.",
+    "doc_type": "support",
+    "document_id": 3,
+    "document_title": "Acme Fabrication service agreement summary",
+    "page": 2,
+    "sheet": null,
+    "similarity": 0.4922974,
+    "source_path": "sample-data/documents/acme-service-agreement.pdf"
+   }
+  ],
+  "top_k": 4
+ },
+ "df496686f774463f6489a363c8e6946c1991879891b02851ca8d6792d40c9cf4": {
+  "company": null,
+  "latency_ms": 848,
+  "query": "refund policy customer return guidelines",
+  "results": [
+   {
+    "chunk_id": "79867e03-fbb2-427f-8b7e-6827220d3e24",
+    "chunk_index": 0,
+    "company_name": "Summit Builders",
+    "content": "Dana Whitfield (then Project Manager at Summit Builders) joined an exit\ninterview call after Summit's Site Ops Suite deal did not close and their\naccount was marked as a former customer. Dana explained that Summit had\nfrozen all new vendor contracts company-wide due to a budget restructuring,\nand that this was unrelated to any dissatisfaction with the product itself.\n\nDana said the team had found the evaluation period useful and would\nconsider revisiting Site Ops Suite once the budget freeze lifts, likely in\na future fiscal year. She asked to stay on the mailing list for product\nupdates in the",
+    "doc_type": "call",
+    "document_id": 17,
+    "document_title": "Exit interview call",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.5362494,
+    "source_path": "sample-data/documents/summit-note-churn.md"
+   },
+   {
+    "chunk_id": "2bc3092c-8bc7-43a5-af72-2aafa341958f",
+    "chunk_index": 0,
+    "company_name": "Northstar Logistics",
+    "content": "Customer: Jordan Brooks (evaluating Fleet Visibility rollout, not yet a\ncustomer)\n\nJordan asked, ahead of signing, whether delay alerts can be configured per\nfleet customer or only globally for the whole account. He said Northstar's\nfleet customers have very different tolerance for what counts as \"delayed\" \u2014\na same-day courier customer cares about 30-minute delays, while a long-haul\nfreight customer only cares about delays over 4 hours.\n\nWe confirmed that alert thresholds are configurable per customer, not just\nglobally, and that this is included in the base Fleet Visibility package with\nno ad",
+    "doc_type": "support",
+    "document_id": 10,
+    "document_title": "Pre-sales support conversation on alerting limits",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.49528775,
+    "source_path": "sample-data/documents/northstar-support-alerting.md"
+   },
+   {
+    "chunk_id": "52ba7b51-fba7-4393-b4e4-5f7f02254b5f",
+    "chunk_index": 0,
+    "company_name": "Riverside Health Group",
+    "content": "## Riverside Health Group: data handling policy\n\nPatient identifiers must never appear in support tickets or in exported reports. Exports are encrypted and expire after seven days.\n\n### Access reviews\n\nAccounts with access to clinical data are reviewed every quarter. A reviewer who finds an unused account disables it within two business days.",
+    "doc_type": "support",
+    "document_id": 14,
+    "document_title": "Riverside Health Group data handling policy",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.49468166,
+    "source_path": "sample-data/documents/riverside-data-handling-policy.docx"
+   },
+   {
+    "chunk_id": "e6e1e40c-9ab0-48b8-bc8a-65492eb715ab",
+    "chunk_index": 1,
+    "company_name": null,
+    "content": "atus link that fleet customers can use to check\n  their own delivery status without calling support.\n\nTypical rollout timeline is four to six weeks: two weeks for carrier feed\nintegration, one to two weeks for configuring per-customer alert thresholds,\nand one to two weeks for user acceptance testing before go-live.\n\nAlerting is included in the base package at no additional cost.",
+    "doc_type": "product",
+    "document_id": 11,
+    "document_title": "Fleet Visibility rollout package overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.5068689,
+    "source_path": "sample-data/documents/product-fleet-visibility.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "e6b2089f0841b79f045776b9657368446d6fed0890cbfa370ab18ef8eb9aa7c3": {
+  "company": null,
+  "latency_ms": 865,
+  "query": "Is alerting included in the base Fleet Visibility package?",
+  "results": [
+   {
+    "chunk_id": "7c9f183c-1bac-4247-8cb1-e3043b9b0f19",
+    "chunk_index": 1,
+    "company_name": "Northstar Logistics",
+    "content": "n a delivery is delayed beyond a configurable threshold.\n3. The ability to share a read-only status link with the fleet customer\n   directly, to reduce inbound \"where is my shipment\" calls.\n\nJordan asked for a proposal covering the Fleet Visibility rollout, including\nimplementation timeline and whether alerting is included in the base package\nor sold as an add-on.",
+    "doc_type": "note",
+    "document_id": 8,
+    "document_title": "Discovery session with Jordan Brooks",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.7259409,
+    "source_path": "sample-data/documents/northstar-note-discovery.md"
+   },
+   {
+    "chunk_id": "e6e1e40c-9ab0-48b8-bc8a-65492eb715ab",
+    "chunk_index": 1,
+    "company_name": null,
+    "content": "atus link that fleet customers can use to check\n  their own delivery status without calling support.\n\nTypical rollout timeline is four to six weeks: two weeks for carrier feed\nintegration, one to two weeks for configuring per-customer alert thresholds,\nand one to two weeks for user acceptance testing before go-live.\n\nAlerting is included in the base package at no additional cost.",
+    "doc_type": "product",
+    "document_id": 11,
+    "document_title": "Fleet Visibility rollout package overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.73173285,
+    "source_path": "sample-data/documents/product-fleet-visibility.md"
+   },
+   {
+    "chunk_id": "38890f41-951a-447c-9946-ab726bb5def0",
+    "chunk_index": 0,
+    "company_name": null,
+    "content": "Fleet Visibility is designed for logistics customers who need real-time\ndelivery status across multiple carriers, consolidated into one view for\ntheir customer success or operations team.\n\nBase package includes:\n- A single dashboard showing delivery status per fleet customer, pulled from\n  connected carrier data feeds.\n- Configurable delay alerts, set per fleet customer rather than only at the\n  account level, so different customers can have different delay thresholds.\n- A read-only shareable status link that fleet customers can use to check\n  their own delivery status without calling support.",
+    "doc_type": "product",
+    "document_id": 11,
+    "document_title": "Fleet Visibility rollout package overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.78517115,
+    "source_path": "sample-data/documents/product-fleet-visibility.md"
+   },
+   {
+    "chunk_id": "eaa078e5-943e-4db7-a904-db041d42094c",
+    "chunk_index": 1,
+    "company_name": "Northstar Logistics",
+    "content": "stomer, not just\nglobally, and that this is included in the base Fleet Visibility package with\nno add-on required. Jordan said this addresses his main concern and he plans\nto bring a rollout proposal to his leadership team next week.",
+    "doc_type": "support",
+    "document_id": 10,
+    "document_title": "Pre-sales support conversation on alerting limits",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6730317,
+    "source_path": "sample-data/documents/northstar-support-alerting.md"
+   }
+  ],
+  "top_k": 4
+ },
+ "ed3c0c00afe792e4a43c3070b451bf9216fd204d7bfec7962a04a3190c1527a9": {
+  "company": null,
+  "latency_ms": 858,
+  "query": "What is the workaround for exporting more than 90 days of history?",
+  "results": [
+   {
+    "chunk_id": "c49ae0ad-cb09-4ef9-9e5b-4371301bd06e",
+    "chunk_index": 0,
+    "company_name": "Acme Fabrication",
+    "content": "Customer: Maya Chen\nIssue: The \"Export full history\" button on the operations dashboard times out\nfor reports covering more than 90 days of interaction data.\n\nSupport notes: Reproduced the issue. The export times out because it builds\nthe CSV synchronously in the request instead of generating it in the\nbackground. As a workaround, we suggested exporting in 30-day windows until a\nbackground-export feature ships.\n\nMaya accepted the workaround for now but said it is \"not a long-term fix\" for\na team that reviews quarterly history. We scheduled a follow-up call for\nearly September to confirm whethe",
+    "doc_type": "support",
+    "document_id": 4,
+    "document_title": "Dashboard export timeout support conversation",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.69011045,
+    "source_path": "sample-data/documents/acme-support-export-timeout.md"
+   },
+   {
+    "chunk_id": "c74360b9-55fc-487a-a4c8-5a6d0db3ed79",
+    "chunk_index": 1,
+    "company_name": null,
+    "content": "matic 10% discount on the\n  combined multi-site total.\n- One implementation session can cover multiple sites if they go live within\n  the same 30-day window; otherwise, each site's go-live counts toward the\n  three included sessions per year.\n\nKnown limitation (as of this quarter): exporting more than 90 days of\ninteraction history in one request can time out. The recommended workaround\nis exporting in 30-day windows. A background export feature is in progress.",
+    "doc_type": "product",
+    "document_id": 12,
+    "document_title": "Premium Operations Plan overview",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6464949,
+    "source_path": "sample-data/documents/product-premium-operations-plan.md"
+   },
+   {
+    "chunk_id": "78c40b52-b40c-4752-9a05-09ae70cb1e39",
+    "chunk_index": 1,
+    "company_name": "Acme Fabrication",
+    "content": "that reviews quarterly history. We scheduled a follow-up call for\nearly September to confirm whether the background-export fix has shipped, and\nto revisit the pricing breakdown she is waiting on for the renewal.\n\nStatus: Workaround shared. Follow-up scheduled. Engineering ticket opened for\nbackground CSV export.",
+    "doc_type": "support",
+    "document_id": 4,
+    "document_title": "Dashboard export timeout support conversation",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.67972636,
+    "source_path": "sample-data/documents/acme-support-export-timeout.md"
+   },
+   {
+    "chunk_id": "5c2991c8-9565-4b97-adc1-080063302cc5",
+    "chunk_index": 1,
+    "company_name": "Riverside Health Group",
+    "content": "log of data-access events is available on\nrequest through support. James said he would forward this to Riverside's\ncompliance team and asked for written confirmation he could share\ninternally; we agreed to send a summary document.",
+    "doc_type": "support",
+    "document_id": 16,
+    "document_title": "Data handling and compliance question",
+    "page": null,
+    "sheet": null,
+    "similarity": 0.6110201,
+    "source_path": "sample-data/documents/riverside-support-compliance.md"
+   }
+  ],
+  "top_k": 4
+ }
+}

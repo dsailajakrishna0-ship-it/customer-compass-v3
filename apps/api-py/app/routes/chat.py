@@ -30,7 +30,8 @@ from app.mcp.registry import Backend, UnknownBackendError
 from app.mcp.registry import resolve as resolve_backend
 from app.mcp.schemas import tool_definitions, validate_arguments
 from app.mcp.tools import looks_like_confirmation
-from app.rag.retrieve import build_context, retrieve_relevant_chunks
+from app.rag.agentic import AgenticReport, check_grounding, retrieve_checked
+from app.rag.retrieve import RetrievedChunk, build_context, retrieve_relevant_chunks
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 logger = logging.getLogger("app.routes.chat")
@@ -164,6 +165,19 @@ async def _finalize(
     return output_finding.neutralized_text, guardrail
 
 
+async def _search(question: str, company_id: int | None, _top_k: int):
+    """The plain search, looked up at call time (tests and the contract suite replace the module name)."""
+    return await retrieve_relevant_chunks(question, company_id)
+
+
+def _with_agentic(body: dict, agentic: AgenticReport) -> dict:
+    """Stage 5.4: what the corrective retrieval did, added only when it ran. Off (the default) the
+    response is exactly what it was before."""
+    if agentic.enabled:
+        body["agentic"] = agentic.to_json()
+    return body
+
+
 def _facts_json(facts) -> dict | None:
     """Converts CompanySummary to the same camelCase shape the Express API
     returns, so the frontend's response types don't need to change here."""
@@ -223,16 +237,18 @@ async def rag_chat(body: ChatRequest):
     try:
         # Retrieval uses the original question (redacting it first would hurt
         # embedding quality) -- only what reaches the LLM gets neutralized.
-        chunks = await retrieve_relevant_chunks(question)
+        # Stage 5.4: with AGENTIC_RETRIEVAL=on the passages are checked first; off, this is the search
+        chunks, agentic = await retrieve_checked(question, None, retrieve=_search)
         if not chunks:
             _, guardrail = await _finalize(
                 "chat/rag", build_report((question_finding, "user_input")), ""
             )
-            return {
+            none_found = {
                 "message": "I could not find any ingested documents relevant to that question.",
                 "citations": [],
                 "guardrail": guardrail,
             }
+            return _with_agentic(none_found, agentic)
 
         chunk_findings = [scan_and_neutralize(chunk.content) for chunk in chunks]
         neutralized_chunks = [
@@ -260,12 +276,16 @@ async def rag_chat(body: ChatRequest):
         # user can see exactly what was retrieved, including the flagged text.
         citations = [_citation(i, chunk) for i, chunk in enumerate(chunks)]
         answer, guardrail = await _finalize("chat/rag", report, result.content)
-        return {
-            "message": answer,
-            "citations": citations,
-            "usage": _usage_json(result),
-            "guardrail": guardrail,
-        }
+        await check_grounding(answer, chunks, agentic)
+        return _with_agentic(
+            {
+                "message": answer,
+                "citations": citations,
+                "usage": _usage_json(result),
+                "guardrail": guardrail,
+            },
+            agentic,
+        )
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(
             status_code=503, detail=str(exc) or "Could not answer with retrieval."
@@ -289,27 +309,31 @@ async def crm_chat(body: ChatRequest):
             if route.wants_structured and route.company
             else None
         )
-        chunks = (
-            await retrieve_relevant_chunks(question, route.company.id if route.company else None)
-            if route.wants_rag
-            else []
-        )
+        agentic = AgenticReport()
+        chunks: list[RetrievedChunk] = []
+        if route.wants_rag:
+            chunks, agentic = await retrieve_checked(
+                question, route.company.id if route.company else None, retrieve=_search
+            )
 
         if not facts and not chunks:
             _, guardrail = await _finalize(
                 "chat/crm", build_report((question_finding, "user_input")), ""
             )
-            return {
-                "message": (
-                    "I could not find a matching company or deal data for that question."
-                    if route.wants_structured
-                    else "I could not find any ingested documents relevant to that question."
-                ),
-                "facts": None,
-                "citations": [],
-                "scopedCompany": route.company.name if route.company else None,
-                "guardrail": guardrail,
-            }
+            return _with_agentic(
+                {
+                    "message": (
+                        "I could not find a matching company or deal data for that question."
+                        if route.wants_structured
+                        else "I could not find any ingested documents relevant to that question."
+                    ),
+                    "facts": None,
+                    "citations": [],
+                    "scopedCompany": route.company.name if route.company else None,
+                    "guardrail": guardrail,
+                },
+                agentic,
+            )
 
         facts_block = None
         if facts:
@@ -363,14 +387,18 @@ async def crm_chat(body: ChatRequest):
 
         scoped = route.company.name if route.company else None
         answer, guardrail = await _finalize("chat/crm", report, result.content, scoped)
-        return {
-            "message": answer,
-            "facts": _facts_json(facts),
-            "citations": citations,
-            "scopedCompany": route.company.name if route.company else None,
-            "usage": _usage_json(result),
-            "guardrail": guardrail,
-        }
+        await check_grounding(answer, chunks, agentic)
+        return _with_agentic(
+            {
+                "message": answer,
+                "facts": _facts_json(facts),
+                "citations": citations,
+                "scopedCompany": route.company.name if route.company else None,
+                "usage": _usage_json(result),
+                "guardrail": guardrail,
+            },
+            agentic,
+        )
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(
             status_code=503, detail=str(exc) or "Could not answer the CRM question."

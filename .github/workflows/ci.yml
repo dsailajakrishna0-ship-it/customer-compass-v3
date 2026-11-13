@@ -45,6 +45,8 @@ jobs:
         run: just eval-judged
       - name: Guard comparison, replayed from the recorded verdicts (no keys, no network calls)
         run: just eval-guards
+      - name: Agentic retrieval comparison, replayed from the recorded searches and model calls (no keys, no network calls)
+        run: just eval-agentic
 
   web:
     name: Web (lint, types, tests, build)

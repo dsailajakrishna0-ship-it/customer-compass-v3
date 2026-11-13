@@ -179,3 +179,14 @@ just eval-guards-record   # record what is missing (OPENROUTER_API_KEY; NeMo Gua
 ```
 
 Latency in the table is the rules' live timing and the recorded timing of every other row. Changing a model, a prompt or a library version in `guard_compare.py` changes the cache keys: re-record and save a new baseline on purpose (`python evals/compare_guards.py --save-baseline`). Results and caveats: [ADR 0024](../docs/adr/0024-guard-comparison-and-pii.md).
+
+## Agentic retrieval comparison (sub-stage 5.4)
+
+`compare_agentic.py` puts plain 🟪hybrid search and 🟪agentic retrieval (a 🟪relevance check, one 🟪query rewrite and retry, a 🟪grounding check on the answer) side by side on the 42 questions of `golden/retrieval.json`: recall, 🟪MRR, citation correctness, declined unanswerable questions, the grounding check, latency, model calls, tokens and cost. Searches are recorded in `agentic/snapshots.json` and model calls in `agentic/cache.jsonl`; `baseline/agentic-v1.json` pins the numbers.
+
+```bash
+just eval-agentic          # replay: no keys, no network, deterministic (CI runs this)
+just eval-agentic-record   # record what is missing (stack with documents ingested, GOOGLE_API_KEY, OPENROUTER_API_KEY)
+```
+
+Every model-backed step uses one pinned small paid model (`meta-llama/llama-3.1-8b-instruct`, about US$0.003 for the whole recording). A change to a 🟪prompt in `app/rag/agentic.py`, to the model pin or to the sample documents makes the replay stop with a missing-recording message: re-record. The results and what they mean are in [ADR 0025](../docs/adr/0025-agentic-retrieval.md).

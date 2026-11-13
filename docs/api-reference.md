@@ -149,6 +149,8 @@ A citation also carries `"page": 3` when the chunk comes from a PDF and `"sheet"
 
 ---
 
+**Optional `agentic` object (Stage 5.4).** Only when `AGENTIC_RETRIEVAL=on` (default `off`, then the response is exactly as above), `/chat/rag` and `/chat/crm` add `"agentic": {"rewrittenQuery": string|null, "retrieved": int, "kept": int, "llmCalls": int, "tokensIn": int, "tokensOut": int, "latencyMs": int, "fallback": string|null, "grounding": {"grounded": bool, "unsupported": [string]}}`. `citations` then lists only the passages the relevance check kept; if none were kept the answer is the usual "could not find" message. See [ADR 0025](adr/0025-agentic-retrieval.md).
+
 ## `POST /api/v1/chat/crm`
 
 CRM copilot: a keyword-based classifier (`app/chat/router.py`) decides

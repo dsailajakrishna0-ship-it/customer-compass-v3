@@ -110,6 +110,14 @@ eval-guards:
 eval-guards-record:
     uv run --project {{api}} --with-requirements evals/requirements-guards.txt python evals/compare_guards.py --mode record --check
 
+# Stage 5.4: agentic retrieval against plain hybrid search (42 questions, one before/after table), replayed from the recorded searches and model calls (offline, free, no keys)
+eval-agentic:
+    uv run --project {{api}} python evals/compare_agentic.py --check
+
+# record what is missing from agentic/cache.jsonl and agentic/snapshots.json (needs the stack with documents ingested, GOOGLE_API_KEY and OPENROUTER_API_KEY; the paid model costs a few cents in all)
+eval-agentic-record:
+    RETRIEVAL_MODE=hybrid uv run --project {{api}} python evals/compare_agentic.py --mode record --check
+
 # offline suite only: the rule-based guard against the adversarial prompts (no stack needed)
 eval-offline:
     uv run --project {{api}} python evals/run_eval.py --suites adversarial
