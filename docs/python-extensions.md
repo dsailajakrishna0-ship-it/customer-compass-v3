@@ -12,11 +12,11 @@ Several 🟪knowledge bases (the CRM documents and, for example, a farm-supply h
 
 | Slice | What | Status |
 | --- | --- | --- |
-| E1.1 | A knowledge-base registry, a second corpus in its own collection, `GET /knowledge-bases`, `POST /knowledge-bases/{id}/ingest`, `POST /knowledge-bases/{id}/search`. [ADR 0029](adr/0029-knowledge-bases.md), [guide](stages/E1-multi-source-rag.md) | In review |
-| E1.2 | Three ways to decide where to search (a router, search everything and merge, an 🟪agent with a tool), on one route, with the router and the agent as a 🟦LangGraph graph | Planned |
+| E1.1 | A knowledge-base registry, a second corpus in its own collection, `GET /knowledge-bases`, `POST /knowledge-bases/{id}/ingest`, `POST /knowledge-bases/{id}/search`. [ADR 0029](adr/0029-knowledge-bases.md), [guide](stages/E1-multi-source-rag.md) | Merged |
+| E1.2 | Three ways to decide where to search (a router, search everything and merge, an 🟪agent with a tool), on one route, `POST /chat/multi`, as one 🟦LangGraph graph. [ADR 0030](adr/0030-multi-source-strategies-as-a-graph.md) | In review |
 | E1.3 | A replayable comparison of the three on the same 24 labelled questions as the Java edition | Planned |
 
-## New routes and settings (E1.1)
+## New routes and settings (E1.1 and E1.2)
 
 | Route or setting | What it does |
 | --- | --- |
@@ -24,3 +24,4 @@ Several 🟪knowledge bases (the CRM documents and, for example, a farm-supply h
 | `POST /api/v1/knowledge-bases/{id}/ingest` | Rebuilds an extra knowledge base from its folder; never touches the CRM documents (`crm` answers 400: use `POST /documents/ingest`); 502 with the summary if the run fails |
 | `POST /api/v1/knowledge-bases/{id}/search` | `{"query": "...", "topK": 4}`: the chunks of that knowledge base only, with the 🟪RAG citation shape (`topK` 1 to 20) |
 | `KNOWLEDGE_BASES` | A JSON list of `{"id", "label", "description", "source_dir"}`; the default is the farm-supply handbook in `sample-data/knowledge-bases/agri-supply/` |
+| `POST /api/v1/chat/multi` | A chat question answered from several knowledge bases. Body: the usual chat body plus `"strategy"`: `route` (default), `all` or `agent` (anything else is a 422). The response adds `routing` (strategy, searched ids, reason, tools used, model calls) and a `knowledgeBase` on each citation |

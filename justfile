@@ -167,6 +167,10 @@ kb-ingest id:
 kb-search id query:
     @python3 -c 'import json,sys,urllib.request as u; r=u.Request("http://localhost:8001/api/v1/knowledge-bases/"+sys.argv[1]+"/search", json.dumps({"query":sys.argv[2]}).encode(), {"Content-Type":"application/json"}); print(json.dumps(json.load(u.urlopen(r)), indent=2))' {{id}} "{{query}}"
 
+# ask across all knowledge bases (Python extension E1.2). STRATEGY=route|all|agent (default route), MODEL=<id> picks the model, API_URL the address. Example: STRATEGY=all just multi "How long must workers stay out after spraying?"
+multi question:
+    @python3 -c 'import json,os,sys,urllib.error,urllib.request as u; p={"messages":[{"role":"user","content":sys.argv[1]}]}; p.update({k:os.environ[v] for k,v in (("strategy","STRATEGY"),("model","MODEL")) if os.environ.get(v)}); r=u.Request(os.environ.get("API_URL","http://localhost:8001").rstrip("/")+"/api/v1/chat/multi", json.dumps(p).encode(), {"Content-Type":"application/json"}); exec("try:\n  t=u.urlopen(r,timeout=180).read()\nexcept urllib.error.HTTPError as e:\n  t=e.read()"); print(json.dumps(json.loads(t), indent=2, ensure_ascii=False))' "{{question}}"
+
 # render docs/diagrams/*.mmd to docs/img/diagrams/*.png (needs Docker; the first run pulls a ~2.4 GB image)
 diagrams:
     for f in docs/diagrams/*.mmd; do n=$(basename "$f" .mmd); docker run --rm --user "$(id -u):$(id -g)" -v "$PWD/docs":/data ghcr.io/mermaid-js/mermaid-cli/mermaid-cli:12.0.0 -p /data/diagrams/mermaid-puppeteer.json -i "/data/diagrams/$n.mmd" -o "/data/img/diagrams/$n.png" -s 2 -b white || exit 1; echo "rendered $n"; done
