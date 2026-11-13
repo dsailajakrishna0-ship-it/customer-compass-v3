@@ -1,0 +1,16 @@
+flowchart LR
+    REQ(["one request<br/>trace id = X-Request-ID"]) --> ROOT["the request span<br/>for example POST<br/>/api/v1/chat/tools"]
+    ROOT --> RET["retrieval<br/>results, similarity,<br/>no text"]
+    ROOT --> GEN["llm.generate<br/>model, tokens, latency,<br/>fallback"]
+    ROOT --> TOOL["tool.get_open_deals<br/>server, argument names,<br/>result status"]
+    ROOT --> RUN["agent.run<br/>status, steps, revisions"]
+    RUN --> S1["classify"]
+    RUN --> S2["Analyst agent"]
+    RUN --> S3["Reviewer agent"]
+    RUN --> S4["awaiting_user_confirmation"]
+    ROOT -.->|"OTLP over HTTP,<br/>background thread,<br/>never blocks"| LF[("Langfuse<br/>(optional profile)")]
+    ROOT -.->|"unchanged"| AUD[("audit tables<br/>tool_audit_log<br/>security_audit_log")]
+    classDef new fill:#a5d6a7,stroke:#1b5e20,stroke-width:2px,color:#0d3b12
+    classDef store fill:#e3f2fd,stroke:#1565c0,stroke-width:1px,color:#0d2a4a
+    class ROOT,RET,GEN,TOOL,RUN,S1,S2,S3,S4 new
+    class LF,AUD store

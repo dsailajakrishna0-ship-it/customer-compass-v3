@@ -15,7 +15,7 @@ The [tech-stack](../tech-stack.md#v3-tech-stack-at-a-glance) lists every tool, w
 | 2 | [Tools and 🟦MCP](02-tools-and-mcp.md) | 🟪Tool calling and schemas (2.1); MCP over HTTP (2.2) | Written (2.1, 2.2a, 2.2b) |
 | 3 | [🟦LangGraph port](03-langgraph-port.md) | Contract vs internal tests (3.1); 🟪agent graphs, state, checkpoints, 🟪human-in-the-loop (3.2) | Written (3.1, 3.2a, 3.2b) |
 | 4 | [🟪Retrieval upgrade](04-retrieval-upgrade.md) | 🟪Hybrid search (4.1a); 🟪reranking (4.1b); document parsing (4.2); 🟪embeddings (4.3) | Written (4.1a, 4.1b, 4.2, 4.3) |
-| 5 | Observability and 🟪evals | Tracing, metrics beyond recall, 🟪guardrail comparison | Written in Stage 5 |
+| 5 | [Observability and 🟪evals](05-observability-and-evals.md) | Tracing (5.1); metrics beyond recall, 🟪guardrail comparison (later) | In progress (5.1) |
 | 6 | CRM modules and auth | Authentication, authorization, schema growth | Written in Stage 6 |
 | 7 | Agents and supervisor | Multi-agent routing, when an agent is worth it | Written in Stage 7 |
 | 8 | Product features | Forms, uploads, end-to-end tests | Written in Stage 8 |

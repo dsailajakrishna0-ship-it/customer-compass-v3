@@ -8,6 +8,8 @@ import time
 from dataclasses import asdict, dataclass, field
 from typing import Literal
 
+from app import tracing
+
 StepKind = Literal["code", "tool", "agent", "gate"]
 StepStatus = Literal["ok", "error", "skipped"]
 
@@ -54,7 +56,36 @@ class Trace:
             duration_ms=int((time.monotonic() - started_at) * 1000),
         )
         self.steps.append(step)
+        _emit_span(step)
         return step
 
     def to_list(self) -> list[dict]:
         return [asdict(step) for step in self.steps]
+
+
+# How Langfuse labels each kind of step. A "gate" (the human-approval pause) is a plain span.
+_OBSERVATION_TYPE = {"code": "span", "tool": "tool", "agent": "agent", "gate": "span"}
+
+
+def _emit_span(step: TraceStep) -> None:
+    """Stage 5.1: the same step, as a span under the run's span, back-dated by its duration. By default
+    only sizes and names go out; the shortened summaries only with TRACING_CAPTURE_CONTENT."""
+    if not tracing.tracing_active():
+        return
+    attributes: dict[str, object] = {
+        "agent.step.index": step.index,
+        "agent.step.kind": step.kind,
+        "agent.step.status": step.status,
+        "agent.step.input_chars": len(step.input_summary),
+        "agent.step.output_chars": len(step.output_summary),
+    }
+    if tracing.capture_content():
+        attributes["langfuse.observation.input"] = step.input_summary
+        attributes["langfuse.observation.output"] = step.output_summary
+    tracing.record_finished_span(
+        step.name,
+        _OBSERVATION_TYPE[step.kind],
+        step.duration_ms,
+        attributes,
+        error=step.status == "error",
+    )

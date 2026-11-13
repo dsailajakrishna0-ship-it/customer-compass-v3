@@ -60,6 +60,7 @@ limits (set through the `AGENT_*` environment variables), the tool code. **The p
 | `test_gateway.py` | other | Model gateway and settings |
 | `test_config.py` | other | Model gateway and settings |
 | `test_logging.py` | other | Model gateway and settings |
+| `test_tracing.py` | other | Model gateway and settings |
 | `test_llm_models_route.py` | other | Model gateway and settings |
 | `test_no_local_models.py` | other | Model gateway and settings |
 | `test_adversarial_set.py` | other | Guardrails |

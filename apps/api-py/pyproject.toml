@@ -23,6 +23,9 @@ dependencies = [
     "psycopg-pool>=3.2",
     "docling-slim[format-docx,format-xlsx]>=2.148,<3",
     "pypdfium2>=4.30",
+    "opentelemetry-api>=1.45.2,<2",
+    "opentelemetry-sdk>=1.45.2,<2",
+    "opentelemetry-exporter-otlp-proto-http>=1.45.2,<2",
 ]
 
 [project.optional-dependencies]

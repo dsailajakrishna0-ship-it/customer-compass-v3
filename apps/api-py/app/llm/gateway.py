@@ -31,6 +31,7 @@ from litellm.integrations.custom_logger import CustomLogger
 from litellm.router import RetryPolicy
 from litellm.types.router import AllowedFailsPolicy
 
+from app import tracing
 from app.config import get_model_catalog, get_settings
 from app.llm.types import GenerationResult, ToolCall
 
@@ -195,6 +196,54 @@ def _is_raw_tool_markup(content: str) -> bool:
 
 
 async def generate(
+    system_prompt: str,
+    messages: Sequence[Mapping[str, object]],
+    model: str | None = None,
+    *,
+    tools: list[dict] | None = None,
+    tool_choice: Literal["auto", "none"] = "auto",
+) -> GenerationResult:
+    """One model call through the chain, as one span (Stage 5.1): which model was asked, which one
+    answered, tokens, latency and whether a fallback ran. The text of the question and the answer is
+    not recorded unless TRACING_CAPTURE_CONTENT is on."""
+    with tracing.span("llm.generate", "generation") as span:
+        if tracing.tracing_active():
+            span.set(
+                {
+                    "gen_ai.request.model": model or get_settings().default_openrouter_model,
+                    "llm.messages": len(messages),
+                    "llm.tools_offered": len(tools or []),
+                    "llm.tool_choice": tool_choice if tools else None,
+                }
+            )
+        result = await _generate(
+            system_prompt, messages, model, tools=tools, tool_choice=tool_choice
+        )
+        if tracing.tracing_active():
+            span.set(
+                {
+                    "gen_ai.response.model": result.model,
+                    "gen_ai.usage.input_tokens": result.tokens_in,
+                    "gen_ai.usage.output_tokens": result.tokens_out,
+                    "llm.latency_ms": result.latency_ms,
+                    "llm.fallback_used": result.fallback_used,
+                    "llm.fallback_from": result.fallback_from_model,
+                    "llm.tool_calls": len(result.tool_calls),
+                }
+            )
+            if tracing.capture_content():
+                span.set(
+                    {
+                        "langfuse.observation.input": str(messages[-1].get("content", ""))
+                        if messages
+                        else None,
+                        "langfuse.observation.output": result.content,
+                    }
+                )
+        return result
+
+
+async def _generate(
     system_prompt: str,
     messages: Sequence[Mapping[str, object]],
     model: str | None = None,

@@ -10,6 +10,7 @@ import httpx
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field, field_validator
 
+from app import tracing
 from app.chat.router import classify_query
 from app.crm.queries import get_company_summary, list_companies
 from app.guardrails.audit import record_events
@@ -422,7 +423,9 @@ async def tools_chat(body: ToolsChatRequest):
                 calls = result.tool_calls[:MAX_CALLS_PER_REPLY]
                 conversation.append(_assistant_tool_message(result.content, calls))
                 for call in calls:
-                    tool_text = await _run_tool_call(session, call, user_confirmed, tools_used)
+                    tool_text = await _run_tool_call(
+                        session, call, user_confirmed, tools_used, backend.id
+                    )
                     tool_finding = scan_and_neutralize(tool_text)
                     findings.append((tool_finding, f"tool: {call.name}"))
                     wrapped = wrap_untrusted_context(tool_finding.neutralized_text)
@@ -502,10 +505,12 @@ def _assistant_tool_message(content: str, calls: list[ToolCall]) -> dict:
 
 
 async def _run_tool_call(
-    session, call: ToolCall, user_confirmed: bool, tools_used: list[dict]
+    session, call: ToolCall, user_confirmed: bool, tools_used: list[dict], server: str = ""
 ) -> str:
     """Validates and runs one tool call. Every failure becomes a tool result the model can read and
-    correct, never an exception; only calls that really ran are recorded in `tools_used`."""
+    correct, never an exception; only calls that really ran are recorded in `tools_used`. A call that
+    runs is one span (Stage 5.1): the tool, the server, the argument names (never their values) and
+    the status the tool answered with."""
     if call.error:
         return json.dumps({"status": "error", "message": f"Invalid tool call: {call.error}."})
     try:
@@ -515,7 +520,29 @@ async def _run_tool_call(
     if call.name == "create_followup_task":
         arguments["confirm"] = user_confirmed
     tools_used.append({"tool": call.name, "arguments": arguments})
+    with tracing.span(
+        f"tool.{call.name}",
+        "tool",
+        {
+            "tool.name": call.name,
+            "tool.mcp_server": server,
+            "tool.argument_names": sorted(arguments),
+            "tool.confirm": arguments.get("confirm"),
+        },
+    ) as span:
+        try:
+            text = await call_tool(session, call.name, arguments)
+        except Exception as error:  # noqa: BLE001 - surfaced to the model as a tool error, not a 503
+            span.fail(error)
+            return json.dumps({"status": "error", "message": str(error)})
+        span.set({"tool.result_status": _result_status(text)})
+        return text
+
+
+def _result_status(text: str) -> str | None:
+    """The `status` a tool answered with (executed, proposed, confirmed, not_found, error), if any."""
     try:
-        return await call_tool(session, call.name, arguments)
-    except Exception as error:  # noqa: BLE001 - surfaced to the model as a tool error, not a 503
-        return json.dumps({"status": "error", "message": str(error)})
+        status = json.loads(text).get("status")
+    except (ValueError, AttributeError):
+        return None
+    return status if isinstance(status, str) else None

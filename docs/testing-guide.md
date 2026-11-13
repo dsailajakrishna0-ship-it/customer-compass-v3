@@ -533,6 +533,27 @@ Mode **Account follow-up agent**. One run takes up to a minute or two on free mo
 
 Reading order: `apps/api-py/tests/README.md`, then `tests/contract/conftest.py` (the two seams and nothing else faked), then the *names* in `tests/contract/test_agent_recommend.py`, then `tests/test_contract_boundary.py`, then `make_llm()` in `app/routes/agent.py`. The [Stage 3 guide](stages/03-langgraph-port.md) explains each step.
 
+### Stage 5.1: tracing with Langfuse
+
+Every request can now leave a trace (a tree of timed steps with token counts, never the text). It is **off by default**; Langfuse is an optional set of containers. Without it the app behaves exactly as before.
+
+```bash
+git pull
+cd apps/api-py && uv run pytest tests/test_tracing.py tests/agent_internals/test_agent_tracing.py -q   # 34 passed, no Langfuse or key needed
+```
+
+| # | Do | Expect | What it shows |
+| --- | --- | --- | --- |
+| 1 | `docker compose --profile observability up -d` and wait about two minutes; open <http://localhost:3000> | Langfuse sign-up page (six extra containers). Create a local account, an organization and a project, then **Settings, API keys, Create** | A self-hosted viewer that only listens on your machine |
+| 2 | Put `TRACING_ENABLED=true`, `LANGFUSE_PUBLIC_KEY=<pk-lf-...>` and `LANGFUSE_SECRET_KEY=<sk-lf-...>` in `.env` (never paste the keys into a chat), then `docker compose up -d --force-recreate api-py` | The API starts normally | Tracing needs the two keys from step 1 |
+| 3 | In the web app ask a General question, then a Tool-calling question (`Which deals are open?`) and run the **Account follow-up agent** for `Acme` | Answers as before | Nothing visible changes for the user |
+| 4 | In Langfuse open **Tracing** | One trace per request, named like `POST /api/v1/chat`. A model call shows model, input and output **token counts**; the tool chat shows a `tool.get_open_deals` child; the agent run shows `agent.run` with one child per step | Every agent run has a trace (the 5.1 exit criterion) |
+| 5 | Click a model call | Input and output are **empty**; only counts and names are shown | The privacy rule: no question or answer text by default |
+| 6 | Copy the `X-Request-ID` from `curl -si localhost:8001/api/v1/chat -H 'X-Request-ID: 0123456789abcdef0123456789abcdef' ...` and search Langfuse for it | The trace has exactly that id | One id finds the logs and the trace |
+| 7 | `docker compose stop langfuse-web langfuse-worker`, then ask another question | The answer still arrives; the API log has at most one export warning | A broken viewer never breaks a request |
+
+**Without Docker for Langfuse:** the `pytest` line only. **Undo:** remove the three `TRACING_*`/`LANGFUSE_*` lines from `.env`, `docker compose up -d --force-recreate api-py`, and `docker compose --profile observability down` (add `-v` only if you want to delete the traces).
+
 ### Stage 4.3: choosing the embedding model, and noticing a changed one
 
 The embedding model is now a setting (`EMBEDDING_PROVIDER`: `google` is the default, `fastembed` is an open-source option for comparison), the index remembers which model built it, and a search with a different model stops with a clear "re-ingest" message. The open-source model is an **optional install** and is not in the Docker image.

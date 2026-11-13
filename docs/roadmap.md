@@ -41,7 +41,7 @@ repo findings (R1–R12) and doc findings (D1–D9) are cited below. Decisions a
 | 2 | Tools and 🟦MCP | Done, except the tool-call 🟪eval check that needs an 🟩OpenRouter key |
 | 3 | 🟦LangGraph port | Done (3.1, 3.2a, 3.2b); the live 🟪agent test with keys is the owner's |
 | 4 | 🟪Retrieval upgrade | In progress (4.1 and 4.2 done; 4.3 🟪embeddings in review) |
-| 5 | Observability and evals | Planned |
+| 5 | Observability and evals | In progress (5.1 tracing in review) |
 | 6 | New CRM modules and auth | Planned |
 | 7 | Agents and supervisor | Planned |
 | 8 | Product features | Planned |
@@ -58,7 +58,7 @@ repo findings (R1–R12) and doc findings (D1–D9) are cited below. Decisions a
 | --- | --- | --- |
 | **0.1 Seed the repo** | Tag V2 `main` as `v2-final` (done). Create this repo, public, MIT (done). Copy the V2 files without `.venv`, `node_modules`, `.env` or history. First seed commit says "Seed from customer-compass-v2 @ `<sha>`". Add `.gitignore`, `.editorconfig`, `SECURITY.md`, `CONTRIBUTING.md`. | V3 runs exactly like V2: `docker compose up`, tests green. |
 | **0.2 Correct the docs** (D1–D9) | Write a real root README (diagram, quick start, doc links). Fold this roadmap into the docs index. Drop `archive-01/` and the "historical" banners. Remove local absolute paths. Make `tech-stack.md` the single source of stack facts; other docs link to it. Start `docs/adr/` with ADR 0001 (V3 goals and tooling rule). Keep model names out of prose. | No stale status, no absolute paths, no duplicated facts. Links checked by CI (0.4). |
-| **0.3 Developer tooling** (R6, T13–T16) | `ruff`, `mypy` or `pyright`, `pre-commit`, pytest with coverage, ESLint, Vitest, a `justfile` (`up`, `test`, `lint`, `eval`, `seed`), Dev Container, pinned image tags (R8). Compose profiles `obs` and `eval` arrive with their first services (5.1, 5.2); core stays un-profiled, `.env.example` cleanup. | `just lint && just test` passes locally with one command. |
+| **0.3 Developer tooling** (R6, T13–T16) | `ruff`, `mypy` or `pyright`, `pre-commit`, pytest with coverage, ESLint, Vitest, a `justfile` (`up`, `test`, `lint`, `eval`, `seed`), Dev Container, pinned image tags (R8). Compose profiles `observability` (5.1) and `eval` arrive with their first services (5.1, 5.2); core stays un-profiled, `.env.example` cleanup. | `just lint && just test` passes locally with one command. |
 | **0.4 CI** (R1, T15) | GitHub Actions: lint and types, Python tests with mocked models, web build and tests, docs link check, `docker compose up` smoke test with a health check, secret scan (gitleaks), `pip-audit`, Trivy image scan. Dependabot or Renovate, PR template, issue templates, CODEOWNERS. Then make those checks required on `main`. | A PR with a deliberate failure is blocked; a clean PR merges only after all checks pass. |
 | **0.5 CD** (free) | Release workflow on tag `v*`: build the API and web images, push to GHCR, create a GitHub Release with the changelog. | Tagging `v3.0.0-alpha.1` produces images and a release without manual steps. |
 | **0.6 Database migrations** (R5, T12) | Alembic baseline from `init.sql` and `002-rag.sql` (schema), demo seed data as its own migration, and a third migration that drops the unused 🟩pgvector column and extension. Plain `postgres:17` image; a `migrate` Compose job runs before the API ([ADR 0005](adr/0005-database-migrations.md)). | A fresh database is built only by migrations, and V2 data tests pass. |

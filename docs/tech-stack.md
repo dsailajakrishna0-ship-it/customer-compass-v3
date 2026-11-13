@@ -56,7 +56,7 @@ Stages refer to [the roadmap](roadmap.md). "Seed" means it came with V2's final 
 | **🟪Hybrid search + 🟪reranker** (Qdrant, 🟦FastEmbed) | Combines keyword and meaning search, then re-orders results | 4.1 | In use (hybrid; reranker optional, off by default) |
 | **🟦Docling** (light `docling-slim`) + `pypdfium2` | Reads Word and spreadsheets (Docling) and PDFs (`pypdfium2`), keeping page and sheet for citations | 4.2 | In use |
 | **🟦FastEmbed** (optional extra `local-embeddings`) | Open-source embeddings that run on this machine without an API key; a comparison, not the default ([ADR 0021](adr/0021-embedding-models-and-reembedding.md)) | 4.3 | In use (optional) |
-| **🟦Langfuse + OpenTelemetry** | Shows every model call and agent step as a trace | 5.1 | Planned |
+| **🟦Langfuse + OpenTelemetry** | Shows every model call and agent step as a trace | 5.1 | In use (optional: off by default, [ADR 0022](adr/0022-tracing-with-opentelemetry-and-langfuse.md)) |
 | **🟦Ragas or 🟦DeepEval** | Scores answer quality with metrics beyond recall and MRR | 5.2 | Planned |
 | **🟦NeMo Guardrails, 🟧Llama Guard, 🟦Presidio** | Stronger prompt-injection and personal-data protection | 5.3 | Planned (comparison) |
 | **Authentication and permissions** (library chosen in 6.1) | Who may do what | 6.1 | Planned |
@@ -73,7 +73,7 @@ Optional comparisons (decided by an ADR, never adopted by default): 🟦Pydantic
 | 2 Tools and 🟦MCP | 2.1: native 🟪tool calling with Pydantic schemas; 2.2a: FastMCP over HTTP with a selectable tool server; 2.2b: a Spring Boot (Java) twin of the tools | 2.1: fenced `tool_call` text removed; 2.2a: the stdio subprocess per chat turn removed | [Stage 2](stages/02-tools-and-mcp.md) (in progress) |
 | 3 🟦LangGraph port | 3.1: API-contract tests and internal tests, two named seams; 3.2: the 🟪agent as a LangGraph graph, a Postgres 🟪checkpointer and a real pause for 🟪human approval | 3.2: the hand-written workflow loop | [Stage 3](stages/03-langgraph-port.md) (done) |
 | 4 🟪Retrieval upgrade | 🟪Hybrid search, 🟪reranker, 🟦Docling, open 🟪embeddings (comparison) | Markdown-only ingestion (4.2: now also PDF, Word, Excel) | in progress |
-| 5 Observability and 🟪evals | 🟦Langfuse, OpenTelemetry, 🟦Ragas or DeepEval, 🟪guardrail comparison | log-line tracing | planned |
+| 5 Observability and 🟪evals | 5.1: OpenTelemetry spans and an optional self-hosted 🟦Langfuse; later 🟦Ragas or DeepEval, 🟪guardrail comparison | none (the audit tables stay) | [Stage 5](stages/05-observability-and-evals.md) (in progress) |
 | 6 CRM modules and auth | Auth, tickets, contracts, meeting notes | none | planned |
 | 7 Agents and supervisor | Added only if evals show a gain | none | planned |
 | 8 Product features | Add-company form, uploads, Playwright | none | planned |
