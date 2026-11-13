@@ -309,7 +309,7 @@ services:
 
   langfuse-redis:
     profiles: ["observability"]
-    image: docker.io/redis:7
+    image: docker.io/redis:8
     restart: unless-stopped
     command: >
       --requirepass ${LANGFUSE_REDIS_AUTH:-myredissecret}
