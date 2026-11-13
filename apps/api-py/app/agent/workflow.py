@@ -29,6 +29,7 @@ from langgraph.checkpoint.base import BaseCheckpointSaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import Command, interrupt
 
+from app import tracing
 from app.agent import agents
 from app.agent.checkpoint import get_checkpointer, thread_id
 from app.agent.policies import AgentLimits, BudgetExceeded, RunBudget
@@ -442,7 +443,39 @@ async def run_account_review(
     limits: AgentLimits | None = None,
     checkpointer: BaseCheckpointSaver | None = None,
 ) -> dict:
+    """One agent run, as one span (Stage 5.1): every step the Trace records becomes a child span, so
+    each run is a trace of its own steps. The result's status and counts are on the run's span."""
     limits = limits or AgentLimits.from_env()
+    with tracing.span(
+        "agent.run",
+        "agent",
+        {
+            "agent.max_steps": limits.max_steps,
+            "agent.timeout_seconds": limits.timeout_seconds,
+            "agent.request_chars": len(message),
+            "langfuse.observation.input": message if tracing.capture_content() else None,
+        },
+    ) as span:
+        result = await _run_account_review(message, llm, limits, checkpointer)
+        span.set(
+            {
+                "agent.status": result["status"],
+                "agent.steps": len(result["trace"]),
+                "agent.llm_calls": len(result.get("llmCalls", [])),
+                "agent.revisions": result.get("review", {}).get("revisions"),
+            }
+        )
+        if result["status"] in ("timed_out", "budget_exceeded"):
+            span.fail(result["status"])
+        return result
+
+
+async def _run_account_review(
+    message: str,
+    llm: agents.LlmCall,
+    limits: AgentLimits,
+    checkpointer: BaseCheckpointSaver | None,
+) -> dict:
     ctx = RunContext(llm=llm, limits=limits, budget=RunBudget(limits))
     try:
         async with asyncio.timeout(limits.timeout_seconds):
@@ -476,6 +509,17 @@ async def _pause_at_gate(
 
 
 async def resume_run(
+    company_name: str, note: str, confirm: bool, checkpointer: BaseCheckpointSaver | None = None
+) -> dict | None:
+    """The user's answer at the gate, as one span (Stage 5.1): whether a paused run was found and what
+    was answered. Names and note text are not recorded."""
+    with tracing.span("agent.resume", "agent", {"agent.confirm": confirm}) as span:
+        result = await _resume_run(company_name, note, confirm, checkpointer)
+        span.set({"agent.resumed": result is not None})
+        return result
+
+
+async def _resume_run(
     company_name: str, note: str, confirm: bool, checkpointer: BaseCheckpointSaver | None = None
 ) -> dict | None:
     """Continues a paused run with the user's answer. Returns what `/agent/confirm` should answer, or

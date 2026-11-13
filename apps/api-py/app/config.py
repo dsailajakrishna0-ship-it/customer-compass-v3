@@ -103,6 +103,21 @@ class Settings(BaseSettings):
     mcp_server_port: int = 8002
     mcp_allowed_hosts: str = "localhost:*,127.0.0.1:*,mcp-fastmcp:*"
 
+    # Stage 5.1 tracing (see app/tracing.py and ADR 0022). Off by default: nothing is exported, nothing
+    # changes, and no tracing service is needed. When on, every request becomes a trace sent over OTLP.
+    tracing_enabled: bool = False
+    # Langfuse's OTLP address (a local deployment: http://localhost:3000/api/public/otel; inside the
+    # compose network: http://langfuse-web:3000/api/public/otel). The exporter adds /v1/traces.
+    tracing_endpoint: str = "http://localhost:3000/api/public/otel"
+    tracing_service_name: str = "customer-compass-api"
+    # Off: a span carries counts, names and sizes only. On: it also carries the shortened step
+    # summaries and the question text, which can hold customer data.
+    tracing_capture_content: bool = False
+    tracing_export_timeout_seconds: float = 5.0
+    # The Langfuse project keys (Settings, API keys). Sent as the Basic auth header; never logged.
+    langfuse_public_key: SecretStr = SecretStr("")
+    langfuse_secret_key: SecretStr = SecretStr("")
+
     # Logging
     log_level: str = "INFO"
     log_format: Literal["json", "console"] = "json"

@@ -24,6 +24,7 @@ from qdrant_client.models import (
     SearchParams,
 )
 
+from app import tracing
 from app.config import get_settings
 from app.rag.embeddings import EmbeddingsUnavailableError, embed_text, embedding_model_id
 from app.rag.qdrant_store import (
@@ -242,6 +243,32 @@ def _chunk(point: ScoredPoint, similarity: float) -> RetrievedChunk:
 
 
 async def retrieve_relevant_chunks(
+    question: str,
+    company_id: int | None = None,
+    top_k: int = DEFAULT_TOP_K,
+) -> list[RetrievedChunk]:
+    """One retrieval, as one span (Stage 5.1): the mode, how many chunks came back and how similar the
+    best and the weakest were. Never the question or the chunk text (unless content capture is on)."""
+    with tracing.span("retrieval", "retriever") as span:
+        chunks = await _retrieve_relevant_chunks(question, company_id, top_k)
+        if tracing.tracing_active():
+            span.set(
+                {
+                    "retrieval.mode": get_settings().retrieval_mode,
+                    "retrieval.top_k": top_k,
+                    "retrieval.company_scoped": company_id is not None,
+                    "retrieval.reranker": get_settings().rerank_provider,
+                    "retrieval.query_chars": len(question),
+                    "retrieval.results": len(chunks),
+                    "retrieval.similarity_max": max((c.similarity for c in chunks), default=None),
+                    "retrieval.similarity_min": min((c.similarity for c in chunks), default=None),
+                    "langfuse.observation.input": question if tracing.capture_content() else None,
+                }
+            )
+        return chunks
+
+
+async def _retrieve_relevant_chunks(
     question: str,
     company_id: int | None = None,
     top_k: int = DEFAULT_TOP_K,

@@ -32,12 +32,15 @@ from app.routes.llm import router as llm_router
 from app.routes.mcp import router as mcp_router
 from app.routes.security import router as security_router
 from app.routes.tasks import router as tasks_router
+from app.tracing import configure_tracing, shutdown_tracing
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     await ensure_schema_and_purge()
+    configure_tracing()  # a no-op unless TRACING_ENABLED=true
     yield
+    shutdown_tracing()  # sends what is still waiting to be exported
     await close_pool()
     await close_checkpointer()
     await close_client()

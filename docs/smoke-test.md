@@ -148,6 +148,17 @@ A reranker re-orders the search results: search fetches a short list of candidat
 
 **Undo:** remove `RERANK_PROVIDER` and `VOYAGE_API_KEY` from `.env` (and `RETRIEVAL_MODE` to go back to plain search), then `docker compose up -d --force-recreate api-py`.
 
+## 5c. Optional tracing (Langfuse)
+
+A trace is a receipt for one request: which steps ran, how long each took, how many tokens the model used. It is off by default and never records question or answer text unless you ask. Needs the keys-free stack plus Part 3 or 4 done.
+
+1. **Start the viewer.** `docker compose --profile observability up -d`, wait about two minutes, open <http://localhost:3000>, create a local account, organization and project, then **Settings, API keys, Create**.
+2. **Switch tracing on.** Put `TRACING_ENABLED=true`, `LANGFUSE_PUBLIC_KEY=<pk-lf-...>` and `LANGFUSE_SECRET_KEY=<sk-lf-...>` in `.env` (never paste the keys into a chat) and run `docker compose up -d --force-recreate api-py`.
+3. **Make some traces.** Ask one General question, one Tool-calling question and run the Account follow-up agent.
+4. **Look.** In Langfuse, **Tracing** shows one trace per request. The agent trace has `agent.run` with a child per step; model calls show token counts; their input and output are empty (the privacy rule).
+
+**Undo:** remove the three lines from `.env`, `docker compose up -d --force-recreate api-py`, `docker compose --profile observability down`.
+
 ## 6. Stop and reset
 
 | # | Goal | Command |
