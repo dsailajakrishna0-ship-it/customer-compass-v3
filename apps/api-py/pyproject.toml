@@ -75,6 +75,7 @@ testpaths = ["tests"]
 filterwarnings = ["ignore:.*ReadOnly.*qualifier:UserWarning"]
 markers = [
     "network: the test really needs the internet (every other test may only use localhost)",
+    "frameworks: tests of the framework side of a manual-versus-framework seam (Stage 5.5); they skip unless evals/requirements-frameworks.txt is installed",
     "contract: an API-contract test (tests/contract): it must keep passing unchanged through the LangGraph port",
 ]
 

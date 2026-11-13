@@ -33,6 +33,10 @@ os.environ.setdefault("LITELLM_MODE", "PRODUCTION")
 
 GuardModeName = Literal["rules", "llm", "both"]
 PiiModeName = Literal["off", "detect", "redact"]
+# Stage 5.5: which side of a manual-versus-framework seam runs. "manual" (the default everywhere) is
+# our own code; "frameworks" is the LangChain / LangGraph side in app/frameworks/ (an optional install:
+# evals/requirements-frameworks.txt). See ADRs 0026 to 0028.
+ImplName = Literal["manual", "frameworks"]
 
 # apps/api-py/app/config.py -> apps/api-py/models.yaml (also /app/models.yaml in the image)
 DEFAULT_MODELS_FILE = Path(__file__).resolve().parent.parent / "models.yaml"
@@ -66,6 +70,16 @@ class Settings(BaseSettings):
     # on the answer; see app/rag/agentic.py and ADR 0025). Off by default: nothing changes.
     agentic_retrieval: Literal["off", "on"] = "off"
     agentic_model: str | None = None  # None: the default chat model checks the passages
+
+    # Stage 5.5: one setting per seam, default "manual". The framework side needs the optional
+    # install in evals/requirements-frameworks.txt; the gateway and the confirm gate stay manual.
+    chunker_impl: ImplName = "manual"  # how a document segment is cut into chunks (ADR 0026)
+    retrieval_impl: ImplName = (
+        "manual"  # how chunks are found in Qdrant, dense search only (ADR 0027)
+    )
+    agent_impl: ImplName = (
+        "manual"  # who picks the evidence tools: our graph or a prebuilt agent (ADR 0028)
+    )
 
     # Embeddings (Google AI Studio)
     google_api_key: SecretStr = SecretStr("")
@@ -129,6 +143,18 @@ class Settings(BaseSettings):
     # Logging
     log_level: str = "INFO"
     log_format: Literal["json", "console"] = "json"
+
+    @model_validator(mode="after")
+    def _frameworks_retrieval_is_dense_only(self) -> Settings:
+        # Our keyword (BM25) vector is custom code, and LangChain's Qdrant store cannot search it
+        # without its own sparse-embedding layer (ADR 0027), so say so at start-up instead of
+        # quietly running dense search.
+        if self.retrieval_impl == "frameworks" and self.retrieval_mode == "hybrid":
+            raise ValueError(
+                "RETRIEVAL_IMPL=frameworks supports RETRIEVAL_MODE=dense only "
+                "(the keyword vector is our own code; see docs/adr/0027)."
+            )
+        return self
 
     @property
     def default_openrouter_model(self) -> str:

@@ -1,0 +1,8 @@
+# Stage 5.5: the framework side of the manual-versus-framework comparison, pinned. Kept OUT of apps/api-py/uv.lock on
+# purpose (same reason as requirements-judge.txt and requirements-guards.txt): the default install and the default
+# behaviour (`CHUNKER_IMPL`, `RETRIEVAL_IMPL`, `AGENT_IMPL` all `manual`) must not depend on them.
+# `uv run --project apps/api-py --with-requirements evals/requirements-frameworks.txt ...` layers them on the API
+# environment (the `just` recipes do this).
+langchain==1.5.0
+langchain-text-splitters==1.1.3
+langchain-qdrant==1.1.0

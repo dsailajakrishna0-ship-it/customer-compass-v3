@@ -8,6 +8,8 @@ and dependency-free while learning the pipeline end to end.
 
 from dataclasses import dataclass
 
+from app.config import get_settings
+
 # Chunking: documents are cut into ~600-char pieces (100 overlap) so each piece gets its own embedding
 CHUNK_SIZE = 600
 CHUNK_OVERLAP = 100
@@ -22,6 +24,18 @@ class Chunk:
 
 
 def chunk_text(
+    text: str, chunk_size: int = CHUNK_SIZE, overlap: int = CHUNK_OVERLAP
+) -> list[Chunk]:
+    """Cuts one segment of text into chunks. `CHUNKER_IMPL` picks the side (Stage 5.5, ADR 0026):
+    our own windows (the default) or LangChain's recursive text splitter, behind this same signature."""
+    if get_settings().chunker_impl == "frameworks":
+        from app.frameworks.chunker import chunk_text_frameworks
+
+        return chunk_text_frameworks(text, chunk_size, overlap)
+    return chunk_text_manual(text, chunk_size, overlap)
+
+
+def chunk_text_manual(
     text: str, chunk_size: int = CHUNK_SIZE, overlap: int = CHUNK_OVERLAP
 ) -> list[Chunk]:
     if chunk_size <= 0:

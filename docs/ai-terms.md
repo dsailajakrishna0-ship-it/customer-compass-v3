@@ -44,6 +44,7 @@ An idea or method used when building with language models.
 | 🟪 **Open-weights model** | A model whose trained numbers are published, so you can run it yourself. | V2 seed |  |
 | 🟪 **OpenAI-compatible API** | An API shaped like OpenAI's chat API, which many providers copy, so one client can talk to all of them. | V2 seed |  |
 | 🟪 **PII** | Personally identifiable information: data that identifies a person, such as a name or email address. | sub-stage 5.3 |  |
+| 🟪 **Prebuilt agent** | A ready-made agent loop from a framework: the model chooses which tools to call, the framework runs them and loops until the model answers without a tool call. | sub-stage 5.5 |  |
 | 🟪 **Prompt** | The text sent to a model: instructions plus the question. What you put in it strongly shapes the answer. | V2 seed | [V2 record](v2-baseline/part-1-foundations/02-first-llm-chat.md) |
 | 🟪 **Prompt injection** | Text that tries to trick a model into ignoring its rules, for example an instruction hidden in a document or a message. | V2 seed | [V2 record](v2-baseline/part-3-trust-safety/08-prompt-injection-guardrails.md) |
 | 🟪 **Query rewrite** | Having a model rephrase a search query (use the right names and terms, drop filler) so a second search can find what the first one missed. | sub-stage 5.4 |  |
@@ -57,6 +58,7 @@ An idea or method used when building with language models.
 | 🟪 **Streaming** | Sending the model's answer word by word as it is produced, instead of waiting for the whole answer. Usually done with Server-Sent Events (SSE). | sub-stage 1.4 |  |
 | 🟪 **Structured output** | Making the model answer in a fixed shape (JSON that matches a schema) instead of free text, so code can use it safely. | sub-stage 2.1 |  |
 | 🟪 **System prompt** | Hidden instructions that set the model's role and rules before the user's message. | V2 seed | [V2 record](v2-baseline/part-3-trust-safety/08-prompt-injection-guardrails.md) |
+| 🟪 **Text splitter** | A tool that cuts a long text into chunks, preferring to cut at paragraph, line and word edges instead of at a fixed character count. | sub-stage 5.5 |  |
 | 🟪 **Tool calling** | The model asks the app to run a function, for example looking up a company, then uses the result in its answer. | V2 seed | [V2 record](v2-baseline/part-4-autonomy-protocols/09-tool-calling-mcp.md) |
 | 🟪 **Vector database** | A database built to store embeddings and quickly find the nearest ones. Qdrant is ours. | V2 seed | [V2 record](v2-baseline/part-1-foundations/03-basic-rag.md) |
 | 🟪 **Vector search** | Finding the stored texts whose embeddings are closest to the question's embedding. | V2 seed | [V2 record](v2-baseline/part-1-foundations/03-basic-rag.md) |

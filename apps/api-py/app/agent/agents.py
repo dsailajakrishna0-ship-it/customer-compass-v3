@@ -13,9 +13,9 @@ fallback instead of raising.
 
 import json
 import re
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable
 from dataclasses import dataclass, field
-from typing import Literal
+from typing import Any, Literal, Protocol
 
 from app.llm.types import ChatMessage, GenerationResult
 
@@ -23,8 +23,23 @@ from app.llm.types import ChatMessage, GenerationResult
 # agents apart without looking at the wording of their prompts.
 AgentRole = Literal["analyst", "reviewer", "task_drafter"]
 
-# One LLM call: (agent role, system prompt, messages) -> result. The workflow binds the model.
-LlmCall = Callable[[AgentRole, str, list[ChatMessage]], Awaitable[GenerationResult]]
+
+class LlmCall(Protocol):
+    """One LLM call: (agent role, system prompt, messages) -> result. The workflow binds the model.
+
+    `tools` (OpenAI-style function definitions) is passed only by the prebuilt agent
+    (`AGENT_IMPL=frameworks`, Stage 5.5), whose model may answer with tool calls; the manual agents
+    never pass it, and then `messages` are plain user/assistant turns."""
+
+    def __call__(
+        self,
+        role: AgentRole,
+        system_prompt: str,
+        messages: list[ChatMessage] | list[dict[str, Any]],
+        /,
+        tools: list[dict] | None = None,
+    ) -> Awaitable[GenerationResult]: ...
+
 
 TASK_NOTE_MAX_CHARS = 300
 

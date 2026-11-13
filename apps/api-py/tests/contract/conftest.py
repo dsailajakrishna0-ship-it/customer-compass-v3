@@ -12,6 +12,7 @@ anywhere else, so these tests can keep passing unchanged while the code behind t
 """
 
 import json
+import os
 from types import SimpleNamespace
 
 import httpx
@@ -20,7 +21,7 @@ import pytest_asyncio
 
 from app.db import get_pool
 from app.llm.gateway import LlmUnavailableError
-from app.llm.types import GenerationResult
+from app.llm.types import GenerationResult, ToolCall
 from app.main import app
 from app.rag.embeddings import EmbeddingsUnavailableError
 
@@ -28,6 +29,24 @@ from app.rag.embeddings import EmbeddingsUnavailableError
 SEAMS = {"app.routes.agent.make_llm", "app.mcp.tools.retrieve_relevant_chunks"}
 
 TEST_NOTE_PREFIX = "CONTRACT-TEST"
+
+# Stage 5.5: the same contract suite runs against both sides of the agent seam (`AGENT_IMPL=frameworks just
+# test-contract-frameworks`). Everything a caller can see is identical; the one inherent difference is that
+# the prebuilt agent asks the model once more before the Analyst's answer (the turn in which the model
+# chooses its evidence tools), so a test that lists the model calls uses `calls_for`.
+AGENT_IMPL = os.environ.get("AGENT_IMPL", "manual")
+
+
+def calls_for(*roles: str) -> list[str]:
+    """The model calls expected for a run, given the manual agent's roles in order. On the prebuilt side
+    the first Analyst turn is two calls (the model chooses tools, then answers); a revision is one."""
+    if AGENT_IMPL != "frameworks":
+        return list(roles)
+    calls: list[str] = []
+    for role in roles:
+        first_analyst = role == "analyst" and "analyst" not in calls
+        calls.extend(["analyst", "analyst"] if first_analyst else [role])
+    return calls
 
 
 def recommendation(action: str, rationale: str, evidence: list[str]) -> str:
@@ -53,6 +72,24 @@ def reply(text: str) -> GenerationResult:
     )
 
 
+def tool_calls_reply(tools: list[dict]) -> GenerationResult:
+    """A model turn that calls every evidence tool it was offered (the prebuilt agent's first turn)."""
+    calls = [
+        ToolCall(
+            id=f"call-{i}",
+            name=tool["function"]["name"],
+            arguments={"query": "recent history, requests and open issues"}
+            if tool["function"]["name"] == "search_documents"
+            else {},
+        )
+        for i, tool in enumerate(tools)
+    ]
+    return GenerationResult(
+        content="", model="fake", tokens_in=1, tokens_out=1, latency_ms=1, estimated_cost=None,
+        tool_calls=calls,
+    )  # fmt: skip
+
+
 class ScriptedModel:
     """A model that answers by agent role (analyst, reviewer, task_drafter), never by reading the prompt.
 
@@ -66,9 +103,14 @@ class ScriptedModel:
         self.calls: list[str] = []
         self.prompts: dict[str, list[str]] = {}
 
-    async def __call__(self, role, _system_prompt, messages):
+    async def __call__(self, role, _system_prompt, messages, tools=None):
         self.calls.append(role)
         self.prompts.setdefault(role, []).append(messages[0]["content"])
+        if role == "analyst" and tools:
+            # the prebuilt agent (AGENT_IMPL=frameworks): ask for the evidence tools once, then answer
+            if not any(m["role"] == "tool" for m in messages):
+                return tool_calls_reply(tools)
+            return reply(self._analyst)
         if role == "analyst":
             return reply(self._analyst)
         if role == "reviewer":
@@ -107,7 +149,7 @@ NO_MODEL_MESSAGE = "No model is configured. Set OPENROUTER_API_KEY in your .env.
 NO_EMBEDDINGS_MESSAGE = "GOOGLE_API_KEY is not set."
 
 
-async def unavailable_model(_role, _system_prompt, _messages):
+async def unavailable_model(_role, _system_prompt, _messages, tools=None):
     """A model seam that fails the way the gateway does when no model can be reached."""
     raise LlmUnavailableError(NO_MODEL_MESSAGE)
 
