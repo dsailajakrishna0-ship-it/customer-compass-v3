@@ -1,0 +1,24 @@
+{
+  "ret-01": {
+    "answer": "Maya Chen asked whether the premium tier includes onboarding support for two additional factory floors that Acme is bringing online next quarter [1].",
+    "contexts": [
+      "Maya Chen (Operations Director at Acme Fabrication) called to discuss renewing\nthe Premium Operations Plan ahead of the October contract date. She asked\nwhether the premium tier includes onboarding su",
+      "depends on knowing the total cost before she can commit to the renewal, so we\nagreed to send a written pricing breakdown.\n\nMaya also mentioned that the dashboard export feature has been slow for her\nt",
+      "Dr. Sarah Kim (Clinic Director at Riverside Health Group) called to confirm\nrenewal of the Premium Operations Plan and to discuss expanding coverage to\na second clinic location opening next quarter.\n\n",
+      "Elena Torres (Owner, Harbor & Pine) joined the quarterly check-in call. She\nsaid she is happy with support response times since switching to the Retail\nsupport package earlier this year, and specifica"
+    ],
+    "question": "What did Maya Chen ask about the renewal of the Premium Operations Plan?",
+    "recorded_at": "2026-11-13"
+  },
+  "ret-04": {
+    "answer": "Yes, a multi-site discount applies at three or more locations. According to the Premium Operations Plan overview, accounts with three or more sites receive an automatic 10% discount on the combined multi-site total [3].",
+    "contexts": [
+      "matic 10% discount on the\n  combined multi-site total.\n- One implementation session can cover multiple sites if they go live within\n  the same 30-day window; otherwise, each site's go-live counts towa",
+      "From: Ravi Patel (Procurement Manager, Acme Fabrication)\nSubject: Volume discount request\n\nHi team,\n\nFollowing up on Maya's call earlier this week. As she mentioned, we are\nadding two new factory loca",
+      "The Premium Operations Plan is designed for manufacturing and industrial\ncustomers running one or more physical sites.\n\nIncluded in the base price for a single site:\n- Full operations dashboard, inclu",
+      "this by end of next week to include in our budget approval request.\nAlso, please confirm whether existing users need to be re-onboarded on each\nnew site, or whether one implementation session can cove"
+    ],
+    "question": "Does a multi-site discount apply at three or more locations?",
+    "recorded_at": "2026-11-13"
+  }
+}

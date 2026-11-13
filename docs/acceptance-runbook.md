@@ -68,6 +68,7 @@ Free models are sometimes slow or rate-limited. "Chain unavailable" for a few mi
 | #57-#60, 4.1a to 4.3 | Search, reranker, documents, embeddings | `cd apps/api-py && uv run pytest tests/test_sparse.py tests/test_hybrid_retrieval.py tests/test_rerank.py tests/test_parse.py tests/test_embedding_models.py -q` | 60 passed, no key or network needed |
 | #59, 4.2 | Each file type is read, with page or sheet | the one-line `parse_file` command in [testing guide, 4.2 step 1](testing-guide.md#stage-42-pdf-word-and-excel-documents-with-the-page-or-sheet-in-the-citation) | `[(1, None), (2, None)]`, then `[(None, 'Rate card'), (None, 'SLA credits')]`, then `[(None, None)]` |
 | #60, 4.3 | The open-source embedding model | `uv run --project apps/api-py --extra local-embeddings python evals/compare_embeddings.py --models fastembed` (downloads 67 MB once) | recall@1 about 0.79, recall@3 about 0.99, MRR about 0.97, **negative** similarity gap |
+| 5.2 | Judged evals replay from the recorded judge answers | `just eval-judged` (first run downloads the pinned DeepEval, about 80 packages) | A table headed with your branch, `calls 14 (0 fresh)`, faithfulness 1.000, relevancy 1.000, precision 1.000, recall 0.750 (2 cases: a smoke test), exit code 0, no key needed |
 
 The whole backend suite at once: `just test` (needs Docker; 388 API tests and the web tests).
 

@@ -1,0 +1,4 @@
+# Stage 5.2: the LLM-judge library, pinned. Kept OUT of apps/api-py/uv.lock on purpose: adding it there
+# downgrades click, rich, huggingface-hub for every default install (uv resolves groups together).
+# `just eval-judged` layers it on top of the API environment with `uv run --with-requirements`.
+deepeval==4.3.4

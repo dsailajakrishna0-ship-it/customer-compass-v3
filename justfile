@@ -93,6 +93,15 @@ eval-hybrid:
 eval-rerank:
     RETRIEVAL_MODE=hybrid RERANK_PROVIDER=${RERANK_PROVIDER:-voyage} uv run --project {{api}} python evals/run_eval.py --suites retrieval --check evals/baseline/v2.json
 
+# Stage 5.2: LLM-judged answer quality, replayed from the recorded judge answers (offline, free, no keys).
+# Prints one metrics table for this branch next to baseline/judged-v1.json; DeepEval is layered on, not installed by default.
+eval-judged:
+    uv run --project {{api}} --with-requirements evals/requirements-judge.txt python evals/run_judged.py --check
+
+# record judge answers that are missing from the cache (needs OPENROUTER_API_KEY; new answers need the API running, API_URL=http://localhost:8001)
+eval-judged-record:
+    uv run --project {{api}} --with-requirements evals/requirements-judge.txt python evals/run_judged.py --mode record --check
+
 # offline suite only: the rule-based guard against the adversarial prompts (no stack needed)
 eval-offline:
     uv run --project {{api}} python evals/run_eval.py --suites adversarial

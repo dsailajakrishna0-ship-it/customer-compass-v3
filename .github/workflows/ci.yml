@@ -41,6 +41,8 @@ jobs:
         run: just test-api
       - name: API-contract tests on their own (they must pass unchanged through the LangGraph port)
         run: just test-contract
+      - name: Judged evals, replayed from the recorded cache (no keys, no network calls to a model)
+        run: just eval-judged
 
   web:
     name: Web (lint, types, tests, build)
