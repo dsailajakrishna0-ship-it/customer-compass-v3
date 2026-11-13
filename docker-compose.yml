@@ -271,7 +271,7 @@ services:
 
   langfuse-clickhouse:
     profiles: ["observability"]
-    image: docker.io/clickhouse/clickhouse-server:26.3.62.3
+    image: docker.io/clickhouse/clickhouse-server:26.10.3.7
     restart: unless-stopped
     user: "101:101"
     environment:
