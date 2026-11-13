@@ -62,6 +62,10 @@ class Settings(BaseSettings):
     rerank_model: str | None = None  # None: the provider's default model
     rerank_timeout_seconds: float = 5.0  # longer than this and the original order is used
     sample_data_dir: Path | None = None
+    # Stage 5.4: optional corrective retrieval (relevance check, one query rewrite, grounding check
+    # on the answer; see app/rag/agentic.py and ADR 0025). Off by default: nothing changes.
+    agentic_retrieval: Literal["off", "on"] = "off"
+    agentic_model: str | None = None  # None: the default chat model checks the passages
 
     # Embeddings (Google AI Studio)
     google_api_key: SecretStr = SecretStr("")

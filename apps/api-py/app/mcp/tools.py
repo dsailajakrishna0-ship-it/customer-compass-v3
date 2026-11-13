@@ -12,6 +12,7 @@ import json
 from app.chat.router import find_mentioned_company
 from app.crm.queries import CompanyRef, get_company_summary, list_companies
 from app.db import get_pool
+from app.rag.agentic import retrieve_checked
 from app.rag.retrieve import retrieve_relevant_chunks
 
 
@@ -137,7 +138,16 @@ async def search_documents_tool(query: str, company_name: str | None = None) -> 
     guardrail-scans and <untrusted_context>-wraps them before they reach the
     model, exactly like Stage 8's document handling."""
     company = await _resolve_company(company_name) if company_name else None
-    chunks = await retrieve_relevant_chunks(query, company.id if company else None)
+
+    async def search(text: str, company_id: int | None, _top_k: int):
+        # looked up at call time, so tests can replace app.mcp.tools.retrieve_relevant_chunks
+        return await retrieve_relevant_chunks(text, company_id)
+
+    # Stage 5.4: with AGENTIC_RETRIEVAL=on the passages are checked and a weak search is retried
+    # once; off (the default) this is exactly the plain search
+    chunks, agentic = await retrieve_checked(
+        query, company.id if company else None, retrieve=search
+    )
     result: dict = {
         "status": "executed",
         "results": [
@@ -155,7 +165,13 @@ async def search_documents_tool(query: str, company_name: str | None = None) -> 
         "search_documents",
         {"query": query, "company_name": company_name},
         "executed",
-        f"Found {len(chunks)} document chunk(s)",
+        f"Found {len(chunks)} document chunk(s)"
+        + (
+            f" (agentic: kept {agentic.kept} of {agentic.retrieved}"
+            f"{', query rewritten' if agentic.rewritten_query else ''})"
+            if agentic.enabled
+            else ""
+        ),
         company.id if company else None,
     )
     return result

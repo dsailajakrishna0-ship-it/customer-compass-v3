@@ -20,13 +20,16 @@ An idea or method used when building with language models.
 | Term | In plain words | Matters from | Read more |
 | --- | --- | --- | --- |
 | 🟪 **Agent** | A program where a model chooses which steps or tools to use to reach a goal, in a loop with hard limits. | V2 seed | [V2 record](v2-baseline/part-4-autonomy-protocols/10-agentic-assistant.md) |
+| 🟪 **Agentic retrieval** | A search that checks its own results and acts on what it finds: it asks whether the passages help, tries a better query if not, and checks the answer against the sources. | sub-stage 5.4 |  |
 | 🟪 **BM25** | A classic keyword-scoring method for search, the keyword half of hybrid search. | sub-stage 4.1 |  |
 | 🟪 **Checkpointer** | Saves an agent's state so a paused run can resume later, even after a restart. | sub-stage 3.2 |  |
 | 🟪 **Chunking** | Cutting documents into small pieces so each piece can be embedded and retrieved on its own. | V2 seed | [V2 record](v2-baseline/part-1-foundations/03-basic-rag.md) |
+| 🟪 **Corrective RAG** | A RAG variant that grades the retrieved passages and, when they are weak, rewrites the query and searches again instead of answering from poor evidence. | sub-stage 5.4 |  |
 | 🟪 **Cosine similarity** | A score for how closely two embeddings point in the same direction; higher means more similar in meaning. | V2 seed | [V2 record](v2-baseline/part-1-foundations/03-basic-rag.md) |
 | 🟪 **Embedding** | A list of numbers that captures the meaning of a text, so texts with similar meaning get similar numbers. | V2 seed | [V2 record](v2-baseline/part-1-foundations/03-basic-rag.md) |
 | 🟪 **Evals** | Repeatable tests for an AI system: fixed questions with known right answers, scored by code or by a judge model. | sub-stage 0.7 | [stage guide](stages/00-foundation.md) |
 | 🟪 **Golden set** | The fixed test questions, each with a known right answer, used to measure the system. | sub-stage 0.7 | [stage guide](stages/00-foundation.md) |
+| 🟪 **Grounding check** | A model lists the claims in an answer that none of the sources support, so an answer that invents a number or name can be flagged. | sub-stage 5.4 |  |
 | 🟪 **Guardrails** | Checks around a model that block unsafe input or unsafe output. Ours start as simple rules. | V2 seed | [V2 record](v2-baseline/part-3-trust-safety/08-prompt-injection-guardrails.md) |
 | 🟪 **Hallucination** | A confident answer that the facts or documents do not support. | V2 seed |  |
 | 🟪 **HNSW** | An index that makes nearest-neighbour search fast on large collections by giving up a little exactness. | V2 seed |  |
@@ -43,9 +46,11 @@ An idea or method used when building with language models.
 | 🟪 **PII** | Personally identifiable information: data that identifies a person, such as a name or email address. | sub-stage 5.3 |  |
 | 🟪 **Prompt** | The text sent to a model: instructions plus the question. What you put in it strongly shapes the answer. | V2 seed | [V2 record](v2-baseline/part-1-foundations/02-first-llm-chat.md) |
 | 🟪 **Prompt injection** | Text that tries to trick a model into ignoring its rules, for example an instruction hidden in a document or a message. | V2 seed | [V2 record](v2-baseline/part-3-trust-safety/08-prompt-injection-guardrails.md) |
+| 🟪 **Query rewrite** | Having a model rephrase a search query (use the right names and terms, drop filler) so a second search can find what the first one missed. | sub-stage 5.4 |  |
 | 🟪 **RAG** | Retrieval-augmented generation: fetch relevant documents first and give them to the model, so its answer is based on your data and can cite sources. | V2 seed | [V2 record](v2-baseline/part-1-foundations/03-basic-rag.md) |
 | 🟪 **recall@k** | Of the documents that should come back, the share found in the first k results. | sub-stage 0.7 | [stage guide](stages/00-foundation.md) |
 | 🟪 **Reciprocal rank fusion (RRF)** | A way to merge several best-first result lists into one using only each item's position, so scores from different searches never have to be compared. | sub-stage 4.1 |  |
+| 🟪 **Relevance check** | A model reads the question and each retrieved passage and says which passages actually help answer it; the rest are dropped. | sub-stage 5.4 |  |
 | 🟪 **Reranker** | A second, more careful model that re-orders the first search results so the best ones come first. | sub-stage 4.1 |  |
 | 🟪 **Retrieval** | Finding the pieces of text most relevant to a question before the model answers. | V2 seed | [V2 record](v2-baseline/part-2-grounded-intelligence/05-realistic-crm-rag.md) |
 | 🟪 **Sparse vector** | A vector with one number per word, mostly zeros: it records which words a text contains, for keyword search. The opposite of a dense embedding. | sub-stage 4.1 |  |

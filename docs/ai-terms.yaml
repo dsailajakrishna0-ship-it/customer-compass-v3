@@ -170,6 +170,40 @@ terms:
     ignore_case: true
     meaning: "Combining meaning-based search (embeddings) with keyword search, which often finds more of the right documents than either alone."
     since: "4.1"
+  - id: agentic-retrieval
+    name: Agentic retrieval
+    category: concept
+    match: ["agentic retrieval", "agentic RAG", "Agentic RAG"]
+    ignore_case: true
+    meaning: "A search that checks its own results and acts on what it finds: it asks whether the passages help, tries a better query if not, and checks the answer against the sources."
+    since: "5.4"
+  - id: corrective-rag
+    name: Corrective RAG
+    category: concept
+    match: ["Corrective RAG", "corrective RAG", "Corrective retrieval", "corrective retrieval"]
+    meaning: "A RAG variant that grades the retrieved passages and, when they are weak, rewrites the query and searches again instead of answering from poor evidence."
+    since: "5.4"
+  - id: query-rewrite
+    name: Query rewrite
+    category: concept
+    match: ["query rewrite", "query rewriting", "rewritten query"]
+    ignore_case: true
+    meaning: "Having a model rephrase a search query (use the right names and terms, drop filler) so a second search can find what the first one missed."
+    since: "5.4"
+  - id: relevance-check
+    name: Relevance check
+    category: concept
+    match: ["relevance check"]
+    ignore_case: true
+    meaning: "A model reads the question and each retrieved passage and says which passages actually help answer it; the rest are dropped."
+    since: "5.4"
+  - id: grounding-check
+    name: Grounding check
+    category: concept
+    match: ["grounding check"]
+    ignore_case: true
+    meaning: "A model lists the claims in an answer that none of the sources support, so an answer that invents a number or name can be flagged."
+    since: "5.4"
   - id: bm25
     name: BM25
     category: concept
