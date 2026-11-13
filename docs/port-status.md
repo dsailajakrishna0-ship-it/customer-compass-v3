@@ -4,8 +4,8 @@ Customer Compass V3 (this repo) has a Java sibling and a planned claims project.
 
 | Repo | Domain | Languages | State |
 | --- | --- | --- | --- |
-| [`customer-compass-v3`](https://github.com/dsailajakrishna0-ship-it/customer-compass-v3) (this repo) | CRM | Python and Java; the web app's radio buttons pick the path | Stage 5 of 9 (5.2 in review) |
-| [`customer-compass-v3-java`](https://github.com/dsailajakrishna0-ship-it/customer-compass-v3-java) | CRM, same API contract | Java only: Spring Boot, Spring AI | J0 to J4 merged (J5, the agent, in progress) |
+| [`customer-compass-v3`](https://github.com/dsailajakrishna0-ship-it/customer-compass-v3) (this repo) | CRM | Python and Java; the web app's radio buttons pick the path | Stage 5 done (5.1 to 5.5 merged); Python extension E1.1 in review ([python-extensions](python-extensions.md)) |
+| [`customer-compass-v3-java`](https://github.com/dsailajakrishna0-ship-it/customer-compass-v3-java) | CRM, same API contract | Java only: Spring Boot, Spring AI | **Feature parity with Stages 0 to 4 reached 2026-11-13** (J0 to J6, the optional reranker and hybrid search merged); Java extensions E1.1 to E1.3 merged |
 | `claims-compass-v1` | Insurance claims management | Java only; a Python version is decided later | **Deferred** until this repo and the Java edition are almost complete |
 | `inbox-compass-v1` (name to confirm) | Email: categorize an email and answer from help articles | Python, the same free-tier stack | **Deferred**, same condition. An experiment sandbox for studying model behaviour (structured output, RAG off versus on, prompt changes) |
 

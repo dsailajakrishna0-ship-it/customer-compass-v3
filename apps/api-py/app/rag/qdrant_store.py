@@ -11,6 +11,10 @@ system of record for ingestion metadata/history; Qdrant only holds chunk
 vectors + their citable payload.
 """
 
+from collections.abc import Iterator
+from contextlib import contextmanager
+from contextvars import ContextVar
+
 from qdrant_client import AsyncQdrantClient
 from qdrant_client.models import (
     Distance,
@@ -34,8 +38,35 @@ DENSE = "dense"
 SPARSE = "bm25"
 
 
+# Which collection the code in this task is working on. Normally unset: the configured collection (the
+# CRM documents). A knowledge base (app/rag/knowledge_bases.py, ADR 0029) sets it for the duration of
+# one ingestion or search, so the same retrieval code serves every corpus without a collection
+# argument on every function. A ContextVar is per asyncio task, so two concurrent requests for two
+# knowledge bases never see each other's value.
+_collection_override: ContextVar[str | None] = ContextVar(
+    "qdrant_collection_override", default=None
+)
+_ingest_hint: ContextVar[str | None] = ContextVar("qdrant_ingest_hint", default=None)
+
+
 def collection_name() -> str:
-    return get_settings().qdrant_collection
+    return _collection_override.get() or get_settings().qdrant_collection
+
+
+def ingest_hint() -> str:
+    """What to tell a person whose index was built with another embedding model."""
+    return _ingest_hint.get() or "Click Ingest documents (or POST /api/v1/documents/ingest)"
+
+
+@contextmanager
+def using_collection(name: str, hint: str | None = None) -> Iterator[None]:
+    """Everything inside the block (including awaits) uses collection `name` instead of the configured one."""
+    token, hint_token = _collection_override.set(name), _ingest_hint.set(hint)
+    try:
+        yield
+    finally:
+        _collection_override.reset(token)
+        _ingest_hint.reset(hint_token)
 
 
 _client: AsyncQdrantClient | None = None

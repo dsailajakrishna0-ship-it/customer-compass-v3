@@ -235,7 +235,7 @@ The framework packages are an **optional install** (`evals/requirements-framewor
 1. *A framework's helpful defaults can be silent bugs.* LangChain's retriever interface rescales a 🟪cosine score `c` to `(1 + c) / 2`, which would have turned our 0.45 relevance floor into "keep nearly everything". The code uses the store's raw-score search.
 2. *Hidden calls.* Built with its defaults, the Qdrant store embeds a dummy text when it is created: a model call nobody asked for, made from inside the event loop where our async 🟪embedding cannot run.
 3. *The contract suite earns its keep.* My first prebuilt agent put the raw request in its 🟪prompt; the test "an injection in the request never reaches the model" failed at once. A second failure showed that counting every model turn as a step made a revision cost 6 steps instead of 2.
-4. *"The model decides" includes "decides not to".* Code that must always gather evidence should be code; a model choosing tools earns its place when the choice is genuinely open, such as which of several knowledge bases to search.
+4. *"The model decides" includes "decides not to".* Code that must always gather evidence should be code; a model choosing tools earns its place when the choice is genuinely open, such as which of several 🟪knowledge bases to search.
 
 **Rule to remember.** *Adopt a framework for a piece when a measurement on your own questions says it helps, not when it is popular.* "Manual wins" is a valid, useful result.
 

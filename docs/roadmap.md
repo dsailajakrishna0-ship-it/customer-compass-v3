@@ -169,6 +169,14 @@ This repository continues as planned, Stages 0 to 9. The Java edition runs next 
 
 **Exit criteria (draft):** each repo starts from a clean `docker compose up`, passes the same contract tests (this repo and the Java edition), and has a short guide that says what it does differently.
 
+## Extensions after parity (from 2026-11-13)
+
+The Java edition reached feature parity with Stages 0 to 4 on 2026-11-13. From then on the two editions expand the AI-agent capabilities **separately** (Java first), so the notes show what each stack teaches: the Java side is in its own repo ([`java-extensions.md`](https://github.com/dsailajakrishna0-ship-it/customer-compass-v3-java/blob/main/docs/java-extensions.md)), the Python side is listed in [`python-extensions.md`](python-extensions.md). The shared API contract does not change.
+
+| Extension | Python edition | Status |
+| --- | --- | --- |
+| **E1 🟪multi-source RAG with routing** | E1.1 🟪knowledge bases ([ADR 0029](adr/0029-knowledge-bases.md)); E1.2 routing strategies with 🟦LangGraph; E1.3 a replayable comparison on the Java edition's questions | E1.1 in review |
+
 ## Risks
 
 | Risk | Mitigation |

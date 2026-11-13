@@ -29,6 +29,7 @@ from app.routes.agent import router as agent_router
 from app.routes.chat import router as chat_router
 from app.routes.companies import router as companies_router
 from app.routes.documents import router as documents_router
+from app.routes.knowledge_bases import router as knowledge_bases_router
 from app.routes.llm import router as llm_router
 from app.routes.mcp import router as mcp_router
 from app.routes.security import router as security_router
@@ -81,6 +82,7 @@ app.add_middleware(
 app.add_middleware(RequestIdMiddleware)
 
 app.include_router(documents_router, prefix="/api/v1")
+app.include_router(knowledge_bases_router, prefix="/api/v1")
 app.include_router(chat_router, prefix="/api/v1")
 app.include_router(llm_router, prefix="/api/v1")
 app.include_router(companies_router, prefix="/api/v1")
