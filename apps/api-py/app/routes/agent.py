@@ -41,8 +41,13 @@ def make_llm(model: str | None) -> LlmCall:
     This is the one place the agent API meets the model, and one of the two documented seams of the
     contract tests (tests/README.md): they replace it with a fake that answers by role."""
 
-    async def llm(_role: AgentRole, system_prompt: str, messages: list[ChatMessage]):
-        return await generate(system_prompt, messages, model)
+    async def llm(
+        _role: AgentRole,
+        system_prompt: str,
+        messages: list[ChatMessage] | list[dict],
+        tools: list[dict] | None = None,
+    ):
+        return await generate(system_prompt, messages, model, tools=tools)
 
     return llm
 

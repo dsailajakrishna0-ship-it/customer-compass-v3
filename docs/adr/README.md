@@ -54,3 +54,6 @@ Short list, with why each was not chosen.
 ## Consequences
 What gets easier, what gets harder, what to re-check later.
 ```
+| [0026](0026-chunker-manual-or-langchain.md) | The chunker: our fixed windows or LangChain's recursive text splitter | Accepted (manual stays the default) |
+| [0027](0027-retrieval-manual-or-langchain.md) | Retrieval: our Qdrant query or LangChain's Qdrant vector store | Accepted (manual wins) |
+| [0028](0028-agent-manual-or-prebuilt.md) | The agent's evidence step: our fixed graph or a LangChain prebuilt agent | Accepted (manual wins) |

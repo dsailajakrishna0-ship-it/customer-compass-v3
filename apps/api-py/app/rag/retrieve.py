@@ -285,10 +285,17 @@ async def _retrieve_relevant_chunks(
     chunks are sent to it and its order decides the final `top_k`; if it fails, the search order stays."""
     settings = get_settings()
     await check_index_model()
-    question_embedding = await embed_text(question)
     # With a reranker we keep a longer shortlist for it to choose from; without one, just top_k
     pool = settings.retrieval_candidates if reranking_enabled() else top_k
 
+    if settings.retrieval_impl == "frameworks":
+        # the LangChain side embeds the question itself, through our embedding function (ADR 0027)
+        from app.frameworks.retriever import dense_chunks
+
+        shortlist = (await dense_chunks(question, company_id, max(pool, top_k)))[:pool]
+        return await _rerank(question, shortlist, top_k)
+
+    question_embedding = await embed_text(question)
     if settings.retrieval_mode == "dense":
         points = await _dense_points(question_embedding, company_id, max(pool, top_k))
         shortlist = [_chunk(p, p.score) for p in points if p.score >= MIN_SIMILARITY][:pool]

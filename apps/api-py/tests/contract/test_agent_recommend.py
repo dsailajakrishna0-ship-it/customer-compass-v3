@@ -6,12 +6,14 @@ import re
 import pytest
 
 from tests.contract.conftest import (
+    AGENT_IMPL,
     APPROVE,
     GOOD_RECOMMENDATION,
     NO_EMBEDDINGS_MESSAGE,
     NO_MODEL_MESSAGE,
     REVISE,
     ScriptedModel,
+    calls_for,
     recommendation,
     reply,
     task_count,
@@ -73,7 +75,7 @@ async def test_the_trace_is_an_ordered_record_of_every_step(api, use_model):
 async def test_the_agents_are_asked_in_order_and_each_call_is_reported(api, use_model):
     model = use_model()
     body = await run(api)
-    assert model.calls == ["analyst", "reviewer", "task_drafter"]
+    assert model.calls == calls_for("analyst", "reviewer", "task_drafter")
     assert [c["agent"] for c in body["llmCalls"]] == model.calls
     assert all(set(c) == {"agent", "model", "latencyMs", "fallbackUsed"} for c in body["llmCalls"])
 
@@ -108,7 +110,7 @@ async def test_an_unknown_company_stops_before_any_agent(api, use_model):
 async def test_the_reviewer_can_send_the_analyst_back_once(api, use_model):
     model = use_model(ScriptedModel(GOOD_RECOMMENDATION, [REVISE, APPROVE]))
     body = await run(api)
-    assert model.calls == ["analyst", "reviewer", "analyst", "reviewer", "task_drafter"]
+    assert model.calls == calls_for("analyst", "reviewer", "analyst", "reviewer", "task_drafter")
     assert body["review"]["revisions"] == 1 and body["review"]["approved"] is True
     assert "Analyst agent (revision)" in [s["name"] for s in body["trace"]]
 
@@ -122,7 +124,7 @@ async def test_revisions_are_bounded_and_an_unapproved_result_is_flagged_not_hid
     body = await run(api)
     assert body["status"] == "completed"
     assert body["review"]["approved"] is False and body["review"]["revisions"] == 1
-    assert model.calls.count("analyst") == 2
+    assert model.calls.count("analyst") == len(calls_for("analyst")) + 1
 
 
 @pytest.mark.asyncio
@@ -147,7 +149,7 @@ async def test_the_step_limit_stops_the_run_with_a_status(api, use_model, monkey
 async def test_the_time_limit_stops_a_hung_model_with_a_status(api, use_model, monkeypatch):
     monkeypatch.setenv("AGENT_TIMEOUT_SECONDS", "0.2")
 
-    async def hung(_role, _system, _messages):
+    async def hung(_role, _system, _messages, tools=None):
         await asyncio.sleep(5)
         return reply("never")
 
@@ -193,4 +195,6 @@ async def test_with_no_embeddings_key_the_api_says_what_to_fix_with_a_503(
     reply = await api.post(URL, json={"message": ACME})
     assert reply.status_code == 503
     assert reply.json()["error"] == NO_EMBEDDINGS_MESSAGE
-    assert model.calls == [], "the evidence step failed first, so no agent was asked"
+    # manual: the evidence step fails first, so no agent is asked; prebuilt: the model is asked which
+    # tools to call, and the first tool fails
+    assert model.calls == ([] if AGENT_IMPL != "frameworks" else ["analyst"])

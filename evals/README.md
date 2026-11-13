@@ -190,3 +190,15 @@ just eval-agentic-record   # record what is missing (stack with documents ingest
 ```
 
 Every model-backed step uses one pinned small paid model (`meta-llama/llama-3.1-8b-instruct`, about US$0.003 for the whole recording). A change to a 🟪prompt in `app/rag/agentic.py`, to the model pin or to the sample documents makes the replay stop with a missing-recording message: re-record. The results and what they mean are in [ADR 0025](../docs/adr/0025-agentic-retrieval.md).
+
+## Manual versus framework comparison (sub-stage 5.5)
+
+`compare_frameworks.py` measures three seams, each with our own code and a 🟦LangChain or 🟦LangGraph side behind the same function (`CHUNKER_IMPL`, `RETRIEVAL_IMPL`, `AGENT_IMPL`): the chunker (🟪cosine search in memory over the 42 🟪retrieval questions), dense retrieval (the real `retrieve_relevant_chunks`, same collection) and the 🟪agent (the 10 cases of `golden/agent.json`, twice each, through `POST /agent/recommend`).
+
+```bash
+just eval-frameworks          # replay evals/frameworks/*.json: no keys, no network, deterministic (CI runs this)
+just eval-frameworks-record   # measure again (Postgres with the demo data, Qdrant, GOOGLE_API_KEY or EMBEDDING_PROVIDER=fastembed, OPENROUTER_API_KEY)
+just test-frameworks          # the framework side's tests and the contract suite with AGENT_IMPL=frameworks
+```
+
+To re-record: ingest with `RETRIEVAL_IMPL=frameworks` first (the 🟪chunks need LangChain's nested `metadata` copy), then run the record recipe. The agent runs use one pinned small paid model (`meta-llama/llama-3.1-8b-instruct`, under one cent for the whole recording); lines of code are counted from the source in the checkout, not baselined. The recorded retrieval and agent runs used the local 🟦FastEmbed model because Google's free 🟪embedding quota was used up; the chunker run used `gemini-embedding-001`. Decisions: ADRs 0026 to 0028.

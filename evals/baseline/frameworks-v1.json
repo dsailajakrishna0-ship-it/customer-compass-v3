@@ -1,0 +1,87 @@
+{
+ "note": "Stage 5.5; lines of code are not baselined",
+ "tables": {
+  "agent": {
+   "frameworks": {
+    "completed": 13.0,
+    "cost_usd": 0.00082136,
+    "evidence_items_mean": 3.3846153846153846,
+    "evidence_steps_mean": 1.4615384615384615,
+    "fallback_used": 0.0,
+    "median_ms": 6602.0,
+    "model_calls_mean": 5.615384615384615,
+    "outcome_as_expected": 19.0,
+    "p95_ms": 20470.0,
+    "reviewer_approved": 7.0,
+    "revisions_mean": 1.0,
+    "runs": 20.0,
+    "tasks_written_by_recommend": 0.0,
+    "tokens_mean": 2701.846153846154,
+    "valid_citations": 8.0
+   },
+   "manual": {
+    "completed": 14.0,
+    "cost_usd": 0.0006918000000000001,
+    "evidence_items_mean": 7.285714285714286,
+    "evidence_steps_mean": 3.0,
+    "fallback_used": 0.0,
+    "median_ms": 10227.0,
+    "model_calls_mean": 3.857142857142857,
+    "outcome_as_expected": 20.0,
+    "p95_ms": 18175.0,
+    "reviewer_approved": 10.0,
+    "revisions_mean": 0.42857142857142855,
+    "runs": 20.0,
+    "tasks_written_by_recommend": 0.0,
+    "tokens_mean": 2215.9285714285716,
+    "valid_citations": 14.0
+   }
+  },
+  "chunker": {
+   "frameworks": {
+    "chunks": 34.0,
+    "median_chars": 393,
+    "mid_word_cuts": 0.0,
+    "mrr": 1.0,
+    "recall_at_1": 0.8425925925925926,
+    "recall_at_3": 1.0,
+    "recall_at_5": 1.0,
+    "short_chunks_under_100": 0.0
+   },
+   "manual": {
+    "chunks": 33.0,
+    "median_chars": 476,
+    "mid_word_cuts": 6.0,
+    "mrr": 1.0,
+    "recall_at_1": 0.8425925925925926,
+    "recall_at_3": 0.9722222222222222,
+    "recall_at_5": 0.9861111111111112,
+    "short_chunks_under_100": 0.0
+   }
+  },
+  "retrieval": {
+   "frameworks": {
+    "median_ms": 5.265402000077302,
+    "mrr": 0.9722222222222222,
+    "p95_ms": 5.659651000314625,
+    "questions": 42.0,
+    "recall_at_1": 0.787037037037037,
+    "recall_at_3": 0.9861111111111112,
+    "recall_at_5": 1.0,
+    "same_chunks_as_manual": 42.0,
+    "unanswerable_declined": 0.0
+   },
+   "manual": {
+    "median_ms": 6.432515998312738,
+    "mrr": 0.9722222222222222,
+    "p95_ms": 6.800434999604477,
+    "questions": 42.0,
+    "recall_at_1": 0.787037037037037,
+    "recall_at_3": 0.9861111111111112,
+    "recall_at_5": 1.0,
+    "same_chunks_as_manual": 42.0,
+    "unanswerable_declined": 0.0
+   }
+  }
+ }
+}

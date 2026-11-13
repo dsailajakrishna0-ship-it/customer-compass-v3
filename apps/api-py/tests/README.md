@@ -25,7 +25,7 @@ A contract test must not need the internet or a model, so it replaces exactly tw
 
 | Seam | What it stands for | Replaced by |
 | --- | --- | --- |
-| `app.routes.agent.make_llm` | The model: `llm(role, system_prompt, messages) -> GenerationResult`, called with the role `analyst`, `reviewer` or `task_drafter`. The agents expect JSON replies (`action`, `rationale`, `evidence`; `verdict`, `reasons`; `task_note`). | A scripted fake that answers by role; it may raise `LlmUnavailableError` (no model) |
+| `app.routes.agent.make_llm` | The model: `llm(role, system_prompt, messages, tools=None) -> GenerationResult`, called with the role `analyst`, `reviewer` or `task_drafter` (with `tools` set only by the prebuilt agent, `AGENT_IMPL=frameworks`, whose model may answer with tool calls; the same contract suite runs against both sides, see ADR 0028). The agents expect JSON replies (`action`, `rationale`, `evidence`; `verdict`, `reasons`; `task_note`). | A scripted fake that answers by role; it may raise `LlmUnavailableError` (no model) |
 | `app.mcp.tools.retrieve_relevant_chunks` | Document retrieval (embeddings and the vector store) | A few canned chunks; it may raise `EmbeddingsUnavailableError` (no embeddings key) |
 
 Both seams may fail with their public error type, and the API must then answer `503` with that error's message (nothing is written).
@@ -78,6 +78,8 @@ limits (set through the `AGENT_*` environment variables), the tool code. **The p
 | `test_rerank.py` | other | Retrieval and ingestion |
 | `test_agentic_retrieval.py` | other | Retrieval and ingestion |
 | `test_agentic_compare.py` | other | Retrieval and ingestion |
+| `test_frameworks.py` | other | Retrieval and ingestion (the framework side of each seam; skips without the optional packages) |
+| `test_frameworks_compare.py` | other | Retrieval and ingestion (the manual-versus-framework tables and recordings) |
 | `test_parse.py` | other | Retrieval and ingestion |
 | `test_embedding_models.py` | other | Retrieval and ingestion |
 | `test_migrations.py` | other | Database |

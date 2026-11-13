@@ -92,6 +92,14 @@ def chunk_segments(segments: list[Segment]) -> list[tuple[Segment, Chunk]]:
     return chunks
 
 
+def _with_framework_metadata(payload: dict) -> dict:
+    """With RETRIEVAL_IMPL=frameworks, LangChain's Qdrant store reads a chunk's fields from a nested
+    `metadata` payload key, so that copy is added (ADR 0027). Otherwise the payload is unchanged."""
+    if get_settings().retrieval_impl != "frameworks":
+        return payload
+    return {**payload, "metadata": {k: v for k, v in payload.items() if k != "content"}}
+
+
 async def _resolve_company_id(pool, company_name: str | None) -> int | None:
     if not company_name:
         return None
@@ -144,22 +152,24 @@ async def ingest_documents() -> IngestSummary:
                 PointStruct(
                     id=str(uuid.uuid4()),
                     vector={DENSE: embeddings[i], SPARSE: document_vector(chunk.content)},
-                    payload={
-                        # page (PDF) and sheet (spreadsheet) are left out when a file has neither,
-                        # so Markdown chunks look exactly as they did before 4.2
-                        **({"page": segment.page} if segment.page is not None else {}),
-                        **({"sheet": segment.sheet} if segment.sheet is not None else {}),
-                        "document_id": document_id,
-                        "chunk_index": chunk.index,
-                        "content": chunk.content,
-                        "char_start": chunk.char_start,
-                        "char_end": chunk.char_end,
-                        "document_title": doc.title,
-                        "source_path": doc.source_path,
-                        "doc_type": doc.doc_type,
-                        "company_id": company_id,
-                        "company_name": doc.company_name,
-                    },
+                    payload=_with_framework_metadata(
+                        {
+                            # page (PDF) and sheet (spreadsheet) are left out when a file has neither,
+                            # so Markdown chunks look exactly as they did before 4.2
+                            **({"page": segment.page} if segment.page is not None else {}),
+                            **({"sheet": segment.sheet} if segment.sheet is not None else {}),
+                            "document_id": document_id,
+                            "chunk_index": chunk.index,
+                            "content": chunk.content,
+                            "char_start": chunk.char_start,
+                            "char_end": chunk.char_end,
+                            "document_title": doc.title,
+                            "source_path": doc.source_path,
+                            "doc_type": doc.doc_type,
+                            "company_id": company_id,
+                            "company_name": doc.company_name,
+                        }
+                    ),
                 )
                 for i, (segment, chunk) in enumerate(chunks)
             ]

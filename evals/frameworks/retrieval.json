@@ -1,0 +1,1467 @@
+{
+ "embedding_model": "fastembed:BAAI/bge-small-en-v1.5",
+ "impls": {
+  "frameworks": {
+   "ret-01": {
+    "chunk_ids": [
+     "27a35bbb-dd50-42a2-b95d-ea91a9c0661f",
+     "d33c5ab7-8059-407e-a47a-f1bf96b1ea9c",
+     "87bd5243-3762-4434-b733-5a2c3d52d9b2",
+     "ad15f218-8d8c-470d-96ac-3b8e495a3463",
+     "db4e57c0-6f91-4331-bb46-970b3997d011"
+    ],
+    "collection_checks": 0,
+    "ms": 5.54715600083,
+    "ranked": [
+     "acme-call-renewal.md",
+     "riverside-call-renewal.md",
+     "acme-email-discount.md",
+     "summit-note-churn.md"
+    ]
+   },
+   "ret-02": {
+    "chunk_ids": [
+     "27a35bbb-dd50-42a2-b95d-ea91a9c0661f",
+     "ad15f218-8d8c-470d-96ac-3b8e495a3463",
+     "5355b202-af00-43e2-a89d-f9bef8ec4286",
+     "00e34a0c-d7b6-4365-a549-f2acda137b72",
+     "87bd5243-3762-4434-b733-5a2c3d52d9b2"
+    ],
+    "collection_checks": 0,
+    "ms": 5.444970000098692,
+    "ranked": [
+     "acme-call-renewal.md",
+     "acme-email-discount.md",
+     "product-premium-operations-plan.md",
+     "acme-service-agreement.pdf",
+     "riverside-call-renewal.md"
+    ]
+   },
+   "ret-03": {
+    "chunk_ids": [
+     "d33c5ab7-8059-407e-a47a-f1bf96b1ea9c",
+     "ad15f218-8d8c-470d-96ac-3b8e495a3463",
+     "f021cb48-d76c-4f14-b575-00dc778114bf",
+     "357789dc-ba32-415d-8d9c-c397f41607c9",
+     "d4f8fb82-7825-47ad-a3ee-9e4feb4c6670"
+    ],
+    "collection_checks": 0,
+    "ms": 5.5362000020977575,
+    "ranked": [
+     "acme-call-renewal.md",
+     "acme-email-discount.md",
+     "northstar-rate-card.xlsx",
+     "goldenvalley-email-pricing.md"
+    ]
+   },
+   "ret-04": {
+    "chunk_ids": [
+     "ad15f218-8d8c-470d-96ac-3b8e495a3463",
+     "5355b202-af00-43e2-a89d-f9bef8ec4286",
+     "d4f8fb82-7825-47ad-a3ee-9e4feb4c6670",
+     "f6ff92bc-482f-4451-87be-f769dabc27f8",
+     "87bd5243-3762-4434-b733-5a2c3d52d9b2"
+    ],
+    "collection_checks": 0,
+    "ms": 5.474695997691015,
+    "ranked": [
+     "acme-email-discount.md",
+     "product-premium-operations-plan.md",
+     "riverside-call-renewal.md"
+    ]
+   },
+   "ret-05": {
+    "chunk_ids": [
+     "59f9a50a-7809-42f2-872f-0ec5c7c7ec47",
+     "f6ff92bc-482f-4451-87be-f769dabc27f8",
+     "18c2890b-f347-438c-9a62-5cee5357b6a7",
+     "388f721e-50d1-41bd-861f-a4ee34a25405",
+     "dfc6a4e9-5478-4b78-98d7-8d68d7abeb2b"
+    ],
+    "collection_checks": 0,
+    "ms": 5.424859999038745,
+    "ranked": [
+     "acme-support-export-timeout.md",
+     "product-premium-operations-plan.md",
+     "riverside-data-handling-policy.docx",
+     "vertex-support-rate-limit.md"
+    ]
+   },
+   "ret-06": {
+    "chunk_ids": [
+     "59f9a50a-7809-42f2-872f-0ec5c7c7ec47",
+     "f6ff92bc-482f-4451-87be-f769dabc27f8",
+     "388f721e-50d1-41bd-861f-a4ee34a25405",
+     "18c2890b-f347-438c-9a62-5cee5357b6a7",
+     "d33c5ab7-8059-407e-a47a-f1bf96b1ea9c"
+    ],
+    "collection_checks": 0,
+    "ms": 5.374992997531081,
+    "ranked": [
+     "acme-support-export-timeout.md",
+     "product-premium-operations-plan.md",
+     "riverside-data-handling-policy.docx",
+     "acme-call-renewal.md"
+    ]
+   },
+   "ret-07": {
+    "chunk_ids": [
+     "357789dc-ba32-415d-8d9c-c397f41607c9",
+     "27b2c34e-cf57-44c4-9b3e-186a6ec386b4",
+     "d33c5ab7-8059-407e-a47a-f1bf96b1ea9c",
+     "27a35bbb-dd50-42a2-b95d-ea91a9c0661f",
+     "f021cb48-d76c-4f14-b575-00dc778114bf"
+    ],
+    "collection_checks": 0,
+    "ms": 5.501358999026706,
+    "ranked": [
+     "goldenvalley-email-pricing.md",
+     "goldenvalley-note-discovery.md",
+     "acme-call-renewal.md",
+     "northstar-rate-card.xlsx"
+    ]
+   },
+   "ret-08": {
+    "chunk_ids": [
+     "357789dc-ba32-415d-8d9c-c397f41607c9",
+     "d33c5ab7-8059-407e-a47a-f1bf96b1ea9c",
+     "27a35bbb-dd50-42a2-b95d-ea91a9c0661f",
+     "f021cb48-d76c-4f14-b575-00dc778114bf",
+     "ad15f218-8d8c-470d-96ac-3b8e495a3463"
+    ],
+    "collection_checks": 0,
+    "ms": 5.322934001014801,
+    "ranked": [
+     "goldenvalley-email-pricing.md",
+     "acme-call-renewal.md",
+     "northstar-rate-card.xlsx",
+     "acme-email-discount.md"
+    ]
+   },
+   "ret-09": {
+    "chunk_ids": [
+     "27b2c34e-cf57-44c4-9b3e-186a6ec386b4",
+     "a334584c-0277-443d-b869-bfa83b3881d9",
+     "b714cd2c-aa71-427f-992e-0817318b1119",
+     "6afd43b5-6f3c-4f54-8762-cd53da0339e3",
+     "ee8e87a2-71a2-4b4b-9f38-7f2948d33ed1"
+    ],
+    "collection_checks": 0,
+    "ms": 5.2542019984684885,
+    "ranked": [
+     "goldenvalley-note-discovery.md",
+     "product-fleet-visibility.md",
+     "northstar-note-discovery.md",
+     "northstar-support-alerting.md"
+    ]
+   },
+   "ret-10": {
+    "chunk_ids": [
+     "27b2c34e-cf57-44c4-9b3e-186a6ec386b4",
+     "1ee6f679-7b80-425c-b4e2-8e3683240ffb",
+     "a334584c-0277-443d-b869-bfa83b3881d9",
+     "357789dc-ba32-415d-8d9c-c397f41607c9",
+     "b714cd2c-aa71-427f-992e-0817318b1119"
+    ],
+    "collection_checks": 0,
+    "ms": 5.522580999240745,
+    "ranked": [
+     "goldenvalley-note-discovery.md",
+     "product-fleet-visibility.md",
+     "goldenvalley-email-pricing.md",
+     "northstar-note-discovery.md"
+    ]
+   },
+   "ret-11": {
+    "chunk_ids": [
+     "cce3c76c-1d8f-46c7-82d6-c1a6d0621596",
+     "d33c5ab7-8059-407e-a47a-f1bf96b1ea9c",
+     "db4e57c0-6f91-4331-bb46-970b3997d011",
+     "87bd5243-3762-4434-b733-5a2c3d52d9b2",
+     "d4f8fb82-7825-47ad-a3ee-9e4feb4c6670"
+    ],
+    "collection_checks": 0,
+    "ms": 5.3100609984539915,
+    "ranked": [
+     "harborpine-note-checkin.md",
+     "acme-call-renewal.md",
+     "summit-note-churn.md",
+     "riverside-call-renewal.md",
+     "acme-email-discount.md"
+    ]
+   },
+   "ret-12": {
+    "chunk_ids": [
+     "cce3c76c-1d8f-46c7-82d6-c1a6d0621596",
+     "47f4e671-ae87-45bd-aa94-4c7c8027e99d",
+     "d4f8fb82-7825-47ad-a3ee-9e4feb4c6670",
+     "f6ff92bc-482f-4451-87be-f769dabc27f8",
+     "1ee6f679-7b80-425c-b4e2-8e3683240ffb"
+    ],
+    "collection_checks": 0,
+    "ms": 5.659651000314625,
+    "ranked": [
+     "harborpine-note-checkin.md",
+     "acme-email-discount.md",
+     "product-premium-operations-plan.md",
+     "goldenvalley-note-discovery.md"
+    ]
+   },
+   "ret-13": {
+    "chunk_ids": [
+     "cce3c76c-1d8f-46c7-82d6-c1a6d0621596",
+     "357789dc-ba32-415d-8d9c-c397f41607c9",
+     "47f4e671-ae87-45bd-aa94-4c7c8027e99d",
+     "b714cd2c-aa71-427f-992e-0817318b1119",
+     "d33c5ab7-8059-407e-a47a-f1bf96b1ea9c"
+    ],
+    "collection_checks": 0,
+    "ms": 5.3555550002784,
+    "ranked": [
+     "harborpine-note-checkin.md",
+     "goldenvalley-email-pricing.md",
+     "northstar-note-discovery.md",
+     "acme-call-renewal.md"
+    ]
+   },
+   "ret-14": {
+    "chunk_ids": [
+     "6afd43b5-6f3c-4f54-8762-cd53da0339e3",
+     "ee8e87a2-71a2-4b4b-9f38-7f2948d33ed1",
+     "3b1fdaf1-0713-4e9f-a29f-efd19dd5bd6e",
+     "27b2c34e-cf57-44c4-9b3e-186a6ec386b4",
+     "357789dc-ba32-415d-8d9c-c397f41607c9"
+    ],
+    "collection_checks": 0,
+    "ms": 5.483225999341812,
+    "ranked": [
+     "northstar-note-discovery.md",
+     "northstar-support-alerting.md",
+     "product-fleet-visibility.md",
+     "goldenvalley-note-discovery.md",
+     "goldenvalley-email-pricing.md"
+    ]
+   },
+   "ret-15": {
+    "chunk_ids": [
+     "6afd43b5-6f3c-4f54-8762-cd53da0339e3",
+     "b714cd2c-aa71-427f-992e-0817318b1119",
+     "27b2c34e-cf57-44c4-9b3e-186a6ec386b4",
+     "6b01b336-7ab9-4f55-8cc3-ab8f67255282",
+     "ee8e87a2-71a2-4b4b-9f38-7f2948d33ed1"
+    ],
+    "collection_checks": 0,
+    "ms": 5.560346999118337,
+    "ranked": [
+     "northstar-note-discovery.md",
+     "goldenvalley-note-discovery.md",
+     "northstar-support-alerting.md"
+    ]
+   },
+   "ret-16": {
+    "chunk_ids": [
+     "ee8e87a2-71a2-4b4b-9f38-7f2948d33ed1",
+     "b714cd2c-aa71-427f-992e-0817318b1119",
+     "a334584c-0277-443d-b869-bfa83b3881d9",
+     "3b1fdaf1-0713-4e9f-a29f-efd19dd5bd6e",
+     "27b2c34e-cf57-44c4-9b3e-186a6ec386b4"
+    ],
+    "collection_checks": 0,
+    "ms": 5.293769998388598,
+    "ranked": [
+     "northstar-support-alerting.md",
+     "northstar-note-discovery.md",
+     "product-fleet-visibility.md",
+     "goldenvalley-note-discovery.md"
+    ]
+   },
+   "ret-17": {
+    "chunk_ids": [
+     "ee8e87a2-71a2-4b4b-9f38-7f2948d33ed1",
+     "6afd43b5-6f3c-4f54-8762-cd53da0339e3",
+     "27b2c34e-cf57-44c4-9b3e-186a6ec386b4",
+     "b714cd2c-aa71-427f-992e-0817318b1119",
+     "a334584c-0277-443d-b869-bfa83b3881d9"
+    ],
+    "collection_checks": 0,
+    "ms": 5.414170998847112,
+    "ranked": [
+     "northstar-support-alerting.md",
+     "northstar-note-discovery.md",
+     "goldenvalley-note-discovery.md",
+     "product-fleet-visibility.md"
+    ]
+   },
+   "ret-18": {
+    "chunk_ids": [
+     "a334584c-0277-443d-b869-bfa83b3881d9",
+     "b714cd2c-aa71-427f-992e-0817318b1119",
+     "27b2c34e-cf57-44c4-9b3e-186a6ec386b4",
+     "6b01b336-7ab9-4f55-8cc3-ab8f67255282",
+     "ee8e87a2-71a2-4b4b-9f38-7f2948d33ed1"
+    ],
+    "collection_checks": 0,
+    "ms": 5.116644999361597,
+    "ranked": [
+     "product-fleet-visibility.md",
+     "northstar-note-discovery.md",
+     "goldenvalley-note-discovery.md",
+     "northstar-support-alerting.md"
+    ]
+   },
+   "ret-19": {
+    "chunk_ids": [
+     "a334584c-0277-443d-b869-bfa83b3881d9",
+     "3b1fdaf1-0713-4e9f-a29f-efd19dd5bd6e",
+     "ee8e87a2-71a2-4b4b-9f38-7f2948d33ed1",
+     "b714cd2c-aa71-427f-992e-0817318b1119",
+     "357789dc-ba32-415d-8d9c-c397f41607c9"
+    ],
+    "collection_checks": 0,
+    "ms": 5.209063001530012,
+    "ranked": [
+     "product-fleet-visibility.md",
+     "northstar-support-alerting.md",
+     "northstar-note-discovery.md",
+     "goldenvalley-email-pricing.md"
+    ]
+   },
+   "ret-20": {
+    "chunk_ids": [
+     "a334584c-0277-443d-b869-bfa83b3881d9",
+     "b714cd2c-aa71-427f-992e-0817318b1119",
+     "6b01b336-7ab9-4f55-8cc3-ab8f67255282",
+     "27b2c34e-cf57-44c4-9b3e-186a6ec386b4",
+     "357789dc-ba32-415d-8d9c-c397f41607c9"
+    ],
+    "collection_checks": 0,
+    "ms": 5.165726000996074,
+    "ranked": [
+     "product-fleet-visibility.md",
+     "northstar-note-discovery.md",
+     "northstar-support-alerting.md",
+     "goldenvalley-note-discovery.md",
+     "goldenvalley-email-pricing.md"
+    ]
+   },
+   "ret-21": {
+    "chunk_ids": [
+     "5355b202-af00-43e2-a89d-f9bef8ec4286",
+     "ad15f218-8d8c-470d-96ac-3b8e495a3463",
+     "27a35bbb-dd50-42a2-b95d-ea91a9c0661f",
+     "87bd5243-3762-4434-b733-5a2c3d52d9b2",
+     "f021cb48-d76c-4f14-b575-00dc778114bf"
+    ],
+    "collection_checks": 0,
+    "ms": 5.265402000077302,
+    "ranked": [
+     "product-premium-operations-plan.md",
+     "acme-email-discount.md",
+     "acme-call-renewal.md",
+     "riverside-call-renewal.md",
+     "northstar-rate-card.xlsx"
+    ]
+   },
+   "ret-22": {
+    "chunk_ids": [
+     "f6ff92bc-482f-4451-87be-f769dabc27f8",
+     "d4f8fb82-7825-47ad-a3ee-9e4feb4c6670",
+     "5355b202-af00-43e2-a89d-f9bef8ec4286",
+     "27a35bbb-dd50-42a2-b95d-ea91a9c0661f",
+     "d33c5ab7-8059-407e-a47a-f1bf96b1ea9c"
+    ],
+    "collection_checks": 0,
+    "ms": 5.1898739984608255,
+    "ranked": [
+     "product-premium-operations-plan.md",
+     "acme-email-discount.md",
+     "acme-call-renewal.md"
+    ]
+   },
+   "ret-23": {
+    "chunk_ids": [
+     "87bd5243-3762-4434-b733-5a2c3d52d9b2",
+     "438835c9-6572-4ede-b178-dae7399db99d",
+     "db4e57c0-6f91-4331-bb46-970b3997d011",
+     "d33c5ab7-8059-407e-a47a-f1bf96b1ea9c",
+     "8b76982e-b014-4e8a-b257-48fedebc33e3"
+    ],
+    "collection_checks": 0,
+    "ms": 6.25937700169743,
+    "ranked": [
+     "riverside-call-renewal.md",
+     "riverside-email-feedback.md",
+     "summit-note-churn.md",
+     "acme-call-renewal.md"
+    ]
+   },
+   "ret-24": {
+    "chunk_ids": [
+     "1ee6f679-7b80-425c-b4e2-8e3683240ffb",
+     "87bd5243-3762-4434-b733-5a2c3d52d9b2",
+     "3b1fdaf1-0713-4e9f-a29f-efd19dd5bd6e",
+     "438835c9-6572-4ede-b178-dae7399db99d",
+     "d4f8fb82-7825-47ad-a3ee-9e4feb4c6670"
+    ],
+    "collection_checks": 0,
+    "ms": 5.163982998055872,
+    "ranked": [
+     "goldenvalley-note-discovery.md",
+     "riverside-call-renewal.md",
+     "product-fleet-visibility.md",
+     "riverside-email-feedback.md",
+     "acme-email-discount.md"
+    ]
+   },
+   "ret-25": {
+    "chunk_ids": [
+     "438835c9-6572-4ede-b178-dae7399db99d",
+     "c4a6815c-c461-43a3-9609-b0a66848145b",
+     "75c74817-0da6-49d8-869f-f505ccd9f026",
+     "87bd5243-3762-4434-b733-5a2c3d52d9b2",
+     "388f721e-50d1-41bd-861f-a4ee34a25405"
+    ],
+    "collection_checks": 0,
+    "ms": 5.110803998832125,
+    "ranked": [
+     "riverside-email-feedback.md",
+     "riverside-support-compliance.md",
+     "riverside-call-renewal.md",
+     "riverside-data-handling-policy.docx"
+    ]
+   },
+   "ret-26": {
+    "chunk_ids": [
+     "75c74817-0da6-49d8-869f-f505ccd9f026",
+     "1ee6f679-7b80-425c-b4e2-8e3683240ffb",
+     "388f721e-50d1-41bd-861f-a4ee34a25405",
+     "59f9a50a-7809-42f2-872f-0ec5c7c7ec47",
+     "d4f8fb82-7825-47ad-a3ee-9e4feb4c6670"
+    ],
+    "collection_checks": 0,
+    "ms": 5.097897999803536,
+    "ranked": [
+     "riverside-support-compliance.md",
+     "goldenvalley-note-discovery.md",
+     "riverside-data-handling-policy.docx",
+     "acme-support-export-timeout.md",
+     "acme-email-discount.md"
+    ]
+   },
+   "ret-27": {
+    "chunk_ids": [
+     "c4a6815c-c461-43a3-9609-b0a66848145b",
+     "75c74817-0da6-49d8-869f-f505ccd9f026",
+     "388f721e-50d1-41bd-861f-a4ee34a25405",
+     "59f9a50a-7809-42f2-872f-0ec5c7c7ec47",
+     "d4f8fb82-7825-47ad-a3ee-9e4feb4c6670"
+    ],
+    "collection_checks": 0,
+    "ms": 4.993414000637131,
+    "ranked": [
+     "riverside-support-compliance.md",
+     "riverside-data-handling-policy.docx",
+     "acme-support-export-timeout.md",
+     "acme-email-discount.md"
+    ]
+   },
+   "ret-28": {
+    "chunk_ids": [
+     "8b76982e-b014-4e8a-b257-48fedebc33e3",
+     "438835c9-6572-4ede-b178-dae7399db99d",
+     "cce3c76c-1d8f-46c7-82d6-c1a6d0621596",
+     "ad15f218-8d8c-470d-96ac-3b8e495a3463",
+     "27a35bbb-dd50-42a2-b95d-ea91a9c0661f"
+    ],
+    "collection_checks": 0,
+    "ms": 5.002752997825155,
+    "ranked": [
+     "summit-note-churn.md",
+     "riverside-email-feedback.md",
+     "harborpine-note-checkin.md",
+     "acme-email-discount.md",
+     "acme-call-renewal.md"
+    ]
+   },
+   "ret-29": {
+    "chunk_ids": [
+     "8b76982e-b014-4e8a-b257-48fedebc33e3",
+     "d4f8fb82-7825-47ad-a3ee-9e4feb4c6670",
+     "1ee6f679-7b80-425c-b4e2-8e3683240ffb",
+     "ad15f218-8d8c-470d-96ac-3b8e495a3463",
+     "0782ec2a-b618-4b95-8fad-c43846316c9e"
+    ],
+    "collection_checks": 0,
+    "ms": 5.129959001351381,
+    "ranked": [
+     "summit-note-churn.md",
+     "acme-email-discount.md",
+     "goldenvalley-note-discovery.md",
+     "vertex-call-renewal.md"
+    ]
+   },
+   "ret-30": {
+    "chunk_ids": [
+     "0782ec2a-b618-4b95-8fad-c43846316c9e",
+     "d33c5ab7-8059-407e-a47a-f1bf96b1ea9c",
+     "dfc6a4e9-5478-4b78-98d7-8d68d7abeb2b",
+     "6afd43b5-6f3c-4f54-8762-cd53da0339e3",
+     "27a35bbb-dd50-42a2-b95d-ea91a9c0661f"
+    ],
+    "collection_checks": 0,
+    "ms": 5.075152002973482,
+    "ranked": [
+     "vertex-call-renewal.md",
+     "acme-call-renewal.md",
+     "vertex-support-rate-limit.md",
+     "northstar-note-discovery.md"
+    ]
+   },
+   "ret-31": {
+    "chunk_ids": [
+     "0782ec2a-b618-4b95-8fad-c43846316c9e",
+     "d33c5ab7-8059-407e-a47a-f1bf96b1ea9c",
+     "3b1fdaf1-0713-4e9f-a29f-efd19dd5bd6e",
+     "dfc6a4e9-5478-4b78-98d7-8d68d7abeb2b",
+     "87bd5243-3762-4434-b733-5a2c3d52d9b2"
+    ],
+    "collection_checks": 0,
+    "ms": 5.01957399683306,
+    "ranked": [
+     "vertex-call-renewal.md",
+     "acme-call-renewal.md",
+     "product-fleet-visibility.md",
+     "vertex-support-rate-limit.md",
+     "riverside-call-renewal.md"
+    ]
+   },
+   "ret-32": {
+    "chunk_ids": [
+     "dfc6a4e9-5478-4b78-98d7-8d68d7abeb2b",
+     "f6ff92bc-482f-4451-87be-f769dabc27f8",
+     "d4f8fb82-7825-47ad-a3ee-9e4feb4c6670",
+     "d33c5ab7-8059-407e-a47a-f1bf96b1ea9c",
+     "0782ec2a-b618-4b95-8fad-c43846316c9e"
+    ],
+    "collection_checks": 0,
+    "ms": 5.380660000810167,
+    "ranked": [
+     "vertex-support-rate-limit.md",
+     "product-premium-operations-plan.md",
+     "acme-email-discount.md",
+     "acme-call-renewal.md",
+     "vertex-call-renewal.md"
+    ]
+   },
+   "ret-33": {
+    "chunk_ids": [
+     "dfc6a4e9-5478-4b78-98d7-8d68d7abeb2b",
+     "0782ec2a-b618-4b95-8fad-c43846316c9e",
+     "5355b202-af00-43e2-a89d-f9bef8ec4286",
+     "27a35bbb-dd50-42a2-b95d-ea91a9c0661f",
+     "d33c5ab7-8059-407e-a47a-f1bf96b1ea9c"
+    ],
+    "collection_checks": 0,
+    "ms": 4.934953998599667,
+    "ranked": [
+     "vertex-support-rate-limit.md",
+     "vertex-call-renewal.md",
+     "product-premium-operations-plan.md",
+     "acme-call-renewal.md"
+    ]
+   },
+   "ret-34": {
+    "chunk_ids": [
+     "59f9a50a-7809-42f2-872f-0ec5c7c7ec47",
+     "d33c5ab7-8059-407e-a47a-f1bf96b1ea9c",
+     "18c2890b-f347-438c-9a62-5cee5357b6a7",
+     "f6ff92bc-482f-4451-87be-f769dabc27f8",
+     "d4f8fb82-7825-47ad-a3ee-9e4feb4c6670"
+    ],
+    "collection_checks": 0,
+    "ms": 5.686429998604581,
+    "ranked": [
+     "acme-support-export-timeout.md",
+     "acme-call-renewal.md",
+     "product-premium-operations-plan.md",
+     "acme-email-discount.md"
+    ]
+   },
+   "ret-35": {
+    "chunk_ids": [
+     "b714cd2c-aa71-427f-992e-0817318b1119",
+     "ee8e87a2-71a2-4b4b-9f38-7f2948d33ed1",
+     "3b1fdaf1-0713-4e9f-a29f-efd19dd5bd6e",
+     "f021cb48-d76c-4f14-b575-00dc778114bf",
+     "6afd43b5-6f3c-4f54-8762-cd53da0339e3"
+    ],
+    "collection_checks": 0,
+    "ms": 5.500821996974992,
+    "ranked": [
+     "northstar-note-discovery.md",
+     "northstar-support-alerting.md",
+     "product-fleet-visibility.md",
+     "northstar-rate-card.xlsx"
+    ]
+   },
+   "ret-36": {
+    "chunk_ids": [
+     "75c74817-0da6-49d8-869f-f505ccd9f026",
+     "c4a6815c-c461-43a3-9609-b0a66848145b",
+     "438835c9-6572-4ede-b178-dae7399db99d",
+     "388f721e-50d1-41bd-861f-a4ee34a25405",
+     "87bd5243-3762-4434-b733-5a2c3d52d9b2"
+    ],
+    "collection_checks": 0,
+    "ms": 5.644008000672329,
+    "ranked": [
+     "riverside-support-compliance.md",
+     "riverside-email-feedback.md",
+     "riverside-data-handling-policy.docx",
+     "riverside-call-renewal.md"
+    ]
+   },
+   "unans-01": {
+    "chunk_ids": [
+     "d4f8fb82-7825-47ad-a3ee-9e4feb4c6670",
+     "d33c5ab7-8059-407e-a47a-f1bf96b1ea9c",
+     "18c2890b-f347-438c-9a62-5cee5357b6a7",
+     "388f721e-50d1-41bd-861f-a4ee34a25405",
+     "357789dc-ba32-415d-8d9c-c397f41607c9"
+    ],
+    "collection_checks": 0,
+    "ms": 5.005382998206187,
+    "ranked": [
+     "acme-email-discount.md",
+     "acme-call-renewal.md",
+     "acme-support-export-timeout.md",
+     "riverside-data-handling-policy.docx",
+     "goldenvalley-email-pricing.md"
+    ]
+   },
+   "unans-02": {
+    "chunk_ids": [
+     "0782ec2a-b618-4b95-8fad-c43846316c9e",
+     "dfc6a4e9-5478-4b78-98d7-8d68d7abeb2b",
+     "27a35bbb-dd50-42a2-b95d-ea91a9c0661f",
+     "27b2c34e-cf57-44c4-9b3e-186a6ec386b4",
+     "6afd43b5-6f3c-4f54-8762-cd53da0339e3"
+    ],
+    "collection_checks": 0,
+    "ms": 5.014136000681901,
+    "ranked": [
+     "vertex-call-renewal.md",
+     "vertex-support-rate-limit.md",
+     "acme-call-renewal.md",
+     "goldenvalley-note-discovery.md",
+     "northstar-note-discovery.md"
+    ]
+   },
+   "unans-03": {
+    "chunk_ids": [
+     "47f4e671-ae87-45bd-aa94-4c7c8027e99d",
+     "438835c9-6572-4ede-b178-dae7399db99d",
+     "18c2890b-f347-438c-9a62-5cee5357b6a7",
+     "d4f8fb82-7825-47ad-a3ee-9e4feb4c6670",
+     "f021cb48-d76c-4f14-b575-00dc778114bf"
+    ],
+    "collection_checks": 0,
+    "ms": 5.073406002338743,
+    "ranked": [
+     "harborpine-note-checkin.md",
+     "riverside-email-feedback.md",
+     "acme-support-export-timeout.md",
+     "acme-email-discount.md",
+     "northstar-rate-card.xlsx"
+    ]
+   },
+   "unans-04": {
+    "chunk_ids": [
+     "d4f8fb82-7825-47ad-a3ee-9e4feb4c6670",
+     "6b01b336-7ab9-4f55-8cc3-ab8f67255282",
+     "f021cb48-d76c-4f14-b575-00dc778114bf",
+     "59f9a50a-7809-42f2-872f-0ec5c7c7ec47",
+     "438835c9-6572-4ede-b178-dae7399db99d"
+    ],
+    "collection_checks": 0,
+    "ms": 5.161348002729937,
+    "ranked": [
+     "acme-email-discount.md",
+     "northstar-support-alerting.md",
+     "northstar-rate-card.xlsx",
+     "acme-support-export-timeout.md",
+     "riverside-email-feedback.md"
+    ]
+   },
+   "unans-05": {
+    "chunk_ids": [
+     "cce3c76c-1d8f-46c7-82d6-c1a6d0621596",
+     "47f4e671-ae87-45bd-aa94-4c7c8027e99d",
+     "ad15f218-8d8c-470d-96ac-3b8e495a3463",
+     "357789dc-ba32-415d-8d9c-c397f41607c9",
+     "f021cb48-d76c-4f14-b575-00dc778114bf"
+    ],
+    "collection_checks": 0,
+    "ms": 5.082822000986198,
+    "ranked": [
+     "harborpine-note-checkin.md",
+     "acme-email-discount.md",
+     "goldenvalley-email-pricing.md",
+     "northstar-rate-card.xlsx"
+    ]
+   },
+   "unans-06": {
+    "chunk_ids": [
+     "00e34a0c-d7b6-4365-a549-f2acda137b72",
+     "27a35bbb-dd50-42a2-b95d-ea91a9c0661f",
+     "ad15f218-8d8c-470d-96ac-3b8e495a3463",
+     "d1a44a3c-93d2-485d-9560-cddcfd4a5d13",
+     "5355b202-af00-43e2-a89d-f9bef8ec4286"
+    ],
+    "collection_checks": 0,
+    "ms": 5.108702000143239,
+    "ranked": [
+     "acme-service-agreement.pdf",
+     "acme-call-renewal.md",
+     "acme-email-discount.md",
+     "product-premium-operations-plan.md"
+    ]
+   }
+  },
+  "manual": {
+   "ret-01": {
+    "chunk_ids": [
+     "27a35bbb-dd50-42a2-b95d-ea91a9c0661f",
+     "d33c5ab7-8059-407e-a47a-f1bf96b1ea9c",
+     "87bd5243-3762-4434-b733-5a2c3d52d9b2",
+     "ad15f218-8d8c-470d-96ac-3b8e495a3463",
+     "db4e57c0-6f91-4331-bb46-970b3997d011"
+    ],
+    "collection_checks": 0,
+    "ms": 7.1309549966827035,
+    "ranked": [
+     "acme-call-renewal.md",
+     "riverside-call-renewal.md",
+     "acme-email-discount.md",
+     "summit-note-churn.md"
+    ]
+   },
+   "ret-02": {
+    "chunk_ids": [
+     "27a35bbb-dd50-42a2-b95d-ea91a9c0661f",
+     "ad15f218-8d8c-470d-96ac-3b8e495a3463",
+     "5355b202-af00-43e2-a89d-f9bef8ec4286",
+     "00e34a0c-d7b6-4365-a549-f2acda137b72",
+     "87bd5243-3762-4434-b733-5a2c3d52d9b2"
+    ],
+    "collection_checks": 0,
+    "ms": 6.770240001060301,
+    "ranked": [
+     "acme-call-renewal.md",
+     "acme-email-discount.md",
+     "product-premium-operations-plan.md",
+     "acme-service-agreement.pdf",
+     "riverside-call-renewal.md"
+    ]
+   },
+   "ret-03": {
+    "chunk_ids": [
+     "d33c5ab7-8059-407e-a47a-f1bf96b1ea9c",
+     "ad15f218-8d8c-470d-96ac-3b8e495a3463",
+     "f021cb48-d76c-4f14-b575-00dc778114bf",
+     "357789dc-ba32-415d-8d9c-c397f41607c9",
+     "d4f8fb82-7825-47ad-a3ee-9e4feb4c6670"
+    ],
+    "collection_checks": 0,
+    "ms": 6.5089359995909035,
+    "ranked": [
+     "acme-call-renewal.md",
+     "acme-email-discount.md",
+     "northstar-rate-card.xlsx",
+     "goldenvalley-email-pricing.md"
+    ]
+   },
+   "ret-04": {
+    "chunk_ids": [
+     "ad15f218-8d8c-470d-96ac-3b8e495a3463",
+     "5355b202-af00-43e2-a89d-f9bef8ec4286",
+     "d4f8fb82-7825-47ad-a3ee-9e4feb4c6670",
+     "f6ff92bc-482f-4451-87be-f769dabc27f8",
+     "87bd5243-3762-4434-b733-5a2c3d52d9b2"
+    ],
+    "collection_checks": 0,
+    "ms": 6.501069001387805,
+    "ranked": [
+     "acme-email-discount.md",
+     "product-premium-operations-plan.md",
+     "riverside-call-renewal.md"
+    ]
+   },
+   "ret-05": {
+    "chunk_ids": [
+     "59f9a50a-7809-42f2-872f-0ec5c7c7ec47",
+     "f6ff92bc-482f-4451-87be-f769dabc27f8",
+     "18c2890b-f347-438c-9a62-5cee5357b6a7",
+     "388f721e-50d1-41bd-861f-a4ee34a25405",
+     "dfc6a4e9-5478-4b78-98d7-8d68d7abeb2b"
+    ],
+    "collection_checks": 0,
+    "ms": 6.661022998741828,
+    "ranked": [
+     "acme-support-export-timeout.md",
+     "product-premium-operations-plan.md",
+     "riverside-data-handling-policy.docx",
+     "vertex-support-rate-limit.md"
+    ]
+   },
+   "ret-06": {
+    "chunk_ids": [
+     "59f9a50a-7809-42f2-872f-0ec5c7c7ec47",
+     "f6ff92bc-482f-4451-87be-f769dabc27f8",
+     "388f721e-50d1-41bd-861f-a4ee34a25405",
+     "18c2890b-f347-438c-9a62-5cee5357b6a7",
+     "d33c5ab7-8059-407e-a47a-f1bf96b1ea9c"
+    ],
+    "collection_checks": 0,
+    "ms": 6.589257998712128,
+    "ranked": [
+     "acme-support-export-timeout.md",
+     "product-premium-operations-plan.md",
+     "riverside-data-handling-policy.docx",
+     "acme-call-renewal.md"
+    ]
+   },
+   "ret-07": {
+    "chunk_ids": [
+     "357789dc-ba32-415d-8d9c-c397f41607c9",
+     "27b2c34e-cf57-44c4-9b3e-186a6ec386b4",
+     "d33c5ab7-8059-407e-a47a-f1bf96b1ea9c",
+     "27a35bbb-dd50-42a2-b95d-ea91a9c0661f",
+     "f021cb48-d76c-4f14-b575-00dc778114bf"
+    ],
+    "collection_checks": 0,
+    "ms": 6.620775002375012,
+    "ranked": [
+     "goldenvalley-email-pricing.md",
+     "goldenvalley-note-discovery.md",
+     "acme-call-renewal.md",
+     "northstar-rate-card.xlsx"
+    ]
+   },
+   "ret-08": {
+    "chunk_ids": [
+     "357789dc-ba32-415d-8d9c-c397f41607c9",
+     "d33c5ab7-8059-407e-a47a-f1bf96b1ea9c",
+     "27a35bbb-dd50-42a2-b95d-ea91a9c0661f",
+     "f021cb48-d76c-4f14-b575-00dc778114bf",
+     "ad15f218-8d8c-470d-96ac-3b8e495a3463"
+    ],
+    "collection_checks": 0,
+    "ms": 6.7734420008491725,
+    "ranked": [
+     "goldenvalley-email-pricing.md",
+     "acme-call-renewal.md",
+     "northstar-rate-card.xlsx",
+     "acme-email-discount.md"
+    ]
+   },
+   "ret-09": {
+    "chunk_ids": [
+     "27b2c34e-cf57-44c4-9b3e-186a6ec386b4",
+     "a334584c-0277-443d-b869-bfa83b3881d9",
+     "b714cd2c-aa71-427f-992e-0817318b1119",
+     "6afd43b5-6f3c-4f54-8762-cd53da0339e3",
+     "ee8e87a2-71a2-4b4b-9f38-7f2948d33ed1"
+    ],
+    "collection_checks": 0,
+    "ms": 6.427235999581171,
+    "ranked": [
+     "goldenvalley-note-discovery.md",
+     "product-fleet-visibility.md",
+     "northstar-note-discovery.md",
+     "northstar-support-alerting.md"
+    ]
+   },
+   "ret-10": {
+    "chunk_ids": [
+     "27b2c34e-cf57-44c4-9b3e-186a6ec386b4",
+     "1ee6f679-7b80-425c-b4e2-8e3683240ffb",
+     "a334584c-0277-443d-b869-bfa83b3881d9",
+     "357789dc-ba32-415d-8d9c-c397f41607c9",
+     "b714cd2c-aa71-427f-992e-0817318b1119"
+    ],
+    "collection_checks": 0,
+    "ms": 6.928686998435296,
+    "ranked": [
+     "goldenvalley-note-discovery.md",
+     "product-fleet-visibility.md",
+     "goldenvalley-email-pricing.md",
+     "northstar-note-discovery.md"
+    ]
+   },
+   "ret-11": {
+    "chunk_ids": [
+     "cce3c76c-1d8f-46c7-82d6-c1a6d0621596",
+     "d33c5ab7-8059-407e-a47a-f1bf96b1ea9c",
+     "db4e57c0-6f91-4331-bb46-970b3997d011",
+     "87bd5243-3762-4434-b733-5a2c3d52d9b2",
+     "d4f8fb82-7825-47ad-a3ee-9e4feb4c6670"
+    ],
+    "collection_checks": 0,
+    "ms": 6.647097998211393,
+    "ranked": [
+     "harborpine-note-checkin.md",
+     "acme-call-renewal.md",
+     "summit-note-churn.md",
+     "riverside-call-renewal.md",
+     "acme-email-discount.md"
+    ]
+   },
+   "ret-12": {
+    "chunk_ids": [
+     "cce3c76c-1d8f-46c7-82d6-c1a6d0621596",
+     "47f4e671-ae87-45bd-aa94-4c7c8027e99d",
+     "d4f8fb82-7825-47ad-a3ee-9e4feb4c6670",
+     "f6ff92bc-482f-4451-87be-f769dabc27f8",
+     "1ee6f679-7b80-425c-b4e2-8e3683240ffb"
+    ],
+    "collection_checks": 0,
+    "ms": 6.7038900015177205,
+    "ranked": [
+     "harborpine-note-checkin.md",
+     "acme-email-discount.md",
+     "product-premium-operations-plan.md",
+     "goldenvalley-note-discovery.md"
+    ]
+   },
+   "ret-13": {
+    "chunk_ids": [
+     "cce3c76c-1d8f-46c7-82d6-c1a6d0621596",
+     "357789dc-ba32-415d-8d9c-c397f41607c9",
+     "47f4e671-ae87-45bd-aa94-4c7c8027e99d",
+     "b714cd2c-aa71-427f-992e-0817318b1119",
+     "d33c5ab7-8059-407e-a47a-f1bf96b1ea9c"
+    ],
+    "collection_checks": 0,
+    "ms": 6.121949998487253,
+    "ranked": [
+     "harborpine-note-checkin.md",
+     "goldenvalley-email-pricing.md",
+     "northstar-note-discovery.md",
+     "acme-call-renewal.md"
+    ]
+   },
+   "ret-14": {
+    "chunk_ids": [
+     "6afd43b5-6f3c-4f54-8762-cd53da0339e3",
+     "ee8e87a2-71a2-4b4b-9f38-7f2948d33ed1",
+     "3b1fdaf1-0713-4e9f-a29f-efd19dd5bd6e",
+     "27b2c34e-cf57-44c4-9b3e-186a6ec386b4",
+     "357789dc-ba32-415d-8d9c-c397f41607c9"
+    ],
+    "collection_checks": 0,
+    "ms": 6.335602000035578,
+    "ranked": [
+     "northstar-note-discovery.md",
+     "northstar-support-alerting.md",
+     "product-fleet-visibility.md",
+     "goldenvalley-note-discovery.md",
+     "goldenvalley-email-pricing.md"
+    ]
+   },
+   "ret-15": {
+    "chunk_ids": [
+     "6afd43b5-6f3c-4f54-8762-cd53da0339e3",
+     "b714cd2c-aa71-427f-992e-0817318b1119",
+     "27b2c34e-cf57-44c4-9b3e-186a6ec386b4",
+     "6b01b336-7ab9-4f55-8cc3-ab8f67255282",
+     "ee8e87a2-71a2-4b4b-9f38-7f2948d33ed1"
+    ],
+    "collection_checks": 0,
+    "ms": 6.321748001937522,
+    "ranked": [
+     "northstar-note-discovery.md",
+     "goldenvalley-note-discovery.md",
+     "northstar-support-alerting.md"
+    ]
+   },
+   "ret-16": {
+    "chunk_ids": [
+     "ee8e87a2-71a2-4b4b-9f38-7f2948d33ed1",
+     "b714cd2c-aa71-427f-992e-0817318b1119",
+     "a334584c-0277-443d-b869-bfa83b3881d9",
+     "3b1fdaf1-0713-4e9f-a29f-efd19dd5bd6e",
+     "27b2c34e-cf57-44c4-9b3e-186a6ec386b4"
+    ],
+    "collection_checks": 0,
+    "ms": 6.201971998962108,
+    "ranked": [
+     "northstar-support-alerting.md",
+     "northstar-note-discovery.md",
+     "product-fleet-visibility.md",
+     "goldenvalley-note-discovery.md"
+    ]
+   },
+   "ret-17": {
+    "chunk_ids": [
+     "ee8e87a2-71a2-4b4b-9f38-7f2948d33ed1",
+     "6afd43b5-6f3c-4f54-8762-cd53da0339e3",
+     "27b2c34e-cf57-44c4-9b3e-186a6ec386b4",
+     "b714cd2c-aa71-427f-992e-0817318b1119",
+     "a334584c-0277-443d-b869-bfa83b3881d9"
+    ],
+    "collection_checks": 0,
+    "ms": 6.417261000024155,
+    "ranked": [
+     "northstar-support-alerting.md",
+     "northstar-note-discovery.md",
+     "goldenvalley-note-discovery.md",
+     "product-fleet-visibility.md"
+    ]
+   },
+   "ret-18": {
+    "chunk_ids": [
+     "a334584c-0277-443d-b869-bfa83b3881d9",
+     "b714cd2c-aa71-427f-992e-0817318b1119",
+     "27b2c34e-cf57-44c4-9b3e-186a6ec386b4",
+     "6b01b336-7ab9-4f55-8cc3-ab8f67255282",
+     "ee8e87a2-71a2-4b4b-9f38-7f2948d33ed1"
+    ],
+    "collection_checks": 0,
+    "ms": 6.245200002013007,
+    "ranked": [
+     "product-fleet-visibility.md",
+     "northstar-note-discovery.md",
+     "goldenvalley-note-discovery.md",
+     "northstar-support-alerting.md"
+    ]
+   },
+   "ret-19": {
+    "chunk_ids": [
+     "a334584c-0277-443d-b869-bfa83b3881d9",
+     "3b1fdaf1-0713-4e9f-a29f-efd19dd5bd6e",
+     "ee8e87a2-71a2-4b4b-9f38-7f2948d33ed1",
+     "b714cd2c-aa71-427f-992e-0817318b1119",
+     "357789dc-ba32-415d-8d9c-c397f41607c9"
+    ],
+    "collection_checks": 0,
+    "ms": 6.445817998610437,
+    "ranked": [
+     "product-fleet-visibility.md",
+     "northstar-support-alerting.md",
+     "northstar-note-discovery.md",
+     "goldenvalley-email-pricing.md"
+    ]
+   },
+   "ret-20": {
+    "chunk_ids": [
+     "a334584c-0277-443d-b869-bfa83b3881d9",
+     "b714cd2c-aa71-427f-992e-0817318b1119",
+     "6b01b336-7ab9-4f55-8cc3-ab8f67255282",
+     "27b2c34e-cf57-44c4-9b3e-186a6ec386b4",
+     "357789dc-ba32-415d-8d9c-c397f41607c9"
+    ],
+    "collection_checks": 0,
+    "ms": 6.194122001033975,
+    "ranked": [
+     "product-fleet-visibility.md",
+     "northstar-note-discovery.md",
+     "northstar-support-alerting.md",
+     "goldenvalley-note-discovery.md",
+     "goldenvalley-email-pricing.md"
+    ]
+   },
+   "ret-21": {
+    "chunk_ids": [
+     "5355b202-af00-43e2-a89d-f9bef8ec4286",
+     "ad15f218-8d8c-470d-96ac-3b8e495a3463",
+     "27a35bbb-dd50-42a2-b95d-ea91a9c0661f",
+     "87bd5243-3762-4434-b733-5a2c3d52d9b2",
+     "f021cb48-d76c-4f14-b575-00dc778114bf"
+    ],
+    "collection_checks": 0,
+    "ms": 6.269279998377897,
+    "ranked": [
+     "product-premium-operations-plan.md",
+     "acme-email-discount.md",
+     "acme-call-renewal.md",
+     "riverside-call-renewal.md",
+     "northstar-rate-card.xlsx"
+    ]
+   },
+   "ret-22": {
+    "chunk_ids": [
+     "f6ff92bc-482f-4451-87be-f769dabc27f8",
+     "d4f8fb82-7825-47ad-a3ee-9e4feb4c6670",
+     "5355b202-af00-43e2-a89d-f9bef8ec4286",
+     "27a35bbb-dd50-42a2-b95d-ea91a9c0661f",
+     "d33c5ab7-8059-407e-a47a-f1bf96b1ea9c"
+    ],
+    "collection_checks": 0,
+    "ms": 6.465708000177983,
+    "ranked": [
+     "product-premium-operations-plan.md",
+     "acme-email-discount.md",
+     "acme-call-renewal.md"
+    ]
+   },
+   "ret-23": {
+    "chunk_ids": [
+     "87bd5243-3762-4434-b733-5a2c3d52d9b2",
+     "438835c9-6572-4ede-b178-dae7399db99d",
+     "db4e57c0-6f91-4331-bb46-970b3997d011",
+     "d33c5ab7-8059-407e-a47a-f1bf96b1ea9c",
+     "8b76982e-b014-4e8a-b257-48fedebc33e3"
+    ],
+    "collection_checks": 0,
+    "ms": 6.37627299875021,
+    "ranked": [
+     "riverside-call-renewal.md",
+     "riverside-email-feedback.md",
+     "summit-note-churn.md",
+     "acme-call-renewal.md"
+    ]
+   },
+   "ret-24": {
+    "chunk_ids": [
+     "1ee6f679-7b80-425c-b4e2-8e3683240ffb",
+     "87bd5243-3762-4434-b733-5a2c3d52d9b2",
+     "3b1fdaf1-0713-4e9f-a29f-efd19dd5bd6e",
+     "438835c9-6572-4ede-b178-dae7399db99d",
+     "d4f8fb82-7825-47ad-a3ee-9e4feb4c6670"
+    ],
+    "collection_checks": 0,
+    "ms": 6.384352996974485,
+    "ranked": [
+     "goldenvalley-note-discovery.md",
+     "riverside-call-renewal.md",
+     "product-fleet-visibility.md",
+     "riverside-email-feedback.md",
+     "acme-email-discount.md"
+    ]
+   },
+   "ret-25": {
+    "chunk_ids": [
+     "438835c9-6572-4ede-b178-dae7399db99d",
+     "c4a6815c-c461-43a3-9609-b0a66848145b",
+     "75c74817-0da6-49d8-869f-f505ccd9f026",
+     "87bd5243-3762-4434-b733-5a2c3d52d9b2",
+     "388f721e-50d1-41bd-861f-a4ee34a25405"
+    ],
+    "collection_checks": 0,
+    "ms": 6.432515998312738,
+    "ranked": [
+     "riverside-email-feedback.md",
+     "riverside-support-compliance.md",
+     "riverside-call-renewal.md",
+     "riverside-data-handling-policy.docx"
+    ]
+   },
+   "ret-26": {
+    "chunk_ids": [
+     "75c74817-0da6-49d8-869f-f505ccd9f026",
+     "1ee6f679-7b80-425c-b4e2-8e3683240ffb",
+     "388f721e-50d1-41bd-861f-a4ee34a25405",
+     "59f9a50a-7809-42f2-872f-0ec5c7c7ec47",
+     "d4f8fb82-7825-47ad-a3ee-9e4feb4c6670"
+    ],
+    "collection_checks": 0,
+    "ms": 6.421245001547504,
+    "ranked": [
+     "riverside-support-compliance.md",
+     "goldenvalley-note-discovery.md",
+     "riverside-data-handling-policy.docx",
+     "acme-support-export-timeout.md",
+     "acme-email-discount.md"
+    ]
+   },
+   "ret-27": {
+    "chunk_ids": [
+     "c4a6815c-c461-43a3-9609-b0a66848145b",
+     "75c74817-0da6-49d8-869f-f505ccd9f026",
+     "388f721e-50d1-41bd-861f-a4ee34a25405",
+     "59f9a50a-7809-42f2-872f-0ec5c7c7ec47",
+     "d4f8fb82-7825-47ad-a3ee-9e4feb4c6670"
+    ],
+    "collection_checks": 0,
+    "ms": 6.507083999167662,
+    "ranked": [
+     "riverside-support-compliance.md",
+     "riverside-data-handling-policy.docx",
+     "acme-support-export-timeout.md",
+     "acme-email-discount.md"
+    ]
+   },
+   "ret-28": {
+    "chunk_ids": [
+     "8b76982e-b014-4e8a-b257-48fedebc33e3",
+     "438835c9-6572-4ede-b178-dae7399db99d",
+     "cce3c76c-1d8f-46c7-82d6-c1a6d0621596",
+     "ad15f218-8d8c-470d-96ac-3b8e495a3463",
+     "27a35bbb-dd50-42a2-b95d-ea91a9c0661f"
+    ],
+    "collection_checks": 0,
+    "ms": 6.472809000115376,
+    "ranked": [
+     "summit-note-churn.md",
+     "riverside-email-feedback.md",
+     "harborpine-note-checkin.md",
+     "acme-email-discount.md",
+     "acme-call-renewal.md"
+    ]
+   },
+   "ret-29": {
+    "chunk_ids": [
+     "8b76982e-b014-4e8a-b257-48fedebc33e3",
+     "d4f8fb82-7825-47ad-a3ee-9e4feb4c6670",
+     "1ee6f679-7b80-425c-b4e2-8e3683240ffb",
+     "ad15f218-8d8c-470d-96ac-3b8e495a3463",
+     "0782ec2a-b618-4b95-8fad-c43846316c9e"
+    ],
+    "collection_checks": 0,
+    "ms": 6.189482002810109,
+    "ranked": [
+     "summit-note-churn.md",
+     "acme-email-discount.md",
+     "goldenvalley-note-discovery.md",
+     "vertex-call-renewal.md"
+    ]
+   },
+   "ret-30": {
+    "chunk_ids": [
+     "0782ec2a-b618-4b95-8fad-c43846316c9e",
+     "d33c5ab7-8059-407e-a47a-f1bf96b1ea9c",
+     "dfc6a4e9-5478-4b78-98d7-8d68d7abeb2b",
+     "6afd43b5-6f3c-4f54-8762-cd53da0339e3",
+     "27a35bbb-dd50-42a2-b95d-ea91a9c0661f"
+    ],
+    "collection_checks": 0,
+    "ms": 6.2318810014403425,
+    "ranked": [
+     "vertex-call-renewal.md",
+     "acme-call-renewal.md",
+     "vertex-support-rate-limit.md",
+     "northstar-note-discovery.md"
+    ]
+   },
+   "ret-31": {
+    "chunk_ids": [
+     "0782ec2a-b618-4b95-8fad-c43846316c9e",
+     "d33c5ab7-8059-407e-a47a-f1bf96b1ea9c",
+     "3b1fdaf1-0713-4e9f-a29f-efd19dd5bd6e",
+     "dfc6a4e9-5478-4b78-98d7-8d68d7abeb2b",
+     "87bd5243-3762-4434-b733-5a2c3d52d9b2"
+    ],
+    "collection_checks": 0,
+    "ms": 6.1534890010079835,
+    "ranked": [
+     "vertex-call-renewal.md",
+     "acme-call-renewal.md",
+     "product-fleet-visibility.md",
+     "vertex-support-rate-limit.md",
+     "riverside-call-renewal.md"
+    ]
+   },
+   "ret-32": {
+    "chunk_ids": [
+     "dfc6a4e9-5478-4b78-98d7-8d68d7abeb2b",
+     "f6ff92bc-482f-4451-87be-f769dabc27f8",
+     "d4f8fb82-7825-47ad-a3ee-9e4feb4c6670",
+     "d33c5ab7-8059-407e-a47a-f1bf96b1ea9c",
+     "0782ec2a-b618-4b95-8fad-c43846316c9e"
+    ],
+    "collection_checks": 0,
+    "ms": 6.347951002680929,
+    "ranked": [
+     "vertex-support-rate-limit.md",
+     "product-premium-operations-plan.md",
+     "acme-email-discount.md",
+     "acme-call-renewal.md",
+     "vertex-call-renewal.md"
+    ]
+   },
+   "ret-33": {
+    "chunk_ids": [
+     "dfc6a4e9-5478-4b78-98d7-8d68d7abeb2b",
+     "0782ec2a-b618-4b95-8fad-c43846316c9e",
+     "5355b202-af00-43e2-a89d-f9bef8ec4286",
+     "27a35bbb-dd50-42a2-b95d-ea91a9c0661f",
+     "d33c5ab7-8059-407e-a47a-f1bf96b1ea9c"
+    ],
+    "collection_checks": 0,
+    "ms": 6.315067999821622,
+    "ranked": [
+     "vertex-support-rate-limit.md",
+     "vertex-call-renewal.md",
+     "product-premium-operations-plan.md",
+     "acme-call-renewal.md"
+    ]
+   },
+   "ret-34": {
+    "chunk_ids": [
+     "59f9a50a-7809-42f2-872f-0ec5c7c7ec47",
+     "d33c5ab7-8059-407e-a47a-f1bf96b1ea9c",
+     "18c2890b-f347-438c-9a62-5cee5357b6a7",
+     "f6ff92bc-482f-4451-87be-f769dabc27f8",
+     "d4f8fb82-7825-47ad-a3ee-9e4feb4c6670"
+    ],
+    "collection_checks": 0,
+    "ms": 6.739578999258811,
+    "ranked": [
+     "acme-support-export-timeout.md",
+     "acme-call-renewal.md",
+     "product-premium-operations-plan.md",
+     "acme-email-discount.md"
+    ]
+   },
+   "ret-35": {
+    "chunk_ids": [
+     "b714cd2c-aa71-427f-992e-0817318b1119",
+     "ee8e87a2-71a2-4b4b-9f38-7f2948d33ed1",
+     "3b1fdaf1-0713-4e9f-a29f-efd19dd5bd6e",
+     "f021cb48-d76c-4f14-b575-00dc778114bf",
+     "6afd43b5-6f3c-4f54-8762-cd53da0339e3"
+    ],
+    "collection_checks": 0,
+    "ms": 6.787056001485325,
+    "ranked": [
+     "northstar-note-discovery.md",
+     "northstar-support-alerting.md",
+     "product-fleet-visibility.md",
+     "northstar-rate-card.xlsx"
+    ]
+   },
+   "ret-36": {
+    "chunk_ids": [
+     "75c74817-0da6-49d8-869f-f505ccd9f026",
+     "c4a6815c-c461-43a3-9609-b0a66848145b",
+     "438835c9-6572-4ede-b178-dae7399db99d",
+     "388f721e-50d1-41bd-861f-a4ee34a25405",
+     "87bd5243-3762-4434-b733-5a2c3d52d9b2"
+    ],
+    "collection_checks": 0,
+    "ms": 6.800434999604477,
+    "ranked": [
+     "riverside-support-compliance.md",
+     "riverside-email-feedback.md",
+     "riverside-data-handling-policy.docx",
+     "riverside-call-renewal.md"
+    ]
+   },
+   "unans-01": {
+    "chunk_ids": [
+     "d4f8fb82-7825-47ad-a3ee-9e4feb4c6670",
+     "d33c5ab7-8059-407e-a47a-f1bf96b1ea9c",
+     "18c2890b-f347-438c-9a62-5cee5357b6a7",
+     "388f721e-50d1-41bd-861f-a4ee34a25405",
+     "357789dc-ba32-415d-8d9c-c397f41607c9"
+    ],
+    "collection_checks": 0,
+    "ms": 6.231375999050215,
+    "ranked": [
+     "acme-email-discount.md",
+     "acme-call-renewal.md",
+     "acme-support-export-timeout.md",
+     "riverside-data-handling-policy.docx",
+     "goldenvalley-email-pricing.md"
+    ]
+   },
+   "unans-02": {
+    "chunk_ids": [
+     "0782ec2a-b618-4b95-8fad-c43846316c9e",
+     "dfc6a4e9-5478-4b78-98d7-8d68d7abeb2b",
+     "27a35bbb-dd50-42a2-b95d-ea91a9c0661f",
+     "27b2c34e-cf57-44c4-9b3e-186a6ec386b4",
+     "6afd43b5-6f3c-4f54-8762-cd53da0339e3"
+    ],
+    "collection_checks": 0,
+    "ms": 6.450737000704976,
+    "ranked": [
+     "vertex-call-renewal.md",
+     "vertex-support-rate-limit.md",
+     "acme-call-renewal.md",
+     "goldenvalley-note-discovery.md",
+     "northstar-note-discovery.md"
+    ]
+   },
+   "unans-03": {
+    "chunk_ids": [
+     "47f4e671-ae87-45bd-aa94-4c7c8027e99d",
+     "438835c9-6572-4ede-b178-dae7399db99d",
+     "18c2890b-f347-438c-9a62-5cee5357b6a7",
+     "d4f8fb82-7825-47ad-a3ee-9e4feb4c6670",
+     "f021cb48-d76c-4f14-b575-00dc778114bf"
+    ],
+    "collection_checks": 0,
+    "ms": 6.211305997567251,
+    "ranked": [
+     "harborpine-note-checkin.md",
+     "riverside-email-feedback.md",
+     "acme-support-export-timeout.md",
+     "acme-email-discount.md",
+     "northstar-rate-card.xlsx"
+    ]
+   },
+   "unans-04": {
+    "chunk_ids": [
+     "d4f8fb82-7825-47ad-a3ee-9e4feb4c6670",
+     "6b01b336-7ab9-4f55-8cc3-ab8f67255282",
+     "f021cb48-d76c-4f14-b575-00dc778114bf",
+     "59f9a50a-7809-42f2-872f-0ec5c7c7ec47",
+     "438835c9-6572-4ede-b178-dae7399db99d"
+    ],
+    "collection_checks": 0,
+    "ms": 6.1754130001645535,
+    "ranked": [
+     "acme-email-discount.md",
+     "northstar-support-alerting.md",
+     "northstar-rate-card.xlsx",
+     "acme-support-export-timeout.md",
+     "riverside-email-feedback.md"
+    ]
+   },
+   "unans-05": {
+    "chunk_ids": [
+     "cce3c76c-1d8f-46c7-82d6-c1a6d0621596",
+     "47f4e671-ae87-45bd-aa94-4c7c8027e99d",
+     "ad15f218-8d8c-470d-96ac-3b8e495a3463",
+     "357789dc-ba32-415d-8d9c-c397f41607c9",
+     "f021cb48-d76c-4f14-b575-00dc778114bf"
+    ],
+    "collection_checks": 0,
+    "ms": 6.594256999960635,
+    "ranked": [
+     "harborpine-note-checkin.md",
+     "acme-email-discount.md",
+     "goldenvalley-email-pricing.md",
+     "northstar-rate-card.xlsx"
+    ]
+   },
+   "unans-06": {
+    "chunk_ids": [
+     "00e34a0c-d7b6-4365-a549-f2acda137b72",
+     "27a35bbb-dd50-42a2-b95d-ea91a9c0661f",
+     "ad15f218-8d8c-470d-96ac-3b8e495a3463",
+     "d1a44a3c-93d2-485d-9560-cddcfd4a5d13",
+     "5355b202-af00-43e2-a89d-f9bef8ec4286"
+    ],
+    "collection_checks": 0,
+    "ms": 6.5425669999967795,
+    "ranked": [
+     "acme-service-agreement.pdf",
+     "acme-call-renewal.md",
+     "acme-email-discount.md",
+     "product-premium-operations-plan.md"
+    ]
+   }
+  }
+ },
+ "recorded_at": "2026-11-13T13:57Z",
+ "versions": {
+  "langchain": "1.5.0",
+  "langchain-core": "1.8.0",
+  "langchain-qdrant": "1.1.0",
+  "langchain-text-splitters": "1.1.3",
+  "langgraph": "1.2.20"
+ }
+}

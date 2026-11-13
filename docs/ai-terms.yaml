@@ -344,6 +344,19 @@ terms:
     meaning: "Using a second model to grade another model's answers when code cannot score them."
     since: Seed
 
+  - id: text-splitter
+    name: Text splitter
+    category: concept
+    match: ["text splitter", "RecursiveCharacterTextSplitter"]
+    meaning: "A tool that cuts a long text into chunks, preferring to cut at paragraph, line and word edges instead of at a fixed character count."
+    since: "5.5"
+  - id: prebuilt-agent
+    name: Prebuilt agent
+    category: concept
+    match: ["prebuilt agent", "create_agent"]
+    meaning: "A ready-made agent loop from a framework: the model chooses which tools to call, the framework runs them and loops until the model answers without a tool call."
+    since: "5.5"
+
   # --------------------------------------------------------------------- tools
   - id: langgraph
     name: LangGraph

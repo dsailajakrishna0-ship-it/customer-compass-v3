@@ -35,6 +35,7 @@ from app.agent.checkpoint import get_checkpointer, thread_id
 from app.agent.policies import AgentLimits, BudgetExceeded, RunBudget
 from app.agent.trace import Trace
 from app.chat.router import find_mentioned_company
+from app.config import get_settings
 from app.crm.queries import get_recent_interactions, list_companies
 from app.guardrails.audit import record_events
 from app.guardrails.llm_guard import guard_input
@@ -425,6 +426,16 @@ def build_approval_graph(checkpointer: BaseCheckpointSaver | None = None):
 _GRAPH = build_graph()
 
 
+def _part_one_graph():
+    """Part 1 of the agent for the configured side (`AGENT_IMPL`, Stage 5.5, ADR 0028). The confirm gate
+    (part 2) is the same for both."""
+    if get_settings().agent_impl == "frameworks":
+        from app.frameworks.agent import build_graph_cached
+
+        return build_graph_cached()
+    return _GRAPH
+
+
 @functools.cache
 def _approval_graph(checkpointer: BaseCheckpointSaver):
     return build_approval_graph(checkpointer)
@@ -479,7 +490,7 @@ async def _run_account_review(
     ctx = RunContext(llm=llm, limits=limits, budget=RunBudget(limits))
     try:
         async with asyncio.timeout(limits.timeout_seconds):
-            final = await _GRAPH.ainvoke(
+            final = await _part_one_graph().ainvoke(
                 {"message": message},
                 config={"configurable": {"ctx": ctx}, "recursion_limit": RECURSION_LIMIT},
             )

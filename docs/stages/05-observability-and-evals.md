@@ -1,7 +1,7 @@
 # Stage 5 — Observability and evals: see what the system did
 
 > **Level:** beginner friendly; read [Stage 3](03-langgraph-port.md) for the 🟪agent steps this stage makes visible. **Reading time:** about 25 minutes so far (this guide grows with 5.4 and 5.5).
-> **Status:** in progress. **5.1 (tracing), 5.2 (answer-quality 🟪evals) and 5.3 (🟪guardrail comparison and 🟪PII) are done; 5.4 (🟪agentic retrieval) is in review; 5.5 is next.**
+> **Status:** in progress. **5.1 (tracing), 5.2 (answer-quality 🟪evals), 5.3 (🟪guardrail comparison and 🟪PII) and 5.4 (🟪agentic retrieval) are done; 5.5 (manual versus framework) is in review.**
 > **Roadmap:** [Stage 5](../roadmap.md#stage-5--observability-and-evals) · **Decisions:** [ADR 0022](../adr/0022-tracing-with-opentelemetry-and-langfuse.md), [ADR 0023](../adr/0023-judged-evals-with-deepeval.md), [ADR 0024](../adr/0024-guard-comparison-and-pii.md)
 
 **AI colour code:** 🟪 concept · 🟦 framework or tool · 🟩 data store or service · 🟧 model. Unmarked technical terms are ordinary software. [A to Z list](../ai-terms.md)
@@ -208,3 +208,48 @@ Plain 🟪retrieval has no way to say "none of this helps". It returns the close
 | 🟢 | `evals/agentic/cache.jsonl`, `evals/agentic/snapshots.json`, `evals/baseline/agentic-v1.json` | The recorded model calls and searches, and the pinned numbers |
 | 🟡 | `justfile`, `.github/workflows/ci.yml` | `just eval-agentic` and `just eval-agentic-record`; a replay step in CI |
 | 🟢 | `tests/test_agentic_retrieval.py`, `tests/test_agentic_compare.py` | 56 offline tests: the checks with a scripted model, the fail-open rule, the routes, the harness, the committed recordings replaying to the baseline |
+
+---
+
+## Concept 5 — Manual or framework? Measure each seam (5.5)
+
+We build every piece by hand first so a guide can show what it does, and adopt a framework for a piece **only if measurements say it helps**. 5.5 runs that test on three pieces, each behind **one setting** (default `manual`, nothing changes unless you set it) and the **same function signature**, so the rest of the app cannot tell which side ran:
+
+| Shop idea | Project idea | In the code |
+| --- | --- | --- |
+| Cutting a long roll of paper into sheets: every 600 millimetres, or at the nearest fold | **The chunker**: our fixed windows or 🟦LangChain's 🟪text splitter | `CHUNKER_IMPL`, `app/frameworks/chunker.py` |
+| Fetching boxes from a warehouse with your own forklift routes, or the warehouse's own system | **🟪Retrieval**: our 🟩Qdrant query or LangChain's Qdrant store | `RETRIEVAL_IMPL`, `app/frameworks/retriever.py` |
+| A clerk who follows a checklist (summary, history, documents), or a clerk who decides which files to pull | **The 🟪agent's evidence step**: our fixed graph or a 🟪prebuilt agent | `AGENT_IMPL`, `app/frameworks/agent.py` |
+
+The framework packages are an **optional install** (`evals/requirements-frameworks.txt`): the default install and every default behaviour never need them. The framework side must keep what makes the app safe: the 🟪human-in-the-loop confirm gate, the audit log and the citations. The whole API-contract suite (26 tests) passes on both sides.
+
+**What we measured** (`just eval-frameworks`, replayed with no keys; one ADR per seam):
+
+| Seam | Result | Decision |
+| --- | --- | --- |
+| Chunker ([ADR 0026](../adr/0026-chunker-manual-or-langchain.md)) | The splitter never cuts a word in two (ours did on 6 of 33 🟪chunks) and 🟪recall@3 is 1.000 against 0.972: one question, on 33 chunks. A little more code (32 lines against 24). | **Manual stays the default**: the Java edition's chunk counts must match ours, and one question is a hint, not proof. |
+| Retrieval ([ADR 0027](../adr/0027-retrieval-manual-or-langchain.md)) | The same chunks in the same order on all 42 questions, the same speed, 81 lines against 30, and it cannot search our keyword vector. | **Manual wins.** |
+| Agent ([ADR 0028](../adr/0028-agent-manual-or-prebuilt.md)) | With one small model the prebuilt agent called no tool before its first answer on 12 of 13 runs, so valid citations fell from 14 of 14 to 8 of 13 and evidence per run halved. Same safety (no task written, the contract passes), 239 lines against 84. | **Manual wins**, and the ADR says what would change that. |
+
+**Four lessons from building it.**
+1. *A framework's helpful defaults can be silent bugs.* LangChain's retriever interface rescales a 🟪cosine score `c` to `(1 + c) / 2`, which would have turned our 0.45 relevance floor into "keep nearly everything". The code uses the store's raw-score search.
+2. *Hidden calls.* Built with its defaults, the Qdrant store embeds a dummy text when it is created: a model call nobody asked for, made from inside the event loop where our async 🟪embedding cannot run.
+3. *The contract suite earns its keep.* My first prebuilt agent put the raw request in its 🟪prompt; the test "an injection in the request never reaches the model" failed at once. A second failure showed that counting every model turn as a step made a revision cost 6 steps instead of 2.
+4. *"The model decides" includes "decides not to".* Code that must always gather evidence should be code; a model choosing tools earns its place when the choice is genuinely open, such as which of several knowledge bases to search.
+
+**Rule to remember.** *Adopt a framework for a piece when a measurement on your own questions says it helps, not when it is popular.* "Manual wins" is a valid, useful result.
+
+**Not done.** The roadmap also asks for a small comparison of sending the same agent runs to 🟦Langfuse and to LangSmith. That needs a LangSmith account and key and has not been run.
+
+---
+
+## Code tour: what changed in 5.5
+
+| | Where | What |
+| --- | --- | --- |
+| 🟢 | `app/frameworks/` (`chunker.py`, `retriever.py`, `agent.py`) | The 🟦LangChain and 🟦LangGraph side of each seam, behind the same function signature; imported only when its setting is on, with one clear error if the optional packages are missing |
+| 🟡 | `app/config.py`, `.env.example` | `CHUNKER_IMPL`, `RETRIEVAL_IMPL`, `AGENT_IMPL` (default `manual`); `RETRIEVAL_IMPL=frameworks` with 🟪hybrid search is refused at start-up |
+| 🟡 | `app/rag/chunking.py`, `app/rag/retrieve.py`, `app/rag/ingest.py`, `app/agent/workflow.py` | The dispatch on each setting; ingestion adds LangChain's nested `metadata` copy only when the framework retriever is on; the 🟪agent's `LlmCall` gained an optional `tools` argument |
+| 🟢 | `evals/compare_frameworks.py`, `evals/frameworks/*.json`, `evals/baseline/frameworks-v1.json`, `evals/requirements-frameworks.txt` | The three tables, recorded and replayable, the baseline check, the pinned optional packages |
+| 🟡 | `justfile`, `.github/workflows/ci.yml` | `just eval-frameworks`, `eval-frameworks-record`, `test-frameworks`; both run in CI |
+| 🟢 | `tests/test_frameworks.py`, `tests/test_frameworks_compare.py`; `tests/contract/` | The framework side's tests (skipped without the packages), the harness tests, and the contract suite made side-aware |

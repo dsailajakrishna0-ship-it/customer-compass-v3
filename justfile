@@ -118,6 +118,19 @@ eval-agentic:
 eval-agentic-record:
     RETRIEVAL_MODE=hybrid uv run --project {{api}} python evals/compare_agentic.py --mode record --check
 
+# Stage 5.5: manual versus framework, one table per seam (chunker, retrieval, agent), replayed from the recorded measurements (offline, free, no keys)
+eval-frameworks:
+    uv run --project {{api}} python evals/compare_frameworks.py --check
+
+# measure again: needs Postgres with the demo data, Qdrant with documents ingested under RETRIEVAL_IMPL=frameworks (so chunks carry LangChain's nested metadata), GOOGLE_API_KEY and OPENROUTER_API_KEY; the paid model costs a few cents in all
+eval-frameworks-record:
+    uv run --project {{api}} --with-requirements evals/requirements-frameworks.txt python evals/compare_frameworks.py --mode record --check
+
+# Stage 5.5: the framework side's own tests plus the whole API-contract suite run against AGENT_IMPL=frameworks (the framework packages are layered on; the default install never needs them)
+test-frameworks: db migrate
+    cd {{api}} && uv run --with-requirements ../../evals/requirements-frameworks.txt pytest -q -m frameworks
+    cd {{api}} && AGENT_IMPL=frameworks uv run --with-requirements ../../evals/requirements-frameworks.txt pytest -q -m contract
+
 # offline suite only: the rule-based guard against the adversarial prompts (no stack needed)
 eval-offline:
     uv run --project {{api}} python evals/run_eval.py --suites adversarial

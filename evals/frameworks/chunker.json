@@ -1,0 +1,682 @@
+{
+ "chunkers": {
+  "frameworks": {
+   "mid_word_cuts": 0,
+   "ranked": {
+    "ret-01": [
+     "acme-call-renewal.md",
+     "riverside-call-renewal.md",
+     "harborpine-note-checkin.md",
+     "acme-support-export-timeout.md",
+     "product-premium-operations-plan.md"
+    ],
+    "ret-02": [
+     "product-premium-operations-plan.md",
+     "acme-call-renewal.md",
+     "acme-service-agreement.pdf",
+     "acme-email-discount.md",
+     "riverside-call-renewal.md"
+    ],
+    "ret-03": [
+     "acme-email-discount.md",
+     "goldenvalley-email-pricing.md",
+     "acme-call-renewal.md",
+     "vertex-call-renewal.md",
+     "northstar-rate-card.xlsx"
+    ],
+    "ret-04": [
+     "product-premium-operations-plan.md",
+     "acme-email-discount.md",
+     "northstar-rate-card.xlsx",
+     "acme-call-renewal.md",
+     "goldenvalley-email-pricing.md"
+    ],
+    "ret-05": [
+     "product-premium-operations-plan.md",
+     "acme-support-export-timeout.md",
+     "vertex-support-rate-limit.md",
+     "riverside-data-handling-policy.docx",
+     "riverside-support-compliance.md"
+    ],
+    "ret-06": [
+     "product-premium-operations-plan.md",
+     "acme-support-export-timeout.md",
+     "vertex-support-rate-limit.md",
+     "riverside-support-compliance.md",
+     "riverside-data-handling-policy.docx"
+    ],
+    "ret-07": [
+     "goldenvalley-email-pricing.md",
+     "goldenvalley-note-discovery.md",
+     "acme-call-renewal.md",
+     "acme-email-discount.md",
+     "vertex-call-renewal.md"
+    ],
+    "ret-08": [
+     "goldenvalley-email-pricing.md",
+     "acme-call-renewal.md",
+     "product-fleet-visibility.md",
+     "product-premium-operations-plan.md",
+     "acme-email-discount.md"
+    ],
+    "ret-09": [
+     "goldenvalley-note-discovery.md",
+     "product-fleet-visibility.md",
+     "northstar-note-discovery.md",
+     "northstar-support-alerting.md",
+     "goldenvalley-email-pricing.md"
+    ],
+    "ret-10": [
+     "goldenvalley-note-discovery.md",
+     "product-fleet-visibility.md",
+     "goldenvalley-email-pricing.md",
+     "northstar-note-discovery.md",
+     "northstar-support-alerting.md"
+    ],
+    "ret-11": [
+     "harborpine-note-checkin.md",
+     "acme-call-renewal.md",
+     "riverside-call-renewal.md",
+     "summit-note-churn.md",
+     "acme-support-export-timeout.md"
+    ],
+    "ret-12": [
+     "harborpine-note-checkin.md",
+     "acme-service-agreement.pdf",
+     "product-premium-operations-plan.md",
+     "product-fleet-visibility.md",
+     "acme-call-renewal.md"
+    ],
+    "ret-13": [
+     "harborpine-note-checkin.md",
+     "goldenvalley-note-discovery.md",
+     "acme-support-export-timeout.md",
+     "summit-note-churn.md",
+     "riverside-call-renewal.md"
+    ],
+    "ret-14": [
+     "northstar-note-discovery.md",
+     "product-fleet-visibility.md",
+     "goldenvalley-note-discovery.md",
+     "northstar-support-alerting.md",
+     "harborpine-note-checkin.md"
+    ],
+    "ret-15": [
+     "northstar-note-discovery.md",
+     "northstar-support-alerting.md",
+     "goldenvalley-note-discovery.md",
+     "product-fleet-visibility.md",
+     "goldenvalley-email-pricing.md"
+    ],
+    "ret-16": [
+     "northstar-support-alerting.md",
+     "product-fleet-visibility.md",
+     "northstar-note-discovery.md",
+     "goldenvalley-note-discovery.md",
+     "goldenvalley-email-pricing.md"
+    ],
+    "ret-17": [
+     "northstar-support-alerting.md",
+     "northstar-note-discovery.md",
+     "goldenvalley-note-discovery.md",
+     "product-fleet-visibility.md",
+     "goldenvalley-email-pricing.md"
+    ],
+    "ret-18": [
+     "product-fleet-visibility.md",
+     "northstar-support-alerting.md",
+     "northstar-note-discovery.md",
+     "goldenvalley-note-discovery.md",
+     "goldenvalley-email-pricing.md"
+    ],
+    "ret-19": [
+     "product-fleet-visibility.md",
+     "northstar-note-discovery.md",
+     "goldenvalley-note-discovery.md",
+     "goldenvalley-email-pricing.md",
+     "northstar-support-alerting.md"
+    ],
+    "ret-20": [
+     "product-fleet-visibility.md",
+     "northstar-note-discovery.md",
+     "northstar-support-alerting.md",
+     "goldenvalley-note-discovery.md",
+     "goldenvalley-email-pricing.md"
+    ],
+    "ret-21": [
+     "product-premium-operations-plan.md",
+     "acme-email-discount.md",
+     "acme-call-renewal.md",
+     "riverside-call-renewal.md",
+     "acme-service-agreement.pdf"
+    ],
+    "ret-22": [
+     "product-premium-operations-plan.md",
+     "acme-call-renewal.md",
+     "product-fleet-visibility.md",
+     "acme-service-agreement.pdf",
+     "acme-email-discount.md"
+    ],
+    "ret-23": [
+     "riverside-call-renewal.md",
+     "riverside-email-feedback.md",
+     "acme-call-renewal.md",
+     "acme-email-discount.md",
+     "summit-note-churn.md"
+    ],
+    "ret-24": [
+     "riverside-call-renewal.md",
+     "riverside-support-compliance.md",
+     "acme-email-discount.md",
+     "product-fleet-visibility.md",
+     "goldenvalley-note-discovery.md"
+    ],
+    "ret-25": [
+     "riverside-email-feedback.md",
+     "riverside-support-compliance.md",
+     "riverside-call-renewal.md",
+     "northstar-rate-card.xlsx",
+     "riverside-data-handling-policy.docx"
+    ],
+    "ret-26": [
+     "riverside-support-compliance.md",
+     "riverside-data-handling-policy.docx",
+     "product-premium-operations-plan.md",
+     "product-fleet-visibility.md",
+     "northstar-support-alerting.md"
+    ],
+    "ret-27": [
+     "riverside-support-compliance.md",
+     "riverside-data-handling-policy.docx",
+     "product-premium-operations-plan.md",
+     "vertex-support-rate-limit.md",
+     "goldenvalley-note-discovery.md"
+    ],
+    "ret-28": [
+     "summit-note-churn.md",
+     "acme-email-discount.md",
+     "riverside-support-compliance.md",
+     "vertex-call-renewal.md",
+     "northstar-support-alerting.md"
+    ],
+    "ret-29": [
+     "summit-note-churn.md",
+     "acme-email-discount.md",
+     "riverside-call-renewal.md",
+     "acme-call-renewal.md",
+     "product-premium-operations-plan.md"
+    ],
+    "ret-30": [
+     "vertex-call-renewal.md",
+     "acme-email-discount.md",
+     "acme-call-renewal.md",
+     "acme-support-export-timeout.md",
+     "riverside-support-compliance.md"
+    ],
+    "ret-31": [
+     "vertex-call-renewal.md",
+     "product-premium-operations-plan.md",
+     "acme-call-renewal.md",
+     "riverside-call-renewal.md",
+     "northstar-rate-card.xlsx"
+    ],
+    "ret-32": [
+     "vertex-support-rate-limit.md",
+     "product-premium-operations-plan.md",
+     "northstar-rate-card.xlsx",
+     "product-fleet-visibility.md",
+     "vertex-call-renewal.md"
+    ],
+    "ret-33": [
+     "vertex-support-rate-limit.md",
+     "product-premium-operations-plan.md",
+     "vertex-call-renewal.md",
+     "acme-support-export-timeout.md",
+     "acme-email-discount.md"
+    ],
+    "ret-34": [
+     "product-premium-operations-plan.md",
+     "acme-support-export-timeout.md",
+     "vertex-support-rate-limit.md",
+     "acme-call-renewal.md",
+     "riverside-data-handling-policy.docx"
+    ],
+    "ret-35": [
+     "northstar-support-alerting.md",
+     "product-fleet-visibility.md",
+     "northstar-note-discovery.md",
+     "goldenvalley-note-discovery.md",
+     "riverside-support-compliance.md"
+    ],
+    "ret-36": [
+     "riverside-support-compliance.md",
+     "goldenvalley-note-discovery.md",
+     "northstar-support-alerting.md",
+     "acme-call-renewal.md",
+     "riverside-call-renewal.md"
+    ],
+    "unans-01": [
+     "northstar-rate-card.xlsx",
+     "summit-note-churn.md",
+     "acme-call-renewal.md",
+     "acme-service-agreement.pdf",
+     "northstar-support-alerting.md"
+    ],
+    "unans-02": [
+     "vertex-call-renewal.md",
+     "vertex-support-rate-limit.md",
+     "summit-note-churn.md",
+     "northstar-support-alerting.md",
+     "northstar-note-discovery.md"
+    ],
+    "unans-03": [
+     "riverside-email-feedback.md",
+     "northstar-support-alerting.md",
+     "riverside-call-renewal.md",
+     "acme-call-renewal.md",
+     "goldenvalley-email-pricing.md"
+    ],
+    "unans-04": [
+     "riverside-support-compliance.md",
+     "product-premium-operations-plan.md",
+     "northstar-rate-card.xlsx",
+     "summit-note-churn.md",
+     "product-fleet-visibility.md"
+    ],
+    "unans-05": [
+     "harborpine-note-checkin.md",
+     "acme-email-discount.md",
+     "goldenvalley-email-pricing.md",
+     "acme-call-renewal.md",
+     "product-premium-operations-plan.md"
+    ],
+    "unans-06": [
+     "acme-service-agreement.pdf",
+     "acme-email-discount.md",
+     "acme-call-renewal.md",
+     "vertex-support-rate-limit.md",
+     "goldenvalley-email-pricing.md"
+    ]
+   },
+   "sizes": [
+    282,
+    472,
+    490,
+    234,
+    434,
+    476,
+    414,
+    398,
+    509,
+    329,
+    479,
+    306,
+    475,
+    386,
+    478,
+    472,
+    259,
+    440,
+    291,
+    600,
+    280,
+    362,
+    378,
+    221,
+    590,
+    344,
+    581,
+    398,
+    331,
+    369,
+    239,
+    531,
+    263,
+    393
+   ]
+  },
+  "manual": {
+   "mid_word_cuts": 6,
+   "ranked": {
+    "ret-01": [
+     "acme-call-renewal.md",
+     "riverside-call-renewal.md",
+     "harborpine-note-checkin.md",
+     "acme-support-export-timeout.md",
+     "summit-note-churn.md"
+    ],
+    "ret-02": [
+     "product-premium-operations-plan.md",
+     "acme-service-agreement.pdf",
+     "acme-email-discount.md",
+     "acme-call-renewal.md",
+     "riverside-call-renewal.md"
+    ],
+    "ret-03": [
+     "acme-email-discount.md",
+     "goldenvalley-email-pricing.md",
+     "acme-call-renewal.md",
+     "vertex-call-renewal.md",
+     "northstar-rate-card.xlsx"
+    ],
+    "ret-04": [
+     "product-premium-operations-plan.md",
+     "acme-email-discount.md",
+     "northstar-rate-card.xlsx",
+     "northstar-support-alerting.md",
+     "harborpine-note-checkin.md"
+    ],
+    "ret-05": [
+     "acme-support-export-timeout.md",
+     "vertex-support-rate-limit.md",
+     "product-premium-operations-plan.md",
+     "acme-call-renewal.md",
+     "riverside-data-handling-policy.docx"
+    ],
+    "ret-06": [
+     "acme-support-export-timeout.md",
+     "product-premium-operations-plan.md",
+     "vertex-support-rate-limit.md",
+     "riverside-support-compliance.md",
+     "acme-call-renewal.md"
+    ],
+    "ret-07": [
+     "goldenvalley-email-pricing.md",
+     "acme-call-renewal.md",
+     "goldenvalley-note-discovery.md",
+     "summit-note-churn.md",
+     "acme-email-discount.md"
+    ],
+    "ret-08": [
+     "goldenvalley-email-pricing.md",
+     "product-premium-operations-plan.md",
+     "acme-call-renewal.md",
+     "acme-service-agreement.pdf",
+     "northstar-support-alerting.md"
+    ],
+    "ret-09": [
+     "goldenvalley-note-discovery.md",
+     "product-fleet-visibility.md",
+     "northstar-note-discovery.md",
+     "northstar-support-alerting.md",
+     "goldenvalley-email-pricing.md"
+    ],
+    "ret-10": [
+     "goldenvalley-note-discovery.md",
+     "product-fleet-visibility.md",
+     "northstar-note-discovery.md",
+     "goldenvalley-email-pricing.md",
+     "northstar-support-alerting.md"
+    ],
+    "ret-11": [
+     "harborpine-note-checkin.md",
+     "summit-note-churn.md",
+     "riverside-call-renewal.md",
+     "northstar-support-alerting.md",
+     "acme-support-export-timeout.md"
+    ],
+    "ret-12": [
+     "harborpine-note-checkin.md",
+     "acme-service-agreement.pdf",
+     "product-premium-operations-plan.md",
+     "northstar-support-alerting.md",
+     "northstar-rate-card.xlsx"
+    ],
+    "ret-13": [
+     "harborpine-note-checkin.md",
+     "northstar-support-alerting.md",
+     "acme-support-export-timeout.md",
+     "riverside-call-renewal.md",
+     "summit-note-churn.md"
+    ],
+    "ret-14": [
+     "northstar-note-discovery.md",
+     "northstar-support-alerting.md",
+     "product-fleet-visibility.md",
+     "goldenvalley-note-discovery.md",
+     "harborpine-note-checkin.md"
+    ],
+    "ret-15": [
+     "northstar-note-discovery.md",
+     "northstar-support-alerting.md",
+     "goldenvalley-note-discovery.md",
+     "product-fleet-visibility.md",
+     "goldenvalley-email-pricing.md"
+    ],
+    "ret-16": [
+     "northstar-support-alerting.md",
+     "product-fleet-visibility.md",
+     "northstar-note-discovery.md",
+     "goldenvalley-note-discovery.md",
+     "goldenvalley-email-pricing.md"
+    ],
+    "ret-17": [
+     "northstar-support-alerting.md",
+     "northstar-note-discovery.md",
+     "goldenvalley-note-discovery.md",
+     "product-fleet-visibility.md",
+     "goldenvalley-email-pricing.md"
+    ],
+    "ret-18": [
+     "product-fleet-visibility.md",
+     "northstar-note-discovery.md",
+     "northstar-support-alerting.md",
+     "goldenvalley-note-discovery.md",
+     "goldenvalley-email-pricing.md"
+    ],
+    "ret-19": [
+     "product-fleet-visibility.md",
+     "northstar-note-discovery.md",
+     "goldenvalley-note-discovery.md",
+     "goldenvalley-email-pricing.md",
+     "northstar-support-alerting.md"
+    ],
+    "ret-20": [
+     "product-fleet-visibility.md",
+     "northstar-support-alerting.md",
+     "northstar-note-discovery.md",
+     "goldenvalley-email-pricing.md",
+     "goldenvalley-note-discovery.md"
+    ],
+    "ret-21": [
+     "product-premium-operations-plan.md",
+     "riverside-call-renewal.md",
+     "acme-email-discount.md",
+     "acme-call-renewal.md",
+     "acme-service-agreement.pdf"
+    ],
+    "ret-22": [
+     "product-premium-operations-plan.md",
+     "acme-service-agreement.pdf",
+     "acme-email-discount.md",
+     "northstar-support-alerting.md",
+     "riverside-call-renewal.md"
+    ],
+    "ret-23": [
+     "riverside-call-renewal.md",
+     "riverside-email-feedback.md",
+     "acme-email-discount.md",
+     "harborpine-note-checkin.md",
+     "acme-call-renewal.md"
+    ],
+    "ret-24": [
+     "riverside-call-renewal.md",
+     "acme-email-discount.md",
+     "riverside-support-compliance.md",
+     "goldenvalley-note-discovery.md",
+     "product-fleet-visibility.md"
+    ],
+    "ret-25": [
+     "riverside-email-feedback.md",
+     "riverside-support-compliance.md",
+     "riverside-call-renewal.md",
+     "northstar-rate-card.xlsx",
+     "harborpine-note-checkin.md"
+    ],
+    "ret-26": [
+     "riverside-support-compliance.md",
+     "riverside-data-handling-policy.docx",
+     "northstar-support-alerting.md",
+     "goldenvalley-note-discovery.md",
+     "northstar-note-discovery.md"
+    ],
+    "ret-27": [
+     "riverside-support-compliance.md",
+     "riverside-data-handling-policy.docx",
+     "vertex-support-rate-limit.md",
+     "goldenvalley-note-discovery.md",
+     "northstar-support-alerting.md"
+    ],
+    "ret-28": [
+     "summit-note-churn.md",
+     "northstar-support-alerting.md",
+     "riverside-support-compliance.md",
+     "vertex-call-renewal.md",
+     "acme-email-discount.md"
+    ],
+    "ret-29": [
+     "summit-note-churn.md",
+     "product-premium-operations-plan.md",
+     "acme-email-discount.md",
+     "riverside-call-renewal.md",
+     "northstar-support-alerting.md"
+    ],
+    "ret-30": [
+     "vertex-call-renewal.md",
+     "acme-email-discount.md",
+     "product-premium-operations-plan.md",
+     "acme-call-renewal.md",
+     "summit-note-churn.md"
+    ],
+    "ret-31": [
+     "vertex-call-renewal.md",
+     "product-premium-operations-plan.md",
+     "vertex-support-rate-limit.md",
+     "acme-support-export-timeout.md",
+     "riverside-call-renewal.md"
+    ],
+    "ret-32": [
+     "vertex-support-rate-limit.md",
+     "northstar-rate-card.xlsx",
+     "product-premium-operations-plan.md",
+     "product-fleet-visibility.md",
+     "vertex-call-renewal.md"
+    ],
+    "ret-33": [
+     "vertex-support-rate-limit.md",
+     "vertex-call-renewal.md",
+     "product-premium-operations-plan.md",
+     "acme-support-export-timeout.md",
+     "acme-email-discount.md"
+    ],
+    "ret-34": [
+     "acme-support-export-timeout.md",
+     "product-premium-operations-plan.md",
+     "acme-call-renewal.md",
+     "vertex-support-rate-limit.md",
+     "northstar-support-alerting.md"
+    ],
+    "ret-35": [
+     "northstar-support-alerting.md",
+     "product-fleet-visibility.md",
+     "northstar-note-discovery.md",
+     "harborpine-note-checkin.md",
+     "vertex-support-rate-limit.md"
+    ],
+    "ret-36": [
+     "riverside-support-compliance.md",
+     "northstar-support-alerting.md",
+     "summit-note-churn.md",
+     "vertex-support-rate-limit.md",
+     "goldenvalley-note-discovery.md"
+    ],
+    "unans-01": [
+     "product-premium-operations-plan.md",
+     "northstar-rate-card.xlsx",
+     "summit-note-churn.md",
+     "vertex-support-rate-limit.md",
+     "acme-support-export-timeout.md"
+    ],
+    "unans-02": [
+     "vertex-support-rate-limit.md",
+     "vertex-call-renewal.md",
+     "summit-note-churn.md",
+     "goldenvalley-note-discovery.md",
+     "northstar-note-discovery.md"
+    ],
+    "unans-03": [
+     "northstar-support-alerting.md",
+     "acme-call-renewal.md",
+     "product-premium-operations-plan.md",
+     "product-fleet-visibility.md",
+     "riverside-email-feedback.md"
+    ],
+    "unans-04": [
+     "riverside-support-compliance.md",
+     "product-premium-operations-plan.md",
+     "summit-note-churn.md",
+     "northstar-rate-card.xlsx",
+     "vertex-support-rate-limit.md"
+    ],
+    "unans-05": [
+     "harborpine-note-checkin.md",
+     "acme-email-discount.md",
+     "goldenvalley-email-pricing.md",
+     "acme-call-renewal.md",
+     "northstar-support-alerting.md"
+    ],
+    "unans-06": [
+     "acme-service-agreement.pdf",
+     "acme-email-discount.md",
+     "acme-call-renewal.md",
+     "goldenvalley-email-pricing.md",
+     "northstar-rate-card.xlsx"
+    ]
+   },
+   "sizes": [
+    600,
+    255,
+    600,
+    226,
+    434,
+    476,
+    600,
+    313,
+    509,
+    600,
+    310,
+    600,
+    283,
+    599,
+    366,
+    472,
+    259,
+    600,
+    233,
+    600,
+    382,
+    600,
+    465,
+    590,
+    344,
+    581,
+    600,
+    230,
+    600,
+    110,
+    531,
+    600,
+    158
+   ]
+  }
+ },
+ "embedding_model": "google:gemini-embedding-001",
+ "recorded_at": "2026-11-13T13:44Z",
+ "versions": {
+  "langchain": "1.5.0",
+  "langchain-core": "1.8.0",
+  "langchain-qdrant": "1.1.0",
+  "langchain-text-splitters": "1.1.3",
+  "langgraph": "1.2.20"
+ }
+}
