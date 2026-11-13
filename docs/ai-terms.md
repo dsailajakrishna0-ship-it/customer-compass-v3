@@ -50,6 +50,7 @@ An idea or method used when building with language models.
 | 🟪 **Prompt** | The text sent to a model: instructions plus the question. What you put in it strongly shapes the answer. | V2 seed | [V2 record](v2-baseline/part-1-foundations/02-first-llm-chat.md) |
 | 🟪 **Prompt injection** | Text that tries to trick a model into ignoring its rules, for example an instruction hidden in a document or a message. | V2 seed | [V2 record](v2-baseline/part-3-trust-safety/08-prompt-injection-guardrails.md) |
 | 🟪 **Query rewrite** | Having a model rephrase a search query (use the right names and terms, drop filler) so a second search can find what the first one missed. | sub-stage 5.4 |  |
+| 🟪 **Query routing** | Deciding which knowledge base (or tool) can answer a question before searching. A router can be a rule, a model that reads descriptions, or the answering model itself choosing a tool. | E1.2 |  |
 | 🟪 **RAG** | Retrieval-augmented generation: fetch relevant documents first and give them to the model, so its answer is based on your data and can cite sources. | V2 seed | [V2 record](v2-baseline/part-1-foundations/03-basic-rag.md) |
 | 🟪 **recall@k** | Of the documents that should come back, the share found in the first k results. | sub-stage 0.7 | [stage guide](stages/00-foundation.md) |
 | 🟪 **Reciprocal rank fusion (RRF)** | A way to merge several best-first result lists into one using only each item's position, so scores from different searches never have to be compared. | sub-stage 4.1 |  |

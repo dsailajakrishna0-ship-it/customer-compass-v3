@@ -1,8 +1,8 @@
 # Extension E1 — Multi-source RAG: more than one knowledge base
 
 > **Level:** beginner friendly; read [Stage 4](04-retrieval-upgrade.md) first (it explains how one collection is searched). **Reading time:** about 15 minutes.
-> **Status:** E1.1 written (🟪knowledge bases). E1.2 (routing strategies) and E1.3 (a comparison) are planned.
-> **Roadmap:** [Extensions after parity](../roadmap.md#extensions-after-parity-from-2026-11-13) · **Decision:** [ADR 0029](../adr/0029-knowledge-bases.md) · **List of Python-only additions:** [python-extensions](../python-extensions.md)
+> **Status:** E1.1 (🟪knowledge bases) and E1.2 (🟪routing strategies) written. E1.3 (a comparison) is planned.
+> **Roadmap:** [Extensions after parity](../roadmap.md#extensions-after-parity-from-2026-11-13) · **Decisions:** [ADR 0029](../adr/0029-knowledge-bases.md), [ADR 0030](../adr/0030-multi-source-strategies-as-a-graph.md) · **List of Python-only additions:** [python-extensions](../python-extensions.md)
 
 **AI colour code:** 🟪 concept · 🟦 framework or tool · 🟩 data store or service · 🟧 model. Unmarked technical terms are ordinary software. [A to Z list](../ai-terms.md)
 
@@ -71,6 +71,68 @@ just kb-search crm "How long must workers stay out of a block after spraying?"
 
 Notice: the first search returns only `knowledge-bases/agri-supply/...` sources; the second returns only CRM documents (probably weak matches); ingesting the CRM documents again leaves the farm-supply count unchanged.
 
+## E1.2 — Three ways to decide where to search
+
+`POST /api/v1/chat/multi` answers a question from the 🟪knowledge bases, with a `strategy`:
+
+| Strategy | Who decides | Model calls | What it costs and risks |
+| --- | --- | --- | --- |
+| `route` (default) | A 🟪router model reads each description and picks the corpora | 1 + the answer | A wrong pick hides a corpus; so an unreadable answer means *search everything*, and only an explicit `[]` means *nowhere* |
+| `all` | Nobody: every corpus is searched and the results merged | the answer only | A search per corpus, and weak sources from the corpora that cannot answer |
+| `agent` | The model, through a `search_knowledge_base(knowledge_base, query)` tool | one per turn | It can search twice, with its own queries; a small model may stop too early or never try the other corpus |
+
+```mermaid
+flowchart TD
+  start(["question"]) --> guard["guard<br/>question cleaned"]
+  guard -->|route| router["router<br/>reads the descriptions"]
+  guard -->|all| all["plan_all<br/>every knowledge base"]
+  guard -->|agent| turn["agent_turn<br/>model with the search tool"]
+  router -->|"ids"| search["search<br/>concurrent, merged by rank"]
+  router -->|"nowhere: []"| respond
+  all --> search
+  search --> respond["respond<br/>answer, or 'could not find'"]
+  turn -->|"asks to search"| tools["run_tools<br/>guard every result"]
+  tools -->|"turns left"| turn
+  tools -->|"limit reached"| force["force_final<br/>tools off"]
+  turn -->|"answers"| finish["finish<br/>scan the answer, audit"]
+  force --> finish
+  respond --> done(["message, citations, routing, usage, guardrail"])
+  finish --> done
+```
+
+| Piece | File | Job |
+| --- | --- | --- |
+| The graph and the route | `app/routes/multi_chat.py` | the nodes, the edges, the tool loop, the guard, the response |
+| Router and merge | `app/rag/multi_source.py` | read the router's JSON safely, search several corpora concurrently, fuse by rank, rerank |
+
+### Concept 5 — A graph that decides, not only a graph that runs
+
+The account 🟪agent of Stage 3 is a sequence with one loop. This graph's job is **branching**: a conditional edge picks the strategy, another the router's verdict, and the agent's tool loop is a visible cycle with a limit (`agent_turn` → `run_tools` → `agent_turn`, or `force_final`). The shape is declared in `build_graph()`, so it can be read, drawn and tested (a test asserts the cycle exists) instead of being buried in a `while`.
+
+### Concept 6 — A 🟪query routing router is a classifier, so plan for it being wrong
+
+Reading the descriptions is a classification, and small models are weak classifiers. The design makes the router's failure harmless: an unreadable answer, or one that names only ids that do not exist, falls back to searching everything and says so in `routing.reason`. Only a deliberate empty list means "nowhere".
+
+### Concept 7 — Merge by position, not by score
+
+🟪Cosine scores from two corpora are not on one scale. 🟪Reciprocal rank fusion uses positions only (the same function that merges 🟪hybrid search); with no 🟪reranker it is a round robin, with one the reranker reads the question and each candidate together and does the real ordering.
+
+### Concept 8 — Hand-written tool nodes, on purpose
+
+🟦LangGraph has a prebuilt tool node and 🟦LangChain a 🟪prebuilt agent. Stage 5.5 measured the prebuilt agent with a small model: it answered before calling any tool on 12 of 13 runs. This loop must also number sources across calls, guard every result and treat the model's arguments as untrusted, so the nodes are ours and LangGraph declares the shape. [ADR 0030](../adr/0030-multi-source-strategies-as-a-graph.md) has the reasoning.
+
+### How to try E1.2
+
+```bash
+just up && just seed && just kb-ingest agri-supply          # the stack and both corpora (needs the embedding and chat keys)
+just multi "How long must workers stay out of a block after spraying?"                 # route (the default)
+STRATEGY=all just multi "What is the renewal notice period?"                           # both corpora, merged
+STRATEGY=agent just multi "Compare how our CRM customers handle renewals with the farm-supply renewal terms"
+STRATEGY=everything just multi "x"                                                     # 422 literal_error
+```
+
+Notice: in `route` read `routing.reason`; in `all` the citations come from both corpora, numbered 1 to 4; in `agent` read `routing.toolsUsed` (each search with its knowledge base and query) and see how the numbering continues across calls. "Renewal" and "pricing" exist in both corpora on purpose.
+
 ## What comes next
 
-**E1.2** decides where to search, three ways, on one Python-only route: a **router** (a model reads the descriptions), **search all and merge** (`asyncio.gather`, 🟪reciprocal rank fusion, then the 🟪reranker) and an **🟪agent** that picks a corpus through a tool, with the router and the agent as a 🟦LangGraph graph. **E1.3** measures the three on the same 24 labelled questions the Java edition used.
+**E1.3** measures the three strategies on the same 24 labelled questions the Java edition used, recorded once on the default 🟪embedding model and replayable without keys, and sets the two stacks' tables side by side.

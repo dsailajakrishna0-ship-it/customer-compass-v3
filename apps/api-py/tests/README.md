@@ -81,6 +81,7 @@ limits (set through the `AGENT_*` environment variables), the tool code. **The p
 | `test_frameworks.py` | other | Retrieval and ingestion (the framework side of each seam; skips without the optional packages) |
 | `test_frameworks_compare.py` | other | Retrieval and ingestion (the manual-versus-framework tables and recordings) |
 | `test_knowledge_bases.py` | other | Retrieval and ingestion (knowledge bases: a second corpus in its own collection; a Python-only extension, in-process Qdrant and fake embeddings) |
+| `test_multi_source.py` | other | Retrieval and ingestion (`POST /chat/multi`: route, all and agent over two knowledge bases, as a LangGraph graph; a Python-only extension, scripted model by role, in-process Qdrant and fake embeddings) |
 | `test_parse.py` | other | Retrieval and ingestion |
 | `test_embedding_models.py` | other | Retrieval and ingestion |
 | `test_migrations.py` | other | Database |
