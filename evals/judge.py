@@ -59,8 +59,9 @@ def cache_key(model: str, prompt_version: str, prompt: str) -> str:
 
 
 class JudgeCache:
-    """One JSON object per line: {key, model, prompt_version, response}. Only hashes and answers are
-    stored (the prompts contain answer text and are kept in the per-run file instead)."""
+    """One JSON object per line: {sha256, model, prompt_version, response}. Only hashes and answers are
+    stored (the prompts contain answer text and are kept in the per-run file instead). The field is called
+    `sha256`, not `key`: a 64-hex value in a field named "key" trips the secret scanner (gitleaks)."""
 
     def __init__(self, path: Path = CACHE_FILE) -> None:
         self.path = path
@@ -69,14 +70,19 @@ class JudgeCache:
             for line in path.read_text().splitlines():
                 if line.strip():
                     row = json.loads(line)
-                    self.entries[row["key"]] = row
+                    self.entries[row["sha256"]] = row
 
     def get(self, key: str) -> str | None:
         row = self.entries.get(key)
         return row["response"] if row else None
 
     def put(self, key: str, model: str, prompt_version: str, response: str) -> None:
-        row = {"key": key, "model": model, "prompt_version": prompt_version, "response": response}
+        row = {
+            "sha256": key,
+            "model": model,
+            "prompt_version": prompt_version,
+            "response": response,
+        }
         self.entries[key] = row
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with self.path.open("a") as handle:

@@ -1,2 +1,18 @@
 # False positive: a placeholder 'wrong key' example in the runbook (the line was reworded afterwards).
 de1a1dd0bf4001598cfaf4af8271b3375f133d58:docs/acceptance-runbook.md:generic-api-key:188
+# False positives: the judge cache's sha256 hashes (field was named "key" in the first commit; renamed afterwards).
+1d714dd31695b0eaa6be60307aed3b899f2404d6:evals/judged/cache.jsonl:generic-api-key:1
+1d714dd31695b0eaa6be60307aed3b899f2404d6:evals/judged/cache.jsonl:generic-api-key:2
+1d714dd31695b0eaa6be60307aed3b899f2404d6:evals/judged/cache.jsonl:generic-api-key:3
+1d714dd31695b0eaa6be60307aed3b899f2404d6:evals/judged/cache.jsonl:generic-api-key:4
+1d714dd31695b0eaa6be60307aed3b899f2404d6:evals/judged/cache.jsonl:generic-api-key:5
+1d714dd31695b0eaa6be60307aed3b899f2404d6:evals/judged/cache.jsonl:generic-api-key:6
+1d714dd31695b0eaa6be60307aed3b899f2404d6:evals/judged/cache.jsonl:generic-api-key:7
+1d714dd31695b0eaa6be60307aed3b899f2404d6:evals/judged/cache.jsonl:generic-api-key:8
+1d714dd31695b0eaa6be60307aed3b899f2404d6:evals/judged/cache.jsonl:generic-api-key:9
+1d714dd31695b0eaa6be60307aed3b899f2404d6:evals/judged/cache.jsonl:generic-api-key:10
+1d714dd31695b0eaa6be60307aed3b899f2404d6:evals/judged/cache.jsonl:generic-api-key:11
+1d714dd31695b0eaa6be60307aed3b899f2404d6:evals/judged/cache.jsonl:generic-api-key:12
+1d714dd31695b0eaa6be60307aed3b899f2404d6:evals/judged/cache.jsonl:generic-api-key:13
+1d714dd31695b0eaa6be60307aed3b899f2404d6:evals/judged/cache.jsonl:generic-api-key:14
+1d714dd31695b0eaa6be60307aed3b899f2404d6:evals/judged/cache.jsonl:generic-api-key:15

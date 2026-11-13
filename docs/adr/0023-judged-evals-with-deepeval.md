@@ -21,7 +21,7 @@ Constraints: free tiers only ([ADR 0010](0010-cloud-only-models.md)); the free O
 **Record and replay.** Every judge call is keyed by `sha256(model, prompt version, prompt)`.
 - `replay` (the default, and the only mode CI may use): never touches the network. A missing key stops the run (`ReplayMiss`); it never silently falls back to a live call.
 - `record`: a missing key is sent to OpenRouter once (paced to stay under the free tier, retries on 429/5xx, gives up cleanly and keeps what it has), then saved. A second run costs nothing and gives identical numbers.
-- The cache (`evals/judged/cache.jsonl`) holds hashes and raw replies, not prompts (prompts contain answer text). Each run also writes every prompt and raw reply to `evals/runs/judged-<time>-<sha>.json` (git-ignored).
+- The cache (`evals/judged/cache.jsonl`) holds sha256 hashes and raw replies, not prompts (prompts contain answer text). Each run also writes every prompt and raw reply to `evals/runs/judged-<time>-<sha>.json` (git-ignored).
 - The answers being judged are recorded the same way (`evals/judged/subjects.json`, taken from `POST /api/v1/chat/rag`), so replay needs no stack.
 
 **One table per run.** `just eval-judged` prints branch and commit, judge and prompt version, call counts (fresh vs cached), the four scores next to `evals/baseline/judged-v1.json`, and the V2 retrieval numbers from `evals/baseline/v2.json` underneath. `evals/baseline/v2.json` is untouched; `judged-v1.json` is a new baseline, written only with `--save-baseline`.
