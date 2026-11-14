@@ -133,6 +133,19 @@ STRATEGY=everything just multi "x"                                              
 
 Notice: in `route` read `routing.reason`; in `all` the citations come from both corpora, numbered 1 to 4; in `agent` read `routing.toolsUsed` (each search with its knowledge base and query) and see how the numbering continues across calls. "Renewal" and "pricing" exist in both corpora on purpose.
 
+## E1.3: the strategies on 24 questions
+
+The same 24 labelled questions as the Java edition, recorded once and replayable without keys:
+
+```bash
+just eval-multi          # the table, from evals/knowledge-bases/recorded.json
+just eval-multi-check    # fails if a count differs from baseline.json (also runs in CI)
+```
+
+Right sources found on the 20 answerable questions: `route` 19, `all` 20, `agent` 17. Citations from the wrong corpus: 31 of 87, 43 of 91, 26 of 126. Off-topic questions with no sources cited: 1, 0 and 0 of 4. The Java edition's table is within a couple of questions of this one on every row; the differences are single-run choices of a small model (a router that picked one corpus, an agent that searched only the CRM). Numbers, differences and limits: [ADR 0032](../adr/0032-multi-source-strategy-results.md).
+
+Notice: open `recorded.json`, find `mq-18` under `agent`, and see the same query repeated against the CRM only.
+
 ## What comes next
 
-**E1.3** measures the three strategies on the same 24 labelled questions the Java edition used, recorded once on the default 🟪embedding model and replayable without keys, and sets the two stacks' tables side by side.
+The recording used the 0.45 floor. A re-record with the 0.60 floor (ADR 0031), and a floor for the farm-supply corpus like the Java edition's, are separate steps.

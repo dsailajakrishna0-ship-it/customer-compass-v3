@@ -14,7 +14,7 @@ Several 🟪knowledge bases (the CRM documents and, for example, a farm-supply h
 | --- | --- | --- |
 | E1.1 | A knowledge-base registry, a second corpus in its own collection, `GET /knowledge-bases`, `POST /knowledge-bases/{id}/ingest`, `POST /knowledge-bases/{id}/search`. [ADR 0029](adr/0029-knowledge-bases.md), [guide](stages/E1-multi-source-rag.md) | Merged |
 | E1.2 | Three ways to decide where to search (a router, search everything and merge, an 🟪agent with a tool), on one route, `POST /chat/multi`, as one 🟦LangGraph graph. [ADR 0030](adr/0030-multi-source-strategies-as-a-graph.md) | In review |
-| E1.3 | A replayable comparison of the three on the same 24 labelled questions as the Java edition | Planned |
+| E1.3 | A replayable comparison of the three on the same 24 labelled questions as the Java edition, replayable without keys (`just eval-multi`, checked in CI). [ADR 0032](adr/0032-multi-source-strategy-results.md) | In review |
 
 ## New routes and settings (E1.1 and E1.2)
 
