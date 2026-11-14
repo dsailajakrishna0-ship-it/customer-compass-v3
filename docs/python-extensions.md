@@ -23,12 +23,12 @@ A coordinator model that decides, turn by turn, which specialist works next, wit
 | Slice | What | Status |
 | --- | --- | --- |
 | E3.1 | `POST /agent/supervise`: a supervisor and five specialists (CRM facts, researcher, analyst, reviewer, drafter) as one 🟦LangGraph graph, the allowed lists in code, the decisions in the response, the same approval gate. [ADR 0033](adr/0033-supervisor-with-specialist-agents.md), [guide](stages/E3-supervisor.md) | In review |
-| E3.2 | An answer team for plain questions, and the supervisor's own search words | Planned |
+| E3.2 | An answer team for plain questions (CRM facts, researcher, answerer; a grounded answer or a fixed "not found" text, no task, no gate), and the supervisor's own search words. [ADR 0034](adr/0034-answer-team-and-supervisor-queries.md) | In review |
 | E3.3 | A replayable comparison with the fixed pipeline on the Java edition's ten golden cases | Planned |
 
 | Route or setting | What it does |
 | --- | --- |
-| `POST /api/v1/agent/supervise` | The request of `/agent/recommend` (`message`, optional `model`); the response is the recommend shape plus `supervisor` (`turns`, `modelDecisions`, `codeDecisions`). A message that is not a follow-up request gets `route: "direct"`. A completed run waits at the same gate: `POST /agent/confirm` |
+| `POST /api/v1/agent/supervise` | The request of `/agent/recommend` (`message`, optional `model`); the response is the recommend shape plus `supervisor` (`turns`, `modelDecisions`, `codeDecisions`). A follow-up request runs the task team; any other message runs the answer team and gets `status: "answered"` with `message`, `grounded` and `citations` (no task). A completed run waits at the same gate: `POST /agent/confirm` |
 | `SUPERVISOR_MAX_TURNS` | How often the supervisor may decide who works next (default 10); a run that hits it ends as `budget_exceeded` |
 
 ## New routes and settings (E1.1 and E1.2)

@@ -21,7 +21,7 @@ from app.llm.types import ChatMessage, GenerationResult
 
 # Which agent is asking. It travels with every model call, so logs, traces and test fakes can tell the
 # agents apart without looking at the wording of their prompts.
-AgentRole = Literal["analyst", "reviewer", "task_drafter", "supervisor"]
+AgentRole = Literal["analyst", "reviewer", "task_drafter", "supervisor", "answerer"]
 
 
 class LlmCall(Protocol):

@@ -818,10 +818,23 @@ also logs `vector_search strategy=...` in the API logs.
 | 2 | With both keys, stack up and corpora ingested: `just supervise "Analyze Acme Fabrication and recommend a next action"` | `status: completed`, the usual recommendation, review and `proposedTask`, plus `supervisor.turns` | Which specialist ran, who chose, why |
 | 3 | In the output find a turn with `"source": "supervisor"` | The turn before the analyst: the supervisor chose between the analyst and the researcher | The one genuine choice; the others say `only one choice allowed` |
 | 4 | `just supervise "Analyze Globex and recommend a next action"` | `status: company_not_found`, `modelDecisions: 0` | No customer: no model call |
-| 5 | `just supervise "What is Acme's industry?"` | `route: direct` | Only follow-up requests use the agent, as for `/agent/recommend` |
+| 5 | `just supervise "What is Acme's industry?"` | Since E3.2 a plain question is answered (`status: answered`); before it was `route: direct` | A question runs the answer team, see Extension E3.2 below |
 | 6 | `curl -s localhost:8001/api/v1/tasks` before and after step 2 | unchanged | Nothing is written until `POST /agent/confirm` |
 
 **What to notice:** a supervisor that proposes something not allowed is overridden and the turn says `"source": "code"` with what it proposed; `SUPERVISOR_MAX_TURNS=2` ends a run as `budget_exceeded`.
+
+## Extension E3.2: the answer team and the supervisor's search words (Python)
+
+| # | Do | Expect | What it shows |
+| --- | --- | --- | --- |
+| 1 | `just test-internal` (or `cd apps/api-py && uv run pytest -q tests/agent_internals/test_supervisor.py`) | all pass; no key, no database needed for that file | The rules for a question: what is allowed when, the grounding rule, the search-word limits, the output guard |
+| 2 | With both keys, stack up and corpora ingested: `just supervise "How long must workers stay out of a block after spraying?"` | `status: answered`, `message` with `[E1]`-style labels, `grounded: true`, `citations` from the farm-supply handbook, no `proposedTask` | The answer team |
+| 3 | In the output read `supervisor.turns` | `crm_facts` and the first `researcher` by `code`; the next turn offers `answerer` or `researcher` and the supervisor chose; a `query` appears on a turn where it searched again | The one real choice, and its own words |
+| 4 | `just supervise "What did Acme Fabrication ask us for?"` | `evidence` starts with `CRM facts` for Acme | A named customer adds the CRM facts to a question |
+| 5 | `just supervise "What is our refund policy for Globex?"` | Either an answer that cites evidence it was given, or the fixed "could not find" text with `grounded: false`; never an answer with no citation | Fail closed on grounding (what the model says first is not measured here) |
+| 6 | `curl -s localhost:8001/api/v1/tasks` before and after any question | unchanged | A question writes nothing and has no gate |
+
+**What to notice:** `"grounded": false` means the model's answer cited no evidence that exists and was replaced by the fixed "could not find" text; a supervisor choice that is not allowed is still overridden (`"source": "code"`).
 
 ## 5. Related docs
 
