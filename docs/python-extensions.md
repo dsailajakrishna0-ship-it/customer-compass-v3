@@ -16,6 +16,21 @@ Several 🟪knowledge bases (the CRM documents and, for example, a farm-supply h
 | E1.2 | Three ways to decide where to search (a router, search everything and merge, an 🟪agent with a tool), on one route, `POST /chat/multi`, as one 🟦LangGraph graph. [ADR 0030](adr/0030-multi-source-strategies-as-a-graph.md) | In review |
 | E1.3 | A replayable comparison of the three on the same 24 labelled questions as the Java edition, replayable without keys (`just eval-multi`, checked in CI). [ADR 0032](adr/0032-multi-source-strategy-results.md) | In review |
 
+## E3: a supervisor with specialist agents
+
+A coordinator model that decides, turn by turn, which specialist works next, with the rules in code (the twin of the Java edition's E3).
+
+| Slice | What | Status |
+| --- | --- | --- |
+| E3.1 | `POST /agent/supervise`: a supervisor and five specialists (CRM facts, researcher, analyst, reviewer, drafter) as one 🟦LangGraph graph, the allowed lists in code, the decisions in the response, the same approval gate. [ADR 0033](adr/0033-supervisor-with-specialist-agents.md), [guide](stages/E3-supervisor.md) | In review |
+| E3.2 | An answer team for plain questions, and the supervisor's own search words | Planned |
+| E3.3 | A replayable comparison with the fixed pipeline on the Java edition's ten golden cases | Planned |
+
+| Route or setting | What it does |
+| --- | --- |
+| `POST /api/v1/agent/supervise` | The request of `/agent/recommend` (`message`, optional `model`); the response is the recommend shape plus `supervisor` (`turns`, `modelDecisions`, `codeDecisions`). A message that is not a follow-up request gets `route: "direct"`. A completed run waits at the same gate: `POST /agent/confirm` |
+| `SUPERVISOR_MAX_TURNS` | How often the supervisor may decide who works next (default 10); a run that hits it ends as `budget_exceeded` |
+
 ## New routes and settings (E1.1 and E1.2)
 
 | Route or setting | What it does |

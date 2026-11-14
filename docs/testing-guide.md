@@ -810,6 +810,19 @@ chunks into `document_chunks_demo`, run the API with
 `QDRANT_COLLECTION=document_chunks_demo`, then clean up). Each chat question
 also logs `vector_search strategy=...` in the API logs.
 
+## Extension E3.1: the supervisor (Python)
+
+| # | Do | Expect | What it shows |
+| --- | --- | --- | --- |
+| 1 | `just test-internal` (or `cd apps/api-py && uv run pytest -q tests/agent_internals/test_supervisor.py`) | all pass; no key, no database needed for that file | The rules: what is allowed when, a bad answer overridden, the turn limit, nothing written before the gate |
+| 2 | With both keys, stack up and corpora ingested: `just supervise "Analyze Acme Fabrication and recommend a next action"` | `status: completed`, the usual recommendation, review and `proposedTask`, plus `supervisor.turns` | Which specialist ran, who chose, why |
+| 3 | In the output find a turn with `"source": "supervisor"` | The turn before the analyst: the supervisor chose between the analyst and the researcher | The one genuine choice; the others say `only one choice allowed` |
+| 4 | `just supervise "Analyze Globex and recommend a next action"` | `status: company_not_found`, `modelDecisions: 0` | No customer: no model call |
+| 5 | `just supervise "What is Acme's industry?"` | `route: direct` | Only follow-up requests use the agent, as for `/agent/recommend` |
+| 6 | `curl -s localhost:8001/api/v1/tasks` before and after step 2 | unchanged | Nothing is written until `POST /agent/confirm` |
+
+**What to notice:** a supervisor that proposes something not allowed is overridden and the turn says `"source": "code"` with what it proposed; `SUPERVISOR_MAX_TURNS=2` ends a run as `budget_exceeded`.
+
 ## 5. Related docs
 
 | Doc | For |

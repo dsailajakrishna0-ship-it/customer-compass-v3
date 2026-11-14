@@ -34,6 +34,7 @@ from app.routes.llm import router as llm_router
 from app.routes.mcp import router as mcp_router
 from app.routes.multi_chat import router as multi_chat_router
 from app.routes.security import router as security_router
+from app.routes.supervise import router as supervise_router
 from app.routes.tasks import router as tasks_router
 from app.tracing import configure_tracing, shutdown_tracing
 
@@ -91,6 +92,7 @@ app.include_router(companies_router, prefix="/api/v1")
 app.include_router(tasks_router, prefix="/api/v1")
 app.include_router(security_router, prefix="/api/v1")
 app.include_router(agent_router, prefix="/api/v1")
+app.include_router(supervise_router, prefix="/api/v1")
 app.include_router(mcp_router, prefix="/api/v1")
 
 

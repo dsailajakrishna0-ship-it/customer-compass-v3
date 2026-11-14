@@ -179,6 +179,10 @@ kb-ingest id:
 kb-search id query:
     @python3 -c 'import json,sys,urllib.request as u; r=u.Request("http://localhost:8001/api/v1/knowledge-bases/"+sys.argv[1]+"/search", json.dumps({"query":sys.argv[2]}).encode(), {"Content-Type":"application/json"}); print(json.dumps(json.load(u.urlopen(r)), indent=2))' {{id}} "{{query}}"
 
+# ask the supervisor (Python extension E3.1): it chooses the specialists turn by turn; MODEL=<id> picks the model, API_URL the address. Example: just supervise "Analyze Acme Fabrication and recommend a next action"
+supervise message:
+    @python3 -c 'import json,os,sys,urllib.error,urllib.request as u; p={"message":sys.argv[1]}; p.update({k:os.environ[v] for k,v in (("model","MODEL"),) if os.environ.get(v)}); r=u.Request(os.environ.get("API_URL","http://localhost:8001").rstrip("/")+"/api/v1/agent/supervise", json.dumps(p).encode(), {"Content-Type":"application/json"}); exec("try:\n  t=u.urlopen(r,timeout=180).read()\nexcept urllib.error.HTTPError as e:\n  t=e.read()"); print(json.dumps(json.loads(t), indent=2, ensure_ascii=False))' "{{message}}"
+
 # ask across all knowledge bases (Python extension E1.2). STRATEGY=route|all|agent (default route), MODEL=<id> picks the model, API_URL the address. Example: STRATEGY=all just multi "How long must workers stay out after spraying?"
 multi question:
     @python3 -c 'import json,os,sys,urllib.error,urllib.request as u; p={"messages":[{"role":"user","content":sys.argv[1]}]}; p.update({k:os.environ[v] for k,v in (("strategy","STRATEGY"),("model","MODEL")) if os.environ.get(v)}); r=u.Request(os.environ.get("API_URL","http://localhost:8001").rstrip("/")+"/api/v1/chat/multi", json.dumps(p).encode(), {"Content-Type":"application/json"}); exec("try:\n  t=u.urlopen(r,timeout=180).read()\nexcept urllib.error.HTTPError as e:\n  t=e.read()"); print(json.dumps(json.loads(t), indent=2, ensure_ascii=False))' "{{question}}"

@@ -16,7 +16,8 @@ The [tech-stack](../tech-stack.md#v3-tech-stack-at-a-glance) lists every tool, w
 | 3 | [🟦LangGraph port](03-langgraph-port.md) | Contract vs internal tests (3.1); 🟪agent graphs, state, checkpoints, 🟪human-in-the-loop (3.2) | Written (3.1, 3.2a, 3.2b) |
 | 4 | [🟪Retrieval upgrade](04-retrieval-upgrade.md) | 🟪Hybrid search (4.1a); 🟪reranking (4.1b); document parsing (4.2); 🟪embeddings (4.3) | Written (4.1a, 4.1b, 4.2, 4.3) |
 | 5 | [Observability and 🟪evals](05-observability-and-evals.md) | Tracing (5.1); metrics beyond recall, 🟪guardrail comparison (later) | In progress (5.1) |
-| E1 | [🟪Multi-source RAG](E1-multi-source-rag.md) (a Python extension, see [python-extensions](../python-extensions.md)) | Several 🟪knowledge bases, each its own collection (E1.1); routing and comparison (later) | In progress (E1.1) |
+| E1 | [🟪Multi-source RAG](E1-multi-source-rag.md) (a Python extension, see [python-extensions](../python-extensions.md)) | Several 🟪knowledge bases, each its own collection (E1.1); routing and comparison (later) | E1.1 to E1.3 merged |
+| E3 | [Supervisor with specialist agents](E3-supervisor.md) (a Python extension, the twin of the Java edition's E3) | The supervisor graph (E3.1); answer team (E3.2) and comparison (E3.3) later | In progress (E3.1) |
 | 6 | CRM modules and auth | Authentication, authorization, schema growth | Written in Stage 6 |
 | 7 | Agents and supervisor | Multi-agent routing, when an agent is worth it | Written in Stage 7 |
 | 8 | Product features | Forms, uploads, end-to-end tests | Written in Stage 8 |

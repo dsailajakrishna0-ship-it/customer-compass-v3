@@ -145,6 +145,9 @@ class Settings(BaseSettings):
     agent_max_steps: int = 8
     agent_timeout_seconds: float = 180.0
     agent_max_revisions: int = 1
+    # E3.1: how often the supervisor may decide who works next (ADR 0033); the specialists' own steps are
+    # budgeted at four per turn
+    supervisor_max_turns: int = 10
 
     # MCP tool servers (Stage 2.2). Two implementations of the same tools; `mcp_backend` picks the
     # default and a chat request may choose another (see app/mcp/registry.py).
