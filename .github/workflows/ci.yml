@@ -49,6 +49,8 @@ jobs:
         run: just eval-agentic
       - name: Manual-versus-framework comparison, replayed from the recorded measurements (no keys, no network calls)
         run: just eval-frameworks
+      - name: Multi-source strategy comparison (route, all, agent), replayed from the recorded answers (no keys, no network calls)
+        run: just eval-multi-check
       - name: Framework side's tests and the contract suite against AGENT_IMPL=frameworks (the optional packages are layered on, not locked)
         run: just test-frameworks
 

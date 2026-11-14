@@ -1,0 +1,313 @@
+[
+ {
+  "kind": "crm",
+  "expected_kbs": [
+   "crm"
+  ],
+  "relevant": {
+   "crm": [
+    "acme-call-renewal.md"
+   ]
+  },
+  "question": "What did Maya Chen ask about the renewal of the Premium Operations Plan?",
+  "id": "mq-01"
+ },
+ {
+  "kind": "crm",
+  "expected_kbs": [
+   "crm"
+  ],
+  "relevant": {
+   "crm": [
+    "acme-email-discount.md"
+   ]
+  },
+  "question": "What pricing breakdown did Ravi Patel request from us?",
+  "id": "mq-02"
+ },
+ {
+  "kind": "crm",
+  "expected_kbs": [
+   "crm"
+  ],
+  "relevant": {
+   "crm": [
+    "acme-support-export-timeout.md",
+    "product-premium-operations-plan.md"
+   ]
+  },
+  "question": "Why does the Export full history button time out?",
+  "id": "mq-03"
+ },
+ {
+  "kind": "crm",
+  "expected_kbs": [
+   "crm"
+  ],
+  "relevant": {
+   "crm": [
+    "goldenvalley-email-pricing.md"
+   ]
+  },
+  "question": "What pilot did Carlos Mendez ask pricing for?",
+  "id": "mq-04"
+ },
+ {
+  "kind": "crm",
+  "expected_kbs": [
+   "crm"
+  ],
+  "relevant": {
+   "crm": [
+    "harborpine-note-checkin.md"
+   ]
+  },
+  "question": "Does the support package cover major holidays?",
+  "id": "mq-05"
+ },
+ {
+  "kind": "crm",
+  "expected_kbs": [
+   "crm"
+  ],
+  "relevant": {
+   "crm": [
+    "northstar-note-discovery.md"
+   ]
+  },
+  "question": "What are Jordan Brooks' top priorities for delivery visibility?",
+  "id": "mq-06"
+ },
+ {
+  "kind": "crm",
+  "expected_kbs": [
+   "crm"
+  ],
+  "relevant": {
+   "crm": [
+    "product-premium-operations-plan.md",
+    "acme-call-renewal.md"
+   ]
+  },
+  "question": "How many implementation sessions are included per year?",
+  "id": "mq-07"
+ },
+ {
+  "kind": "crm",
+  "expected_kbs": [
+   "crm"
+  ],
+  "relevant": {
+   "crm": [
+    "summit-note-churn.md"
+   ]
+  },
+  "question": "Why did Summit Builders leave?",
+  "id": "mq-08"
+ },
+ {
+  "kind": "agri",
+  "expected_kbs": [
+   "agri-supply"
+  ],
+  "relevant": {
+   "agri-supply": [
+    "pesticide-reentry-intervals.md"
+   ]
+  },
+  "question": "How long must workers stay out of a block after spraying?",
+  "id": "mq-09"
+ },
+ {
+  "kind": "agri",
+  "expected_kbs": [
+   "agri-supply"
+  ],
+  "relevant": {
+   "agri-supply": [
+    "cold-chain-handling.md"
+   ]
+  },
+  "question": "What temperature range must seedlings be kept at during delivery?",
+  "id": "mq-10"
+ },
+ {
+  "kind": "agri",
+  "expected_kbs": [
+   "agri-supply"
+  ],
+  "relevant": {
+   "agri-supply": [
+    "seed-lot-shelf-life.md"
+   ]
+  },
+  "question": "What germination percentage is needed to sell vegetable seed?",
+  "id": "mq-11"
+ },
+ {
+  "kind": "agri",
+  "expected_kbs": [
+   "agri-supply"
+  ],
+  "relevant": {
+   "agri-supply": [
+    "sprayer-calibration-support.md"
+   ]
+  },
+  "question": "Why was coverage uneven after switching to low-drift nozzles?",
+  "id": "mq-12"
+ },
+ {
+  "kind": "agri",
+  "expected_kbs": [
+   "agri-supply"
+  ],
+  "relevant": {
+   "agri-supply": [
+    "delivery-windows-pallets.md"
+   ]
+  },
+  "question": "On which days do cold chain orders ship?",
+  "id": "mq-13"
+ },
+ {
+  "kind": "agri",
+  "expected_kbs": [
+   "agri-supply"
+  ],
+  "relevant": {
+   "agri-supply": [
+    "organic-certification-note.md"
+   ]
+  },
+  "question": "Which products are allowed under the Willow Creek co-op's organic certification?",
+  "id": "mq-14"
+ },
+ {
+  "kind": "agri",
+  "expected_kbs": [
+   "agri-supply"
+  ],
+  "relevant": {
+   "agri-supply": [
+    "recall-procedure.md"
+   ]
+  },
+  "question": "How quickly must customers be listed when a product is recalled?",
+  "id": "mq-15"
+ },
+ {
+  "kind": "agri",
+  "expected_kbs": [
+   "agri-supply"
+  ],
+  "relevant": {
+   "agri-supply": [
+    "annual-supply-agreement-renewal.md"
+   ]
+  },
+  "question": "What early payment discount applies to Stonebridge Orchards?",
+  "id": "mq-16"
+ },
+ {
+  "kind": "both",
+  "expected_kbs": [
+   "crm",
+   "agri-supply"
+  ],
+  "relevant": {
+   "crm": [
+    "acme-call-renewal.md",
+    "riverside-call-renewal.md",
+    "vertex-call-renewal.md"
+   ],
+   "agri-supply": [
+    "annual-supply-agreement-renewal.md"
+   ]
+  },
+  "question": "What renewal notice and renewal terms apply to our customer agreements and to the farm-supply supply agreement?",
+  "id": "mq-17"
+ },
+ {
+  "kind": "both",
+  "expected_kbs": [
+   "crm",
+   "agri-supply"
+  ],
+  "relevant": {
+   "crm": [
+    "acme-email-discount.md",
+    "goldenvalley-email-pricing.md"
+   ],
+   "agri-supply": [
+    "annual-supply-agreement-renewal.md"
+   ]
+  },
+  "question": "How do volume discounts and pricing work for Acme and for Stonebridge Orchards?",
+  "id": "mq-18"
+ },
+ {
+  "kind": "both",
+  "expected_kbs": [
+   "crm",
+   "agri-supply"
+  ],
+  "relevant": {
+   "crm": [
+    "northstar-support-alerting.md",
+    "acme-support-export-timeout.md"
+   ],
+   "agri-supply": [
+    "sprayer-calibration-support.md",
+    "recall-procedure.md"
+   ]
+  },
+  "question": "How does support handle a problem report: the Northstar alerting question and the sprayer calibration ticket?",
+  "id": "mq-19"
+ },
+ {
+  "kind": "both",
+  "expected_kbs": [
+   "crm",
+   "agri-supply"
+  ],
+  "relevant": {
+   "crm": [
+    "product-fleet-visibility.md"
+   ],
+   "agri-supply": [
+    "delivery-windows-pallets.md"
+   ]
+  },
+  "question": "Compare the delivery and rollout timelines in the Fleet Visibility package with the farm-supply delivery windows.",
+  "id": "mq-20"
+ },
+ {
+  "kind": "neither",
+  "expected_kbs": [],
+  "relevant": {},
+  "question": "What is the capital of France?",
+  "id": "mq-21"
+ },
+ {
+  "kind": "neither",
+  "expected_kbs": [],
+  "relevant": {},
+  "question": "How do I bake a chocolate cake?",
+  "id": "mq-22"
+ },
+ {
+  "kind": "neither",
+  "expected_kbs": [],
+  "relevant": {},
+  "question": "What is the weather in Chicago today?",
+  "id": "mq-23"
+ },
+ {
+  "kind": "neither",
+  "expected_kbs": [],
+  "relevant": {},
+  "question": "Who won the 2018 football World Cup?",
+  "id": "mq-24"
+ }
+]

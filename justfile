@@ -126,6 +126,18 @@ eval-frameworks:
 eval-frameworks-record:
     uv run --project {{api}} --with-requirements evals/requirements-frameworks.txt python evals/compare_frameworks.py --mode record --check
 
+# E1.3: the three multi-source strategies on 24 labelled questions, replayed from the recorded answers (offline, free, no keys)
+eval-multi:
+    python3 evals/knowledge-bases/compare_strategies.py
+
+# E1.3: replay and fail if the counts differ from evals/knowledge-bases/baseline.json
+eval-multi-check:
+    python3 evals/knowledge-bases/compare_strategies.py --check
+
+# E1.3: ask the running API (the CRM documents and agri-supply ingested, GOOGLE_API_KEY and OPENROUTER_API_KEY set) for what is not recorded yet; API_URL, MODEL and EMBEDDING_MODEL are optional (the paid model costs a fraction of a cent)
+eval-multi-record:
+    python3 evals/knowledge-bases/compare_strategies.py --record
+
 # Stage 5.5: the framework side's own tests plus the whole API-contract suite run against AGENT_IMPL=frameworks (the framework packages are layered on; the default install never needs them)
 test-frameworks: db migrate
     cd {{api}} && uv run --with-requirements ../../evals/requirements-frameworks.txt pytest -q -m frameworks
