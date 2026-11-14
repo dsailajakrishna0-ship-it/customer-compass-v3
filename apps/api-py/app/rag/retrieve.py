@@ -42,18 +42,14 @@ from app.rag.sparse import query_vector
 DEFAULT_TOP_K = 4
 # Chunks below this cosine similarity are treated as not relevant enough to cite.
 #
-# Tuned empirically for gemini-embedding-001 (see evals/README.md, Stage 6):
-# sampled questions against the live sample-data corpus showed genuinely
-# relevant chunks scoring ~0.50-0.80, while clearly unrelated questions
-# ("What is the capital of France?", "How do I bake a chocolate cake?")
-# scored ~0.42-0.44. 0.45 sits in the gap between those two clusters. Note
-# this does NOT fully solve plausible-but-uncovered questions (e.g. "What
-# is our refund policy?" scores ~0.50-0.54, same range as real matches,
-# because it's topically CRM/support-adjacent) — that's a known limitation
-# of similarity-only filtering; the LLM's "not in the sources" response
-# text is still the real safety net for those, and the eval suite checks
-# for that behavior rather than expecting zero citations.
-MIN_SIMILARITY = 0.45
+# Calibrated for gemini-embedding-001 (E1.4, ADR 0031): the best chunk of each relevant CRM question
+# scored at least 0.605 and the best chunk of each unrelated question at most 0.597, so 0.60 sits in
+# that narrow gap. It was 0.45 (Stage 6), which let 10 of 12 unrelated questions through. The gap is
+# thin: 12 labelled questions per corpus, and 0.60 also drops about 8% of the weaker supporting chunks
+# (2 of 24 in the top four) of relevant questions. A different embedding model needs its own calibration.
+# It does NOT catch every plausible-but-uncovered question; the LLM's "not in the sources" response
+# is still the safety net there, and the eval suite checks for that behavior.
+MIN_SIMILARITY = 0.60
 
 # Stage 3.a scale-aware search: small collections are searched exactly (every
 # vector compared, always correct); at or above `vector_index_min_points` the search

@@ -68,6 +68,8 @@ Each test uses **both** a deterministic check (keyword match / JS assertion
 on the structured response) and an **🟪LLM-as-judge** rubric (a second, more capable free model that grades each answer) for the more
 nuanced "did the answer actually make sense" grading.
 
+> **Update (E1.4, ADR 0031):** `MIN_SIMILARITY` is now **0.60**. The 0.45 in the section below is the Stage 6 value and the baseline numbers in this README were measured with it; re-measure before comparing.
+
 ## MIN_SIMILARITY tuning (PR 4 follow-up)
 
 PR 4 flagged that `MIN_SIMILARITY=0.3` (inherited unchanged from the old

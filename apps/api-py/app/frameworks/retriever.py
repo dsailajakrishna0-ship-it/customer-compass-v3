@@ -14,7 +14,7 @@ Things the framework needs or does that our code does not (ADR 0027):
   is constructed: a hidden model call, made here from inside the event loop, where the adapter below
   cannot run it. Switched off (below), a search is one Qdrant call, the same as ours (measured);
 - its retriever interface (`as_retriever(search_type="similarity_score_threshold")`) rescales cosine
-  scores to `(1 + cosine) / 2`, which would silently turn our 0.45 floor into "keep nearly everything";
+  scores to `(1 + cosine) / 2`, which would silently turn our similarity floor into "keep nearly everything";
   so this module calls the store's raw-score search with `score_threshold` instead.
 """
 

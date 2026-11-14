@@ -14,7 +14,7 @@ differs between the rows is the embedding model.
 
 Besides the ranking scores it prints the *similarity gap*: the lowest best-match score of an
 answerable question, against the highest best-match score of an unanswerable one. A positive gap
-means a similarity floor can separate them; the floor itself (0.45 for Gemini) does not carry over
+means a similarity floor can separate them; the floor itself (0.60 for Gemini on the CRM documents) does not carry over
 from one model to another.
 """
 

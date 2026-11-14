@@ -85,7 +85,7 @@ A 🟪RAG answer is only as good as the 🟪chunks it is given. Today's search f
 
 **What we measured.** The open-source model (`bge-small-en-v1.5`, 384 numbers, about 67 MB, no key, about 15 ms a question on a laptop CPU) ranked the golden set well: 🟪recall@3 0.986, 🟪MRR 0.972. The same-corpus Gemini numbers need your key, so the ADR leaves that row to be filled in; the default stays Gemini.
 
-**A lesson that is easy to miss.** Our *similarity floor* (0.45) was tuned for Gemini. For the small model even unrelated questions score 0.64 to 0.77, so the same floor would let everything through. **A similarity threshold belongs to a model, not to the system**: changing the model means re-tuning it, and re-embedding.
+**A lesson that is easy to miss.** Our *similarity floor* (0.60 since E1.4, ADR 0031; 0.45 before) was tuned for Gemini. For the small model even unrelated questions score 0.64 to 0.77, so the same floor would let everything through. **A similarity threshold belongs to a model, not to the system**: changing the model means re-tuning it, and re-embedding.
 
 **Why a clear error and not an automatic re-embed.** Re-embedding can be slow, and with a paid model, costly. Hiding that behind a search request would be a surprise; a message that says "click Ingest documents" is not.
 
