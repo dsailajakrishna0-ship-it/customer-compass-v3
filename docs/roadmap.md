@@ -175,7 +175,8 @@ The Java edition reached feature parity with Stages 0 to 4 on 2026-11-13. From t
 
 | Extension | Python edition | Status |
 | --- | --- | --- |
-| **E1 🟪multi-source RAG with routing** | E1.1 🟪knowledge bases ([ADR 0029](adr/0029-knowledge-bases.md)); E1.2 🟪routing strategies with 🟦LangGraph ([ADR 0030](adr/0030-multi-source-strategies-as-a-graph.md)); E1.3 a replayable comparison on the Java edition's questions | E1.1 merged; E1.2 in review |
+| **E1 🟪multi-source RAG with routing** | E1.1 🟪knowledge bases ([ADR 0029](adr/0029-knowledge-bases.md)); E1.2 🟪routing strategies with 🟦LangGraph ([ADR 0030](adr/0030-multi-source-strategies-as-a-graph.md)); E1.3 a replayable comparison on the Java edition's questions | E1.1 to E1.3 merged |
+| **E3 supervisor with specialist 🟪agents** | E3.1 the supervisor graph ([ADR 0033](adr/0033-supervisor-with-specialist-agents.md)); E3.2 an answer team; E3.3 a comparison with the fixed pipeline | E3.1 in review |
 
 ## Risks
 

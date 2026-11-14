@@ -10,7 +10,7 @@ from typing import Literal
 
 from app import tracing
 
-StepKind = Literal["code", "tool", "agent", "gate"]
+StepKind = Literal["code", "tool", "agent", "gate", "supervisor"]
 StepStatus = Literal["ok", "error", "skipped"]
 
 SUMMARY_MAX_CHARS = 300
@@ -64,7 +64,13 @@ class Trace:
 
 
 # How Langfuse labels each kind of step. A "gate" (the human-approval pause) is a plain span.
-_OBSERVATION_TYPE = {"code": "span", "tool": "tool", "agent": "agent", "gate": "span"}
+_OBSERVATION_TYPE = {
+    "code": "span",
+    "tool": "tool",
+    "agent": "agent",
+    "gate": "span",
+    "supervisor": "agent",
+}
 
 
 def _emit_span(step: TraceStep) -> None:
