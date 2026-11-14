@@ -836,6 +836,18 @@ also logs `vector_search strategy=...` in the API logs.
 
 **What to notice:** `"grounded": false` means the model's answer cited no evidence that exists and was replaced by the fixed "could not find" text; a supervisor choice that is not allowed is still overridden (`"source": "code"`).
 
+## Extension E3.3: the supervisor against the pipeline (Python, harness)
+
+| # | Do | Expect | What it shows |
+| --- | --- | --- | --- |
+| 1 | `cd apps/api-py && uv run pytest -q tests/test_supervisor_eval.py` | `19 passed`; no key, no network, no stack | The table worked by hand on a made-up recording, the baseline check, and the recording step against a stand-in API (resume, retry, a run that writes a task) |
+| 2 | `just eval-supervisor` | `Nothing recorded yet: run with --record against a running API.` and exit code 2 | No real recording is shipped: no Python numbers have been measured yet |
+| 3 | `just eval-supervisor-check` | The same "Nothing recorded yet" message and exit code 2 (after a recording, but before a baseline: `FAIL: there is no baseline.json yet`) | Why CI has no replay step yet: a check needs a baseline, and a baseline needs the recording |
+| 4 | Read `evals/supervisor/cases.json` | Ten cases; `agent-08` expects `direct` from the pipeline and `answered` from the supervisor | The one case where the arms differ by design |
+| 5 | Optional, owner's go first, with both keys, the stack up and both corpora ingested: `MODEL=meta-llama/llama-3.1-8b-instruct EMBEDDING_MODEL=gemini-embedding-001 just eval-supervisor-record`, then `just eval-supervisor` | 40 requests, then the table; the "tasks written before a confirm" row must be 0 | The comparison itself (it makes live model and embedding calls) |
+
+**What to notice:** every count replays exactly; only the latency rows depend on the recording run.
+
 ## 5. Related docs
 
 | Doc | For |

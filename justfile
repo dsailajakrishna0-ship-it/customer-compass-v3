@@ -187,6 +187,18 @@ supervise message:
 multi question:
     @python3 -c 'import json,os,sys,urllib.error,urllib.request as u; p={"messages":[{"role":"user","content":sys.argv[1]}]}; p.update({k:os.environ[v] for k,v in (("strategy","STRATEGY"),("model","MODEL")) if os.environ.get(v)}); r=u.Request(os.environ.get("API_URL","http://localhost:8001").rstrip("/")+"/api/v1/chat/multi", json.dumps(p).encode(), {"Content-Type":"application/json"}); exec("try:\n  t=u.urlopen(r,timeout=180).read()\nexcept urllib.error.HTTPError as e:\n  t=e.read()"); print(json.dumps(json.loads(t), indent=2, ensure_ascii=False))' "{{question}}"
 
+# E3.3: the fixed pipeline against the supervisor on the ten golden agent cases, replayed from the recording (offline, free, no keys; says so when nothing is recorded yet)
+eval-supervisor:
+    python3 evals/supervisor/compare_agents.py
+
+# E3.3: replay and fail if a count differs from evals/supervisor/baseline.json
+eval-supervisor-check:
+    python3 evals/supervisor/compare_agents.py --check
+
+# E3.3: ask the running API (the stack up, the CRM documents and agri-supply ingested, GOOGLE_API_KEY and OPENROUTER_API_KEY set) for what is not recorded yet: 10 cases x 2 runs x 2 arms = 40 requests, about 14 to 20 minutes and a few hundred embedding calls; API_URL, MODEL and EMBEDDING_MODEL are optional
+eval-supervisor-record:
+    python3 evals/supervisor/compare_agents.py --record
+
 # render docs/diagrams/*.mmd to docs/img/diagrams/*.png (needs Docker; the first run pulls a ~2.4 GB image)
 diagrams:
     for f in docs/diagrams/*.mmd; do n=$(basename "$f" .mmd); docker run --rm --user "$(id -u):$(id -g)" -v "$PWD/docs":/data ghcr.io/mermaid-js/mermaid-cli/mermaid-cli:12.0.0 -p /data/diagrams/mermaid-puppeteer.json -i "/data/diagrams/$n.mmd" -o "/data/img/diagrams/$n.png" -s 2 -b white || exit 1; echo "rendered $n"; done
