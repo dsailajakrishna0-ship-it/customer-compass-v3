@@ -142,7 +142,7 @@ just eval-multi          # the table, from evals/knowledge-bases/recorded.json
 just eval-multi-check    # fails if a count differs from baseline.json (also runs in CI)
 ```
 
-Right sources found on the 20 answerable questions: `route` 19, `all` 20, `agent` 17. Citations from the wrong corpus: 31 of 87, 43 of 91, 26 of 126. Off-topic questions with no sources cited: 1, 0 and 0 of 4. The Java edition's table is within a couple of questions of this one on every row; the differences are single-run choices of a small model (a router that picked one corpus, an agent that searched only the CRM). Numbers, differences and limits: [ADR 0032](../adr/0032-multi-source-strategy-results.md).
+Right sources found on the 20 answerable questions: `route` 19, `all` 20, `agent` 17. Citations from the wrong corpus: 31 of 87, 43 of 91, 26 of 126. Off-topic questions with no sources cited: 1, 0 and 0 of 4. The Java edition's table is within a couple of questions of this one on every row; the differences are single-run choices of a small model (a router that picked one corpus, an 🟪agent that searched only the CRM). Numbers, differences and limits: [ADR 0032](../adr/0032-multi-source-strategy-results.md).
 
 Notice: open `recorded.json`, find `mq-18` under `agent`, and see the same query repeated against the CRM only.
 
