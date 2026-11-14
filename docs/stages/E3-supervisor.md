@@ -1,6 +1,6 @@
 # Stage E3: a supervisor with specialist agents (Python extension)
 
-The Python twin of the Java edition's E3 (see [python-extensions.md](../python-extensions.md)). Decisions: [ADR 0033](../adr/0033-supervisor-with-specialist-agents.md). Cut into slices: **E3.1** the supervisor graph (this page), **E3.2** an answer team and the supervisor's own search words, **E3.3** a comparison with the fixed pipeline.
+The Python twin of the Java edition's E3 (see [python-extensions.md](../python-extensions.md)). Decisions: [ADR 0033](../adr/0033-supervisor-with-specialist-agents.md). Cut into slices: **E3.1** the supervisor graph, **E3.2** an answer team and the supervisor's own search words (below), **E3.3** a comparison with the fixed pipeline.
 
 **AI colour code:** 🟪 concept · 🟦 framework or tool · 🟩 data store or service · 🟧 model. Unmarked technical terms are ordinary software. [A to Z list](../ai-terms.md)
 
@@ -66,6 +66,51 @@ just supervise "Analyze Acme Fabrication and recommend a next action"
 
 Notice: `supervisor.turns` lists each decision. Most say `"source": "code"` and `"reason": "only one choice allowed"`; the turn before the analyst is the real choice (`"source": "supervisor"`), and it may have called the researcher first (look for `search_knowledge_bases` in `trace`). A name the CRM does not have (`Analyze Globex and recommend a next action`) ends at once as `company_not_found` with no model call. Nothing is written until `POST /agent/confirm` (the web app's Confirm button, or the curl in the testing guide).
 
+## E3.2: an answer team and the supervisor's own search words
+
+Decisions: [ADR 0034](../adr/0034-answer-team-and-supervisor-queries.md). The same route, `POST /api/v1/agent/supervise`, now handles two kinds of request. Code decides which team runs (the rule that already separated a follow-up from a simple question, `needs_agent`).
+
+```mermaid
+flowchart TD
+  req["request"] --> kind{"follow-up or question?<br/>(code)"}
+  kind -->|follow-up| team1["task team: crm_facts, researcher, analyst, reviewer, drafter<br/>approval gate"]
+  kind -->|question| team2["answer team: crm_facts, researcher, answerer"]
+  team2 --> sup{"supervisor:<br/>search again (own words)<br/>or answer now"}
+  sup -->|"researcher + query"| res["researcher"]
+  res --> sup
+  sup -->|answerer| ans["answerer<br/>cites [E1]...; no valid citation = fixed 'not found' text"]
+  ans --> out["status answered<br/>message, grounded, citations, supervisor"]
+```
+
+| State of a question | Allowed |
+| --- | --- |
+| customer not loaded | `crm_facts` |
+| no research yet | `researcher` (one choice: no model call) |
+| researched | `answerer`, and `researcher` once more (a real choice: the supervisor is asked) |
+| answered | `FINISH` |
+
+The response of a question has `status: "answered"`, `message`, `grounded`, `evidence`, `citations` (the evidence items the answer cited), `guardrail`, `llmCalls` and `supervisor`. It has no `proposedTask` and nothing to confirm.
+
+### Concepts
+
+1. **Route to a team, not only to a step.** The supervisor coordinates different sets of specialists depending on the kind of work. The team is chosen in code, because the approval gate must never depend on a model's mood.
+2. **A decision with content.** The supervisor does not only pick a name: it can write the words the researcher searches for. Model-written text is still untrusted input: trimmed, capped at 200 characters, only honoured for the researcher, and what it 🟪retrieves is guarded as before.
+3. **Fail closed on grounding.** An answer is shown only if it cites evidence that exists; otherwise the fixed "could not find" text is shown and `grounded` is `false`.
+4. **No customer is fine for a question** and not for a follow-up: the same specialist, different rules per team.
+5. **Decisions stay visible.** `supervisor.turns` records who chose each step, why, and the search words.
+6. **What was left out.** Parallel specialists need a reducer for the evidence list; with such short specialists it would only buy latency.
+
+### How to try E3.2
+
+```bash
+just up && just seed && just kb-ingest agri-supply          # the stack and both corpora (needs the embedding and chat keys)
+just supervise "How long must workers stay out of a block after spraying?"   # a question: the answer team
+just supervise "What did Acme Fabrication ask us for?"                       # a question that names a customer
+just supervise "Analyze Acme Fabrication and recommend a next action"        # a follow-up: the task team, with the gate
+```
+
+Notice: a question returns `status: answered` with `grounded` and `citations`, and no `proposedTask`; `supervisor.turns` shows the researcher chosen by code (one choice) and then the one real choice (answer now, or search again), with the supervisor's own `query` on a turn when it searched again.
+
 ## What comes next
 
-**E3.2** adds an answer team for plain questions and lets the supervisor write its own search words; **E3.3** compares the supervisor with the fixed pipeline on the Java edition's ten golden cases, recorded once and replayable without keys.
+**E3.3** compares the supervisor with the fixed pipeline on the Java edition's ten golden cases, recorded once and replayable without keys. It needs a recording with keys, so it waits for the owner's go.
