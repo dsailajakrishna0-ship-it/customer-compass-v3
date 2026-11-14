@@ -24,7 +24,7 @@ A coordinator model that decides, turn by turn, which specialist works next, wit
 | --- | --- | --- |
 | E3.1 | `POST /agent/supervise`: a supervisor and five specialists (CRM facts, researcher, analyst, reviewer, drafter) as one 🟦LangGraph graph, the allowed lists in code, the decisions in the response, the same approval gate. [ADR 0033](adr/0033-supervisor-with-specialist-agents.md), [guide](stages/E3-supervisor.md) | In review |
 | E3.2 | An answer team for plain questions (CRM facts, researcher, answerer; a grounded answer or a fixed "not found" text, no task, no gate), and the supervisor's own search words. [ADR 0034](adr/0034-answer-team-and-supervisor-queries.md) | In review |
-| E3.3 | A replayable comparison with the fixed pipeline on the Java edition's ten golden cases | Planned |
+| E3.3 | A replayable comparison with the fixed pipeline on the Java edition's ten golden cases: the harness (`just eval-supervisor`, `-check`, `-record`) is proved on a made-up recording; the recording is pending. [ADR 0035](adr/0035-supervisor-versus-pipeline-comparison.md) | In review |
 
 | Route or setting | What it does |
 | --- | --- |

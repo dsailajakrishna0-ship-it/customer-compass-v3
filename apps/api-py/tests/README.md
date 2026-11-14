@@ -91,6 +91,7 @@ limits (set through the `AGENT_*` environment variables), the tool code. **The p
 | `test_measure_limits.py` | other | Repository rules and tooling |
 | `test_judged_evals.py` | other | Repository rules and tooling |
 | `test_guard_compare.py` | other | Repository rules and tooling |
+| `test_supervisor_eval.py` | other | Repository rules and tooling |
 | `test_network_guard.py` | other | Repository rules and tooling |
 | `test_test_hygiene.py` | other | Repository rules and tooling |
 | `test_resolve_conflicts.py` | other | Repository rules and tooling |

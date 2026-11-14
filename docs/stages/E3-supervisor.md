@@ -111,6 +111,22 @@ just supervise "Analyze Acme Fabrication and recommend a next action"        # a
 
 Notice: a question returns `status: answered` with `grounded` and `citations`, and no `proposedTask`; `supervisor.turns` shows the researcher chosen by code (one choice) and then the one real choice (answer now, or search again), with the supervisor's own `query` on a turn when it searched again.
 
+## E3.3: the supervisor against the fixed pipeline
+
+The same ten golden cases as the Java edition, each run twice against `POST /agent/recommend` (the fixed pipeline) and `POST /agent/supervise`, with the answers recorded once and replayable without keys. Decisions and method: [ADR 0035](../adr/0035-supervisor-versus-pipeline-comparison.md).
+
+```bash
+just eval-supervisor          # the table from evals/supervisor/recorded.json (says "Nothing recorded yet" until the recording exists)
+just eval-supervisor-check    # fails if a count differs from baseline.json
+just eval-supervisor-record   # asks the running API for what is not recorded yet (live calls: ask the owner first)
+```
+
+What the table will show per arm: runs as expected, analyses completed, valid citations, reviewer approvals, evidence items, farm-supply items shown to the analyst, model calls (per completed run and in total), tasks written before a confirm (must be 0) and failed requests; for the supervisor also its turns, model decisions, overrides by code, runs that used the researcher and its own search words.
+
+**Recording pending:** the harness is proved on a made-up recording in `tests/test_supervisor_eval.py`, so there are no measured Python numbers yet and none are claimed.
+
+Notice: the one case where the arms differ by design is the plain question (`agent-08`): the pipeline sends it away (`route: direct`) and the supervisor answers it (`status: answered`).
+
 ## What comes next
 
-**E3.3** compares the supervisor with the fixed pipeline on the Java edition's ten golden cases, recorded once and replayable without keys. It needs a recording with keys, so it waits for the owner's go.
+The recording, once the owner approves it (it needs the stack, both 🟪knowledge bases ingested, and live chat and 🟪embedding calls), then the results go into ADR 0035.
