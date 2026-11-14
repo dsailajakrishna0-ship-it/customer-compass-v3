@@ -84,7 +84,7 @@ Open <http://localhost:5173>, **Ingest documents** once (19 documents). Leave th
 | General chat | `What deals does Acme Fabrication have open?` | The model says it has no CRM access; **no invented deal** |
 | Document knowledge (RAG) | `What did Acme Fabrication say about the volume discount?` | A cited answer from `acme-email-discount.md` (numbered sources with similarity about 0.6 to 0.8) |
 | Document knowledge (RAG) | `What's your refund policy?` | A decline or an answer that says the documents do not cover it |
-| Document knowledge (RAG) | `What's the capital of France?` | Paris, possibly with one to four weak sources (about 0.45); the model must not claim they discuss France |
+| Document knowledge (RAG) | `What's the capital of France?` | Paris, normally with no sources (the floor is 0.60); if a weak source does appear, the model must not claim it discusses France |
 | CRM copilot | `What open deals does Acme Fabrication have?` | Facts: Premium Operations Plan renewal, $48,000, open, close 2026-10-15 |
 | CRM copilot | `What did Acme Fabrication say about onboarding in their emails?` | Sources only from Acme's own documents |
 | CRM copilot | `What open deals does a company we've never heard of have?` | "could not find a matching company", no invented company |

@@ -161,7 +161,7 @@ question names one.
 | *"What did Acme Fabrication say about the volume discount?"* | Cites `acme-email-discount.md` (Ravi Patel's request), similarity ~0.6-0.8. |
 | *"Does the Fleet Visibility package include alerting, and can alerts be set per customer?"* | Cites `product-fleet-visibility.md` + Northstar's alerting documents; answer should be complete, not cut off mid-sentence (Stage 6.1 fix, PR #7). |
 | *"What's your refund policy?"* | No ingested document covers this — expect either zero citations with a canned "could not find" message, or (if the threshold is borderline) citations present but the model explicitly declining to answer rather than guessing — both are correct, documented behavior. |
-| *"What's the capital of France?"* | Model still answers "Paris" correctly, but may show 1-4 citations with **low** similarity (~0.45-0.48, just above the 0.45 threshold) rather than zero — since the CRM data-volume expansion (PR #10, 7 companies, 16 docs) added more documents, there's now a higher chance of a borderline near-threshold match. This is expected/documented, not a regression — the key check is that the model doesn't pretend those sources actually answer the question. |
+| *"What's the capital of France?"* | Model still answers "Paris" correctly. Since the floor became 0.60 (ADR 0031) an unrelated question normally shows **no** citations; if one does appear it scores just above 0.60 — before that change (0.45 floor), since the CRM data-volume expansion (PR #10, 7 companies, 16 docs) added more documents, there's now a higher chance of a borderline near-threshold match. This is expected/documented, not a regression — the key check is that the model doesn't pretend those sources actually answer the question. |
 
 **Same two tests via curl**:
 
@@ -183,7 +183,8 @@ curl -s -X POST http://localhost:8001/api/v1/chat/rag \
 `similarity` roughly 0.6-0.8, `sourcePath` ending in
 `acme-email-discount.md`). The second (verified 2026-10-18, after the
 7-company data expansion) now returns `"citations"` **not empty** — 1-4
-entries with low similarity (~0.45-0.48, just above the 0.45 threshold) —
+entries with low similarity (~0.45-0.48, just above the then 0.45 threshold;
+since E1.4 the floor is 0.60 and this normally returns none) —
 but the model answer still correctly says "Paris" and should not claim
 those sources actually cover the question. If you see `"citations": []`
 instead, that's also fine (both are documented/acceptable outcomes
