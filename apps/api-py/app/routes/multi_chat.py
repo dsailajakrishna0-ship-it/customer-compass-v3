@@ -38,6 +38,8 @@ from app.guardrails.prompt_guard import (
 )
 from app.llm.gateway import generate
 from app.llm.types import ToolCall
+from app.memory.turn import Turn
+from app.memory.turn import begin as begin_turn
 from app.rag.knowledge_bases import KnowledgeBase, all_knowledge_bases, search_knowledge_base
 from app.rag.multi_source import TOP_K, KbChunk, listing, route_question, search_all
 from app.rag.retrieve import RetrievedChunk, build_context
@@ -440,13 +442,16 @@ def build_response(final: MultiState) -> dict:
     return body
 
 
-async def run(body: MultiChatRequest) -> MultiState:
-    """One request through the graph; the final state, not yet shaped as a response."""
+async def run(body: MultiChatRequest, turn: Turn | None = None) -> MultiState:
+    """One request through the graph; the final state, not yet shaped as a response. With a memory turn
+    the stored window goes before the request's own messages."""
     initial: MultiState = {
         "strategy": body.strategy,
         "model": body.model,
         "question": body.messages[-1].content,
-        "messages": [dict(m) for m in body.message_dicts],
+        "messages": [
+            dict(m) for m in (turn.with_history(body.message_dicts) if turn else body.message_dicts)
+        ],
     }
     with tracing.span("multi_chat.run", "chain", {"multi.strategy": body.strategy}) as span:
         final: MultiState = await build_graph().ainvoke(
@@ -464,8 +469,14 @@ async def run(body: MultiChatRequest) -> MultiState:
 @router.post("")
 async def multi_chat(body: MultiChatRequest):
     """Answers from several knowledge bases; `strategy` decides where to look (see the module notes)."""
+    turn = await begin_turn(body.conversation_id)  # 404 before any model runs
     try:
-        return build_response(await run(body))
+        final = await run(body, turn)
+        return await turn.finish(
+            build_response(final), final["question_finding"]["neutralized_text"]
+        )
+    except HTTPException:
+        raise
     except Exception as exc:  # noqa: BLE001 - a clear 503, like the other chat routes
         raise HTTPException(
             status_code=503, detail=str(exc) or "Could not answer across the knowledge bases."

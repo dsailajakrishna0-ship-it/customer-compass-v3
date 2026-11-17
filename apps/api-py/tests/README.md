@@ -82,6 +82,8 @@ limits (set through the `AGENT_*` environment variables), the tool code. **The p
 | `test_frameworks_compare.py` | other | Retrieval and ingestion (the manual-versus-framework tables and recordings) |
 | `test_knowledge_bases.py` | other | Retrieval and ingestion (knowledge bases: a second corpus in its own collection; a Python-only extension, in-process Qdrant and fake embeddings) |
 | `test_multi_source.py` | other | Retrieval and ingestion (`POST /chat/multi`: route, all and agent over two knowledge bases, as a LangGraph graph; a Python-only extension, scripted model by role, in-process Qdrant and fake embeddings) |
+| `test_memory_store.py` | other | Conversation memory (E4.1, ADR 0036: the window, the whole-turn write, time limit, cap and deletion, against the real Postgres) |
+| `test_chat_memory.py` | other | Conversation memory (E4.1: the stored history reaches the model, stored text is the guarded text, 404 before any model call, a failed answer stores nothing; scripted model) |
 | `test_parse.py` | other | Retrieval and ingestion |
 | `test_embedding_models.py` | other | Retrieval and ingestion |
 | `test_migrations.py` | other | Database |

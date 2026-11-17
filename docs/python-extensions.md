@@ -40,3 +40,18 @@ A coordinator model that decides, turn by turn, which specialist works next, wit
 | `POST /api/v1/knowledge-bases/{id}/search` | `{"query": "...", "topK": 4}`: the chunks of that knowledge base only, with the 🟪RAG citation shape (`topK` 1 to 20) |
 | `KNOWLEDGE_BASES` | A JSON list of `{"id", "label", "description", "source_dir"}`; the default is the farm-supply handbook in `sample-data/knowledge-bases/agri-supply/` |
 | `POST /api/v1/chat/multi` | A chat question answered from several knowledge bases. Body: the usual chat body plus `"strategy"`: `route` (default), `all` or `agent` (anything else is a 422). The response adds `routing` (strategy, searched ids, reason, tools used, model calls) and a `knowledgeBase` on each citation |
+
+## E4: conversation memory
+
+The server keeps a chat's history between requests, so a client sends only the new message. The Java edition follows with a lab comparison (J8.6) on the same contract.
+
+| Slice | What | Status |
+| --- | --- | --- |
+| E4.1 | An optional `conversationId` on the five chat routes, `POST/GET/DELETE /conversations`, a window of 20 messages and 16,000 characters, a 24-hour limit and a 1,000-conversation cap, Postgres tables (migration `0004`). [ADR 0036](adr/0036-conversation-memory.md), [guide](stages/E4-conversation-memory.md) | In review |
+
+| Route or setting | What it does |
+| --- | --- |
+| `POST /api/v1/conversations` | Makes a conversation; `201` with `conversationId`, `createdAt`, `lastUsedAt`, `expiresAt` |
+| `GET` and `DELETE /api/v1/conversations/{id}` | All stored messages (reading does not extend the time limit); delete at once (`204`) |
+| `conversationId` in a chat body | The stored window goes before the new message; the answer adds `conversationId` and `memory.messagesUsed`, `memory.messagesStored` |
+| `MEMORY_MAX_MESSAGES`, `MEMORY_MAX_CHARS`, `MEMORY_TTL_HOURS`, `MEMORY_MAX_CONVERSATIONS`, `MEMORY_MAX_STORED_MESSAGES` | The window, the time limit, the cap and the per-conversation bound (defaults 20, 16000, 24, 1000, 200) |
