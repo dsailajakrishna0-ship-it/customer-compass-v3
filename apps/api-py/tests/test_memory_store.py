@@ -175,3 +175,43 @@ async def test_concurrent_turns_keep_each_pair_together():
     for i in range(0, 16, 2):
         assert messages[i].role == "user" and messages[i + 1].role == "assistant"
         assert messages[i].content[1:] == messages[i + 1].content[1:]
+
+
+@pytest.mark.asyncio
+async def test_stored_messages_are_bounded_to_the_newest():
+    await clean()
+    c = await store.create_conversation()
+    for i in range(120):
+        await store.append_turn(c.id, f"q{i}", f"a{i}")
+    _, messages = await store.get_conversation(c.id)
+    assert len(messages) == 200
+    assert messages[0].content == "q20" and messages[-1].content == "a119"
+    window, stored = await store.load_window(c.id)
+    assert stored == 200 and len(window) == 20  # the window is unchanged by the bound
+
+
+@pytest.mark.asyncio
+async def test_a_conversation_below_the_bound_is_untouched():
+    await clean()
+    c = await store.create_conversation()
+    for i in range(5):
+        await store.append_turn(c.id, f"q{i}", f"a{i}")
+    _, messages = await store.get_conversation(c.id)
+    assert len(messages) == 10 and messages[0].content == "q0"
+
+
+@pytest.mark.asyncio
+async def test_a_failed_append_leaves_the_old_messages_intact(monkeypatch):
+    await clean()
+    monkeypatch.setenv("MEMORY_MAX_STORED_MESSAGES", "4")
+    reset_settings()
+    c = await store.create_conversation()
+    await store.append_turn(c.id, "q0", "a0")
+    await store.append_turn(c.id, "q1", "a1")
+    pool = await get_pool()
+    # an assistant text the database refuses (a NUL character) makes the insert fail after the lock
+    with pytest.raises(Exception):  # noqa: B017, PT011 - any database error
+        await store.append_turn(c.id, "q2", "bad\x00text")
+    _, messages = await store.get_conversation(c.id)
+    assert [m.content for m in messages] == ["q0", "a0", "q1", "a1"]
+    assert await pool.fetchval("SELECT COUNT(*) FROM conversation_messages") == 4

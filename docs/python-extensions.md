@@ -54,4 +54,4 @@ The server keeps a chat's history between requests, so a client sends only the n
 | `POST /api/v1/conversations` | Makes a conversation; `201` with `conversationId`, `createdAt`, `lastUsedAt`, `expiresAt` |
 | `GET` and `DELETE /api/v1/conversations/{id}` | All stored messages (reading does not extend the time limit); delete at once (`204`) |
 | `conversationId` in a chat body | The stored window goes before the new message; the answer adds `conversationId` and `memory.messagesUsed`, `memory.messagesStored` |
-| `MEMORY_MAX_MESSAGES`, `MEMORY_MAX_CHARS`, `MEMORY_TTL_HOURS`, `MEMORY_MAX_CONVERSATIONS` | The window, the time limit and the cap (defaults 20, 16000, 24, 1000) |
+| `MEMORY_MAX_MESSAGES`, `MEMORY_MAX_CHARS`, `MEMORY_TTL_HOURS`, `MEMORY_MAX_CONVERSATIONS`, `MEMORY_MAX_STORED_MESSAGES` | The window, the time limit, the cap and the per-conversation bound (defaults 20, 16000, 24, 1000, 200) |

@@ -14,6 +14,8 @@ The rules this module keeps, each tested:
 - **time limit and cap**: a conversation expires `memory_ttl_hours` after its last stored turn; an expired
   one is deleted when it is touched, and creating a conversation removes the expired ones; beyond
   `memory_max_conversations` the least recently used is deleted, so storage cannot grow without bound;
+- **bounded per conversation**: after the insert the oldest messages beyond `memory_max_stored_messages`
+  are deleted in the same transaction, so one client cannot grow a conversation without limit;
 - **no content in logs**: nothing here logs a message.
 """
 
@@ -158,6 +160,13 @@ async def append_turn(conversation_id: str, user_text: str, assistant_text: str)
         except asyncpg.ForeignKeyViolationError as error:
             raise ConversationNotFoundError from error
         await conn.execute("UPDATE conversations SET last_used_at = NOW() WHERE id = $1", uid)
+        # bounded per conversation: keep only the newest N, in the same transaction as the insert
+        await conn.execute(
+            "DELETE FROM conversation_messages WHERE conversation_id = $1 AND id NOT IN "
+            "(SELECT id FROM conversation_messages WHERE conversation_id = $1 ORDER BY id DESC LIMIT $2)",
+            uid,
+            max(get_settings().memory_max_stored_messages, 2),
+        )
         stored = await conn.fetchval(
             "SELECT COUNT(*) FROM conversation_messages WHERE conversation_id = $1", uid
         )

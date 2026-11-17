@@ -29,6 +29,7 @@ sequenceDiagram
 | Use it | add `"conversationId"` to `/chat`, `/chat/rag`, `/chat/crm`, `/chat/tools` or `/chat/multi`; send only the **new** message; the last message must be from the user |
 | Window | the last `MEMORY_MAX_MESSAGES` (20) stored messages, trimmed from the oldest to `MEMORY_MAX_CHARS` (16,000) characters; never starts with an answer |
 | Stored | after a success only, the person's message (the **guard-neutralized** text) and the answer, in one transaction |
+| Stored bound | `MEMORY_MAX_STORED_MESSAGES` (200) per conversation: the oldest are deleted when a turn is appended, in the same transaction |
 | Time limit | `MEMORY_TTL_HOURS` (24) after the last stored turn; reads do not extend it |
 | Cap | `MEMORY_MAX_CONVERSATIONS` (1,000); creating one beyond it deletes the least recently used |
 | Read and delete | `GET` and `DELETE /api/v1/conversations/{id}` (`204`); delete removes the messages at once |

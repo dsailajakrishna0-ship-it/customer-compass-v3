@@ -140,6 +140,8 @@ class Settings(BaseSettings):
     memory_max_chars: int = 16_000
     memory_ttl_hours: float = 24.0
     memory_max_conversations: int = 1_000
+    # one conversation never stores more than this many messages: the oldest are deleted when a turn is added
+    memory_max_stored_messages: int = 200
 
     # Guardrails
     guard_mode: GuardModeName = "rules"
