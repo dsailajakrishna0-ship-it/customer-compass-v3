@@ -5,10 +5,11 @@ import json
 import logging
 from dataclasses import replace
 from typing import Literal
+from uuid import UUID
 
 import httpx
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app import tracing
 from app.chat.router import classify_query
@@ -30,6 +31,7 @@ from app.mcp.registry import Backend, UnknownBackendError
 from app.mcp.registry import resolve as resolve_backend
 from app.mcp.schemas import tool_definitions, validate_arguments
 from app.mcp.tools import looks_like_confirmation
+from app.memory.turn import begin as begin_turn
 from app.rag.agentic import AgenticReport, check_grounding, retrieve_checked
 from app.rag.retrieve import RetrievedChunk, build_context, retrieve_relevant_chunks
 
@@ -104,6 +106,24 @@ class ChatMessagePayload(BaseModel):
 class ChatRequest(BaseModel):
     messages: list[ChatMessagePayload] = Field(..., min_length=1, max_length=12)
     model: str | None = None
+    # E4.1 (ADR 0036): with an id the server keeps the history; the client sends only the new message
+    conversation_id: str | None = Field(default=None, alias="conversationId")
+
+    @field_validator("conversation_id")
+    @classmethod
+    def _conversation_id_is_uuid(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        try:
+            return str(UUID(value))
+        except ValueError as error:
+            raise ValueError("conversationId must be a UUID") from error
+
+    @model_validator(mode="after")
+    def _last_message_is_the_person(self) -> "ChatRequest":
+        if self.conversation_id is not None and self.messages[-1].role != "user":
+            raise ValueError("with a conversationId the last message must be from the user")
+        return self
 
     @property
     def message_dicts(self) -> list[ChatMessage]:
@@ -207,19 +227,22 @@ def _facts_json(facts) -> dict | None:
 @router.post("")
 async def general_chat(body: ChatRequest):
     """General-purpose chat, no CRM/document grounding (Stage 2 behavior)."""
+    turn = await begin_turn(body.conversation_id)  # 404 before any model runs
     try:
         question_finding = await guard_input(body.messages[-1].content)
         messages = body.message_dicts
         messages[-1] = {**messages[-1], "content": question_finding.neutralized_text}
+        messages = turn.with_history(messages)
         report = build_report((question_finding, "user_input"))
 
         result = await generate(GENERAL_SYSTEM_PROMPT, messages, body.model)
         answer, guardrail = await _finalize("chat", report, result.content)
-        return {
-            "message": answer,
-            "usage": _usage_json(result),
-            "guardrail": guardrail,
-        }
+        return await turn.finish(
+            {"message": answer, "usage": _usage_json(result), "guardrail": guardrail},
+            question_finding.neutralized_text,
+        )
+    except HTTPException:
+        raise
     except Exception as exc:  # noqa: BLE001 - surfaced as a clear 503, mirrors the Express route
         raise HTTPException(
             status_code=503,
@@ -231,6 +254,7 @@ async def general_chat(body: ChatRequest):
 @router.post("/rag")
 async def rag_chat(body: ChatRequest):
     """Retrieval-augmented chat: retrieves cited chunks and grounds the answer in them."""
+    turn = await begin_turn(body.conversation_id)
     question = body.messages[-1].content
     question_finding = await guard_input(question)
 
@@ -248,7 +272,9 @@ async def rag_chat(body: ChatRequest):
                 "citations": [],
                 "guardrail": guardrail,
             }
-            return _with_agentic(none_found, agentic)
+            return await turn.finish(
+                _with_agentic(none_found, agentic), question_finding.neutralized_text
+            )
 
         chunk_findings = [scan_and_neutralize(chunk.content) for chunk in chunks]
         neutralized_chunks = [
@@ -257,7 +283,7 @@ async def rag_chat(body: ChatRequest):
         ]
         context = wrap_untrusted_context(build_context(neutralized_chunks))
         augmented_messages: list[ChatMessage] = [
-            *body.message_dicts[:-1],
+            *turn.with_history(body.message_dicts[:-1]),
             {
                 "role": "user",
                 "content": f"Context:\n{context}\n\nQuestion: {question_finding.neutralized_text}",
@@ -277,15 +303,20 @@ async def rag_chat(body: ChatRequest):
         citations = [_citation(i, chunk) for i, chunk in enumerate(chunks)]
         answer, guardrail = await _finalize("chat/rag", report, result.content)
         await check_grounding(answer, chunks, agentic)
-        return _with_agentic(
-            {
-                "message": answer,
-                "citations": citations,
-                "usage": _usage_json(result),
-                "guardrail": guardrail,
-            },
-            agentic,
+        return await turn.finish(
+            _with_agentic(
+                {
+                    "message": answer,
+                    "citations": citations,
+                    "usage": _usage_json(result),
+                    "guardrail": guardrail,
+                },
+                agentic,
+            ),
+            question_finding.neutralized_text,
         )
+    except HTTPException:
+        raise
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(
             status_code=503, detail=str(exc) or "Could not answer with retrieval."
@@ -298,6 +329,7 @@ async def crm_chat(body: ChatRequest):
     """CRM copilot chat: routes a question to structured DB facts, document RAG
     retrieval, or both, depending on keyword-based classification. Never replaces
     "" or "/rag" — additive, so their behavior is unchanged."""
+    turn = await begin_turn(body.conversation_id)
     question = body.messages[-1].content
     question_finding = await guard_input(question)
 
@@ -320,19 +352,22 @@ async def crm_chat(body: ChatRequest):
             _, guardrail = await _finalize(
                 "chat/crm", build_report((question_finding, "user_input")), ""
             )
-            return _with_agentic(
-                {
-                    "message": (
-                        "I could not find a matching company or deal data for that question."
-                        if route.wants_structured
-                        else "I could not find any ingested documents relevant to that question."
-                    ),
-                    "facts": None,
-                    "citations": [],
-                    "scopedCompany": route.company.name if route.company else None,
-                    "guardrail": guardrail,
-                },
-                agentic,
+            return await turn.finish(
+                _with_agentic(
+                    {
+                        "message": (
+                            "I could not find a matching company or deal data for that question."
+                            if route.wants_structured
+                            else "I could not find any ingested documents relevant to that question."
+                        ),
+                        "facts": None,
+                        "citations": [],
+                        "scopedCompany": route.company.name if route.company else None,
+                        "guardrail": guardrail,
+                    },
+                    agentic,
+                ),
+                question_finding.neutralized_text,
             )
 
         facts_block = None
@@ -367,7 +402,7 @@ async def crm_chat(body: ChatRequest):
 
         context_parts = [part for part in (facts_block, doc_block) if part is not None]
         augmented_messages: list[ChatMessage] = [
-            *body.message_dicts[:-1],
+            *turn.with_history(body.message_dicts[:-1]),
             {
                 "role": "user",
                 "content": f"{chr(10).join(context_parts)}\n\nQuestion: {question_finding.neutralized_text}",
@@ -388,17 +423,22 @@ async def crm_chat(body: ChatRequest):
         scoped = route.company.name if route.company else None
         answer, guardrail = await _finalize("chat/crm", report, result.content, scoped)
         await check_grounding(answer, chunks, agentic)
-        return _with_agentic(
-            {
-                "message": answer,
-                "facts": _facts_json(facts),
-                "citations": citations,
-                "scopedCompany": route.company.name if route.company else None,
-                "usage": _usage_json(result),
-                "guardrail": guardrail,
-            },
-            agentic,
+        return await turn.finish(
+            _with_agentic(
+                {
+                    "message": answer,
+                    "facts": _facts_json(facts),
+                    "citations": citations,
+                    "scopedCompany": route.company.name if route.company else None,
+                    "usage": _usage_json(result),
+                    "guardrail": guardrail,
+                },
+                agentic,
+            ),
+            question_finding.neutralized_text,
         )
+    except HTTPException:
+        raise
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(
             status_code=503, detail=str(exc) or "Could not answer the CRM question."
@@ -417,6 +457,7 @@ async def tools_chat(body: ToolsChatRequest):
     search_documents, create_followup_task) mid-conversation using the provider's native tool
     calling (ADR 0014). MCP still owns tool discovery and execution (a separate stdio subprocess);
     the Pydantic models in app/mcp/schemas.py define and validate what the model may pass."""
+    turn = await begin_turn(body.conversation_id)
     question = body.messages[-1].content
     question_finding = await guard_input(question)
     # The confirmation decision is made here, from the user's own raw latest
@@ -436,7 +477,7 @@ async def tools_chat(body: ToolsChatRequest):
             connected = True
 
             conversation: list[dict] = [
-                *(dict(m) for m in body.message_dicts[:-1]),
+                *(dict(m) for m in turn.with_history(body.message_dicts[:-1])),
                 {"role": "user", "content": question_finding.neutralized_text},
             ]
             findings = [(question_finding, "user_input")]
@@ -480,13 +521,16 @@ async def tools_chat(body: ToolsChatRequest):
             assert result is not None  # the loop ran at least once
             report = build_report(*findings)
             answer, guardrail = await _finalize("chat/tools", report, result.content)
-            return {
+            tools_response = {
                 "message": answer,
                 "toolsUsed": tools_used,
                 "mcpServer": backend.id,
                 "usage": _usage_json(result),
                 "guardrail": guardrail,
             }
+        return await turn.finish(tools_response, question_finding.neutralized_text)
+    except HTTPException:
+        raise
     except Exception as exc:  # noqa: BLE001
         cause = _root_cause(exc)
         if not connected and isinstance(cause, OSError | httpx.TransportError):

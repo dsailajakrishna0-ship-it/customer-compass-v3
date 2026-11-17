@@ -85,9 +85,20 @@ commands are in section 1; stage-specific steps are in the linked docs.
 | `POST /agent/recommend`, `POST /agent/confirm` | 10 | Account follow-up agent: recommend never writes; confirm is the only write path. |
 | `GET /mcp/servers` | 2.2 | The MCP tool servers: configured, reachable, and the default. |
 | `POST /documents/search` | 2.2b | Document search for other services (the Java tool server calls it). |
+| `POST /conversations`, `GET` and `DELETE /conversations/{id}`; `conversationId` on the chat routes | E4.1 | Server-side chat memory: make a conversation, send only the new message, read it back, delete it (see [stage E4](stages/E4-conversation-memory.md)). |
 | `GET /tasks` | 9 | Follow-up tasks created by the tool-calling copilot. |
 | `GET /tool-audit-log?limit=10` | 9 | Every MCP tool call (executed / proposed / confirmed / error). |
 | `GET /security-audit-log?limit=5` | 8.c | Guardrail detections; filters `event_type`, `pattern`. |
+
+#### Try conversation memory (E4.1, needs the model keys)
+
+```bash
+ID=$(curl -s -X POST localhost:8001/api/v1/conversations | python3 -c 'import sys,json;print(json.load(sys.stdin)["conversationId"])')
+curl -s localhost:8001/api/v1/chat -H 'content-type: application/json' -d "{\"conversationId\":\"$ID\",\"messages\":[{\"role\":\"user\",\"content\":\"My name is Dana.\"}]}"
+curl -s localhost:8001/api/v1/chat -H 'content-type: application/json' -d "{\"conversationId\":\"$ID\",\"messages\":[{\"role\":\"user\",\"content\":\"What is my name?\"}]}"   # memory.messagesUsed is 2
+curl -s localhost:8001/api/v1/conversations/$ID      # all four stored messages
+curl -s -X DELETE localhost:8001/api/v1/conversations/$ID -w '%{http_code}\n'   # 204, then GET is 404
+```
 
 ### Tools you start only when needed
 

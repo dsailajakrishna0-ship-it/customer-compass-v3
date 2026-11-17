@@ -29,6 +29,8 @@ EXPECTED_TABLES = {
     "documents",
     "document_chunks",
     "ingestion_runs",
+    "conversations",
+    "conversation_messages",
 }
 
 

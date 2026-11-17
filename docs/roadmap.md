@@ -177,6 +177,7 @@ The Java edition reached feature parity with Stages 0 to 4 on 2026-11-13. From t
 | --- | --- | --- |
 | **E1 🟪multi-source RAG with routing** | E1.1 🟪knowledge bases ([ADR 0029](adr/0029-knowledge-bases.md)); E1.2 🟪routing strategies with 🟦LangGraph ([ADR 0030](adr/0030-multi-source-strategies-as-a-graph.md)); E1.3 a replayable comparison on the Java edition's questions | E1.1 to E1.3 merged |
 | **E3 supervisor with specialist 🟪agents** | E3.1 the supervisor graph ([ADR 0033](adr/0033-supervisor-with-specialist-agents.md)); E3.2 an answer team ([ADR 0034](adr/0034-answer-team-and-supervisor-queries.md)); E3.3 a comparison with the fixed pipeline ([ADR 0035](adr/0035-supervisor-versus-pipeline-comparison.md)) | E3.1 and E3.2 merged, E3.3 harness in review (recording pending) |
+| **E4 conversation memory** | E4.1 the server keeps the history behind an optional `conversationId`, with a window, a time limit and a cap ([ADR 0036](adr/0036-conversation-memory.md)); the Java lab comparison J8.6 follows | E4.1 in review |
 
 ## Risks
 

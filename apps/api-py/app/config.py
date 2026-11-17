@@ -133,6 +133,14 @@ class Settings(BaseSettings):
     )
     llm_cooldown_seconds: float = 30.0  # a model that just failed is skipped for this long
 
+    # E4.1: conversation memory (ADR 0036). The server keeps a chat's history when a request carries a
+    # conversationId. A window of the stored messages goes to the model (by count, then by characters);
+    # a conversation expires this many hours after its last stored turn; and at most this many are kept.
+    memory_max_messages: int = 20
+    memory_max_chars: int = 16_000
+    memory_ttl_hours: float = 24.0
+    memory_max_conversations: int = 1_000
+
     # Guardrails
     guard_mode: GuardModeName = "rules"
     guard_model: str | None = None

@@ -430,6 +430,17 @@ for the full design and manual test steps.
 
 ---
 
+## Conversation memory (Python extension, E4.1)
+
+Additive: without `conversationId` every chat endpoint is unchanged. Decisions: [ADR 0036](adr/0036-conversation-memory.md).
+
+- `POST /api/v1/conversations` → `201 {"conversationId", "createdAt", "lastUsedAt", "expiresAt"}`.
+- `GET /api/v1/conversations/{id}` → the same plus `"messages": [{"role", "content"}]`; does not extend the time limit. `DELETE /api/v1/conversations/{id}` → `204`. Unknown, expired or malformed id → `404 "Conversation not found or expired."`
+- Chat bodies (`/chat`, `/chat/rag`, `/chat/crm`, `/chat/tools`, `/chat/multi`) accept an optional `"conversationId"` (a UUID, else `422`). With it, `messages` are the **new** messages and the last must be from the user; the stored window (20 messages, 16,000 characters) goes before them, an unknown or expired id is a `404` before any model runs, and the answer adds `"conversationId"` and `"memory": {"messagesUsed", "messagesStored"}` (counts only).
+- **The id is the only access control** (the application has no accounts): anyone who knows it can read, extend and delete that conversation. Content is never logged or traced.
+
+---
+
 ## Error shape
 
 Any non-2xx response has this body shape (both keys always present, same
