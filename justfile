@@ -246,3 +246,11 @@ comparisons-agent-with-langgraph:
 # E5.5 the agent with an approval pause as a LangChain create_agent with human-approval middleware on port 19142 (same settings)
 comparisons-agent-with-langchain:
     cd comparisons && PYTHONPATH=common:agent-graph/withLangChain uv run python agent-graph/withLangChain/main.py
+
+# E5.6 conversation memory with LangChain (message history and trim_messages) on port 19162 (needs OPENROUTER_API_KEY; MEMORY_* settings change the limits)
+comparisons-memory-with-langchain:
+    cd comparisons && PYTHONPATH=common:memory/withLangChain uv run python memory/withLangChain/main.py
+
+# E5.6 conversation memory with LangGraph (the checkpointer and a thread id) on port 19161 (same settings)
+comparisons-memory-with-langgraph:
+    cd comparisons && PYTHONPATH=common:memory/withLangGraph uv run python memory/withLangGraph/main.py

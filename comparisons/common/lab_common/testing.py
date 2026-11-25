@@ -30,6 +30,7 @@ class ScriptedChatModel(BaseChatModel):
     script: list[AIMessage]
     seen: list[list[BaseMessage]] = []
     tools_bound: list[str] = []
+    on_call: Any = None  # called at the start of every model call (tests use it to delete or wait)
 
     @property
     def _llm_type(self) -> str:
@@ -47,6 +48,8 @@ class ScriptedChatModel(BaseChatModel):
         **kwargs: Any,
     ) -> ChatResult:
         self.seen.append(list(messages))
+        if self.on_call is not None:
+            self.on_call()
         if not self.script:
             raise AssertionError("The model was called more often than the test scripted.")
         return ChatResult(generations=[ChatGeneration(message=self.script.pop(0))])
