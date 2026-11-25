@@ -13,6 +13,9 @@ comparisons/
     withLangChain/        E5.2: TextLoader, RecursiveCharacterTextSplitter, Gemini embeddings, QdrantVectorStore (port 19111)
   rag-retrieval/
     withLangChain/        E5.3: QdrantVectorStore.similarity_search_with_score, the floor in our code (port 19121)
+  observability/
+    withLangChain/        E5.4: the tool-calling chat observed through LangChain callbacks (port 19131)
+    withLangGraph/        E5.4: the tool-calling chat observed through LangGraph stream updates (port 19132)
   tests/
 ```
 
@@ -25,6 +28,8 @@ The tool-calling backends serve `POST /api/v1/chat/tools` (the application's bod
 | `just comparisons-tool-calling-with-langgraph` | Starts the withLangGraph backend on port 19102 (same settings) |
 | `just comparisons-ingest-with-langchain` | Starts the withLangChain ingestion backend on port 19111 (needs `GOOGLE_API_KEY` and `just qdrant`; replaces the collection `compare_withlangchain`) |
 | `just comparisons-retrieve-with-langchain` | Starts the withLangChain retrieval backend on port 19121 (needs `GOOGLE_API_KEY`, `just qdrant` and a prior ingestion run) |
+| `just comparisons-observe-with-langchain` | Starts the observed withLangChain tool-calling backend on port 19131 (`TELEMETRY_ENABLED=true` to record; needs `OPENROUTER_API_KEY` and the application up); then `GET /api/v1/observability/recent` |
+| `just comparisons-observe-with-langgraph` | Starts the observed withLangGraph tool-calling backend on port 19132 (same settings) |
 
 Settings (tool calling): `PORT`, `CRM_BASE_URL` (default `http://localhost:8001`), `LLM_BASE_URL` (default OpenRouter), `OPENROUTER_API_KEY`, `MODEL` (default `meta-llama/llama-3.1-8b-instruct`).
 

@@ -230,3 +230,11 @@ comparisons-ingest-with-langchain:
 # E5.3 RAG retrieval with LangChain on port 19121 (needs GOOGLE_API_KEY, `just qdrant` and a prior `just comparisons-ingest-with-langchain` run)
 comparisons-retrieve-with-langchain:
     cd comparisons && PYTHONPATH=common:rag-retrieval/withLangChain uv run python rag-retrieval/withLangChain/main.py
+
+# E5.4 observed tool calling with LangChain (callbacks) on port 19131 (TELEMETRY_ENABLED=true to record; needs OPENROUTER_API_KEY and the application up)
+comparisons-observe-with-langchain:
+    cd comparisons && PYTHONPATH=common:tool-calling/withLangChain:observability/withLangChain uv run python observability/withLangChain/main.py
+
+# E5.4 observed tool calling with LangGraph (stream updates) on port 19132 (same settings)
+comparisons-observe-with-langgraph:
+    cd comparisons && PYTHONPATH=common:tool-calling/withLangGraph:observability/withLangGraph uv run python observability/withLangGraph/main.py

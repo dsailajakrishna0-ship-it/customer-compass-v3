@@ -123,6 +123,9 @@ class LangGraphToolChat:
             model=name, base_url=self._base_url, api_key=self._api_key, max_retries=0
         ), name
 
+    def _run(self, graph, payload):  # noqa: ANN001, ANN202 - a hook the observed variant overrides
+        return graph.invoke(payload)
+
     def answer(self, messages: list[Message], model: str | None) -> Result:
         llm, name = self._llm(model)
         graph = build_graph(llm, self._tools)
@@ -131,7 +134,7 @@ class LangGraphToolChat:
             HumanMessage(m.content) if m.role == "user" else AIMessage(m.content) for m in messages
         ]
         try:
-            state = graph.invoke({"messages": start, "rounds": 0})
+            state = self._run(graph, {"messages": start, "rounds": 0})
         except UnavailableError:
             raise
         except Exception as exc:
