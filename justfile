@@ -222,3 +222,7 @@ comparisons-tool-calling-with-langchain:
 # E5.1 tool calling with LangGraph (a StateGraph we draw) on port 19102 (same settings)
 comparisons-tool-calling-with-langgraph:
     cd comparisons && PYTHONPATH=common:tool-calling/withLangGraph uv run python tool-calling/withLangGraph/main.py
+
+# E5.2 RAG ingestion with LangChain on port 19111 (needs GOOGLE_API_KEY and `just qdrant`; replaces the collection compare_withlangchain)
+comparisons-ingest-with-langchain:
+    cd comparisons && PYTHONPATH=common:rag-ingestion/withLangChain uv run python rag-ingestion/withLangChain/main.py

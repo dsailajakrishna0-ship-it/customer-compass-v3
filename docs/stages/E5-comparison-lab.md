@@ -30,7 +30,7 @@ Ports 19101 and up, the mirror of Java's 18101 and up (🟪tool calling 1910x, i
 | Slice | What | Framework pieces to compare (to verify in each library's docs when the slice starts) |
 | --- | --- | --- |
 | **E5.1** | `common/`, the web app's Approach list for Python ports, and 🟪tool calling both ways | 🟦LangChain: `@tool`, `create_agent`. 🟦LangGraph: `ToolNode`, `tools_condition` in a `StateGraph` |
-| **E5.2** | 🟪RAG ingestion with LangChain | document loaders, `RecursiveCharacterTextSplitter`, 🟧Gemini 🟪embeddings, `QdrantVectorStore.add_documents` |
+| **E5.2** (built: [ADR 0038](../adr/0038-comparison-lab-rag-ingestion-with-langchain.md)) | 🟪RAG ingestion with LangChain (port 19111) | document loaders, `RecursiveCharacterTextSplitter`, 🟧Gemini 🟪embeddings, `QdrantVectorStore.add_documents` |
 | **E5.3** | RAG 🟪retrieval with LangChain | `similarity_search_with_score` on the 🟩Qdrant store, the 0.60 floor still our code |
 | **E5.4** | Observability both ways | LangChain callbacks and LangGraph stream events turned into the same OpenTelemetry signals |
 | **E5.5** | The 🟪agent with an approval pause both ways | LangGraph `StateGraph`, 🟪checkpointer, `interrupt`; LangChain `create_agent` with its human-approval middleware |
