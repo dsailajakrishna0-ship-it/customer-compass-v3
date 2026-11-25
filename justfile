@@ -226,3 +226,7 @@ comparisons-tool-calling-with-langgraph:
 # E5.2 RAG ingestion with LangChain on port 19111 (needs GOOGLE_API_KEY and `just qdrant`; replaces the collection compare_withlangchain)
 comparisons-ingest-with-langchain:
     cd comparisons && PYTHONPATH=common:rag-ingestion/withLangChain uv run python rag-ingestion/withLangChain/main.py
+
+# E5.3 RAG retrieval with LangChain on port 19121 (needs GOOGLE_API_KEY, `just qdrant` and a prior `just comparisons-ingest-with-langchain` run)
+comparisons-retrieve-with-langchain:
+    cd comparisons && PYTHONPATH=common:rag-retrieval/withLangChain uv run python rag-retrieval/withLangChain/main.py

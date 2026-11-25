@@ -87,6 +87,7 @@ def test_the_pipeline_reads_cuts_embeds_and_stores(folder):
     assert first.payload["metadata"]["title"] == "First note"
     assert first.payload["metadata"]["company"] == "Acme"
     assert first.payload["metadata"]["start_index"] == 0
+    assert first.payload["metadata"]["chunk_index"] == 0
     assert (
         "---" not in first.payload["page_content"] and "title:" not in first.payload["page_content"]
     )
