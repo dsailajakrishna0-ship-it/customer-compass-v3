@@ -16,10 +16,13 @@ comparisons/
   observability/
     withLangChain/        E5.4: the tool-calling chat observed through LangChain callbacks (port 19131)
     withLangGraph/        E5.4: the tool-calling chat observed through LangGraph stream updates (port 19132)
+  agent-graph/
+    withLangGraph/        E5.5: the agent as a StateGraph, interrupt() and a checkpointer (port 19141)
+    withLangChain/        E5.5: the agent as create_agent with human-approval middleware (port 19142)
   tests/
 ```
 
-The tool-calling backends serve `POST /api/v1/chat/tools` (the application's body and answer shape, without the prompt guard); the ingestion backends serve `POST /api/v1/ingest` (optional `{"limit": n}`); the retrieval backends serve `POST /api/v1/retrieve` (`{"query", "topK", "minSimilarity"}`); every backend serves `GET /health`.
+The tool-calling backends serve `POST /api/v1/chat/tools` (the application's body and answer shape, without the prompt guard); the ingestion backends serve `POST /api/v1/ingest` (optional `{"limit": n}`); the retrieval backends serve `POST /api/v1/retrieve` (`{"query", "topK", "minSimilarity"}`); the agent backends serve `POST /api/v1/agent/start` and `POST /api/v1/agent/resume`; every backend serves `GET /health`.
 
 | Command | What it does |
 | --- | --- |
@@ -30,6 +33,8 @@ The tool-calling backends serve `POST /api/v1/chat/tools` (the application's bod
 | `just comparisons-retrieve-with-langchain` | Starts the withLangChain retrieval backend on port 19121 (needs `GOOGLE_API_KEY`, `just qdrant` and a prior ingestion run) |
 | `just comparisons-observe-with-langchain` | Starts the observed withLangChain tool-calling backend on port 19131 (`TELEMETRY_ENABLED=true` to record; needs `OPENROUTER_API_KEY` and the application up); then `GET /api/v1/observability/recent` |
 | `just comparisons-observe-with-langgraph` | Starts the observed withLangGraph tool-calling backend on port 19132 (same settings) |
+| `just comparisons-agent-with-langgraph` | Starts the withLangGraph agent backend on port 19141 (needs `OPENROUTER_API_KEY` and the application up) |
+| `just comparisons-agent-with-langchain` | Starts the withLangChain agent backend on port 19142 (same settings) |
 
 Settings (tool calling): `PORT`, `CRM_BASE_URL` (default `http://localhost:8001`), `LLM_BASE_URL` (default OpenRouter), `OPENROUTER_API_KEY`, `MODEL` (default `meta-llama/llama-3.1-8b-instruct`).
 
