@@ -22,10 +22,15 @@ comparisons/
   memory/
     withLangChain/        E5.6: InMemoryChatMessageHistory, RunnableWithMessageHistory and trim_messages (port 19162)
     withLangGraph/        E5.6: the checkpointer and a thread id, trim_messages in the model node (port 19161)
+  multi-agent/
+    supervisor/withLangGraph/     E5.7: one coordinator decides, from a list code builds (port 19151)
+    hierarchical/withLangGraph/   E5.7: a top supervisor over two child graphs (port 19152)
+    network/withLangGraph/        E5.7: peers name each other, no manager (port 19153)
+    handoff/withLangGraph/        E5.7: each agent hands the work on by name, tool calls read not run (port 19154)
   tests/
 ```
 
-The tool-calling backends serve `POST /api/v1/chat/tools` (the application's body and answer shape, without the prompt guard); the ingestion backends serve `POST /api/v1/ingest` (optional `{"limit": n}`); the retrieval backends serve `POST /api/v1/retrieve` (`{"query", "topK", "minSimilarity"}`); the agent backends serve `POST /api/v1/agent/start` and `POST /api/v1/agent/resume`; the memory backends serve `POST /api/v1/conversations`, `POST /api/v1/chat/memory` and `GET` and `DELETE /api/v1/conversations/{id}`; every backend serves `GET /health`.
+The tool-calling backends serve `POST /api/v1/chat/tools` (the application's body and answer shape, without the prompt guard); the ingestion backends serve `POST /api/v1/ingest` (optional `{"limit": n}`); the retrieval backends serve `POST /api/v1/retrieve` (`{"query", "topK", "minSimilarity"}`); the agent backends serve `POST /api/v1/agent/start` and `POST /api/v1/agent/resume`; the memory backends serve `POST /api/v1/conversations`, `POST /api/v1/chat/memory` and `GET` and `DELETE /api/v1/conversations/{id}`; the multi-agent backends serve `POST /api/v1/multi-agent/run`; every backend serves `GET /health`.
 
 | Command | What it does |
 | --- | --- |
@@ -40,6 +45,10 @@ The tool-calling backends serve `POST /api/v1/chat/tools` (the application's bod
 | `just comparisons-agent-with-langchain` | Starts the withLangChain agent backend on port 19142 (same settings) |
 | `just comparisons-memory-with-langchain` | Starts the withLangChain conversation-memory backend on port 19162 (needs `OPENROUTER_API_KEY`; the `MEMORY_*` settings change the limits) |
 | `just comparisons-memory-with-langgraph` | Starts the withLangGraph conversation-memory backend on port 19161 (same settings) |
+| `just comparisons-multi-agent-supervisor` | Starts the supervisor-pattern backend on port 19151 (needs `OPENROUTER_API_KEY` and the application up) |
+| `just comparisons-multi-agent-hierarchical` | Starts the hierarchical-pattern backend on port 19152 (same settings) |
+| `just comparisons-multi-agent-network` | Starts the network-pattern backend on port 19153 (same settings) |
+| `just comparisons-multi-agent-handoff` | Starts the handoff-pattern backend on port 19154 (same settings) |
 
 Settings (tool calling): `PORT`, `CRM_BASE_URL` (default `http://localhost:8001`), `LLM_BASE_URL` (default OpenRouter), `OPENROUTER_API_KEY`, `MODEL` (default `meta-llama/llama-3.1-8b-instruct`).
 
