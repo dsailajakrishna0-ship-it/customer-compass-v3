@@ -1,10 +1,11 @@
 # Image: slim Python 3.12 base; uv installs deps, uvicorn serves the FastAPI app on port 8001
 FROM python:3.12-slim
 
-# Pull in the Debian security fix for zlib1g (CVE-2026-76844, CVE-2026-85091) that the base image
-# does not have yet. Remove this layer once the python:3.12-slim tag ships the fixed zlib1g.
+# Pull in the Debian security fixes for zlib1g (CVE-2026-76844, CVE-2026-85091) and libzstd1
+# (CVE-2026-124851) that the base image does not have yet. Remove this layer once the
+# python:3.12-slim tag ships the fixed packages.
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends --only-upgrade zlib1g \
+    && apt-get install -y --no-install-recommends --only-upgrade zlib1g libzstd1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install uv (fast Python package manager) — see
