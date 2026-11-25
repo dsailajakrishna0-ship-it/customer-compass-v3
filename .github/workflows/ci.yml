@@ -53,6 +53,8 @@ jobs:
         run: just eval-multi-check
       - name: Framework side's tests and the contract suite against AGENT_IMPL=frameworks (the optional packages are layered on, not locked)
         run: just test-frameworks
+      - name: Comparison lab (E5), lint and tests against a scripted model (no keys, no network)
+        run: just comparisons-test
 
   web:
     name: Web (lint, types, tests, build)
@@ -141,6 +143,9 @@ jobs:
           cd apps/api-py
           uv export --no-dev --no-hashes --no-emit-project -o "$RUNNER_TEMP/requirements.txt"
           uvx pip-audit -r "$RUNNER_TEMP/requirements.txt" --no-deps --disable-pip
+          cd ../../comparisons
+          uv export --no-dev --no-hashes --no-emit-project -o "$RUNNER_TEMP/requirements-lab.txt"
+          uvx pip-audit -r "$RUNNER_TEMP/requirements-lab.txt" --no-deps --disable-pip
       - name: Web dependency audit (npm)
         run: npm audit --omit=dev --audit-level=high
       - name: Trivy (repo files and Dockerfile)
