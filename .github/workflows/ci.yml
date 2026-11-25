@@ -53,7 +53,7 @@ jobs:
         run: just eval-multi-check
       - name: Framework side's tests and the contract suite against AGENT_IMPL=frameworks (the optional packages are layered on, not locked)
         run: just test-frameworks
-      - name: Comparison lab (E5): lint and tests against a scripted model (no keys, no network)
+      - name: Comparison lab (E5), lint and tests against a scripted model (no keys, no network)
         run: just comparisons-test
 
   web:
