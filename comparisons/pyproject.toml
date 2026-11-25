@@ -34,5 +34,5 @@ ignore = ["E501"]  # long strings and docstrings are fine
 
 [tool.pytest.ini_options]
 # one folder per approach, so each folder goes on the path (lab_common and the two approaches)
-pythonpath = ["common", "tool-calling/withLangChain", "tool-calling/withLangGraph", "rag-ingestion/withLangChain"]
+pythonpath = ["common", "tool-calling/withLangChain", "tool-calling/withLangGraph", "rag-ingestion/withLangChain", "rag-retrieval/withLangChain"]
 testpaths = ["tests"]

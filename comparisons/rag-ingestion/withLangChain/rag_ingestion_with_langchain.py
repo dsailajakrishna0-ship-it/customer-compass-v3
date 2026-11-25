@@ -141,6 +141,11 @@ class LangChainIngest:
             chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP, add_start_index=True
         )
         chunks = splitter.split_documents(documents)
+        position: dict[str, int] = {}
+        for chunk in chunks:  # the chunk's number inside its document, as the Java lab stores it
+            source = chunk.metadata["source"]
+            chunk.metadata["chunk_index"] = position.get(source, 0)
+            position[source] = position.get(source, 0) + 1
 
         checked = CheckedEmbeddings(model, self._dimensions)
         vectors = checked.embed_documents([c.page_content for c in chunks]) if chunks else []
