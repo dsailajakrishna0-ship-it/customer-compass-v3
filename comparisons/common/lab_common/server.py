@@ -18,6 +18,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from .chat import Message, ToolChat, UnavailableError
+from .telemetry import Telemetry
 
 MAX_MESSAGES = 12
 MAX_CONTENT_CHARACTERS = 4_000
@@ -60,7 +61,7 @@ def parse_model(body: dict[str, Any]) -> str | None:
     return model if model.strip() else None
 
 
-def create_app(chat: ToolChat) -> FastAPI:
+def create_app(chat: ToolChat, telemetry: Telemetry | None = None) -> FastAPI:
     app = FastAPI(title=f"Comparison backend: {chat.approach}", docs_url=None, redoc_url=None)
     # The browser app runs on another port, so every answer says it may be read.
     app.add_middleware(
@@ -73,6 +74,19 @@ def create_app(chat: ToolChat) -> FastAPI:
     @app.get("/health")
     def health() -> dict[str, str]:
         return {"status": "ok", "approach": chat.approach}
+
+    @app.get("/api/v1/observability/recent")
+    def recent() -> JSONResponse:
+        """The most recent traces and the metrics; 404 with a hint when observation is off."""
+        if telemetry is None:
+            return JSONResponse(
+                {
+                    "enabled": False,
+                    "detail": "Observation is off. Start the backend with TELEMETRY_ENABLED=true.",
+                },
+                status_code=404,
+            )
+        return JSONResponse(telemetry.recent_json())
 
     @app.post("/api/v1/chat/tools")
     async def tools(request: Request) -> JSONResponse:

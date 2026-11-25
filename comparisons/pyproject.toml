@@ -16,6 +16,8 @@ dependencies = [
     "langchain-community>=0.4.2",
     "qdrant-client>=1.15.1",
     "python-frontmatter>=1.3.0",
+    "opentelemetry-api>=1.45.2",
+    "opentelemetry-sdk>=1.45.2",
 ]
 
 [dependency-groups]
@@ -34,5 +36,5 @@ ignore = ["E501"]  # long strings and docstrings are fine
 
 [tool.pytest.ini_options]
 # one folder per approach, so each folder goes on the path (lab_common and the two approaches)
-pythonpath = ["common", "tool-calling/withLangChain", "tool-calling/withLangGraph", "rag-ingestion/withLangChain", "rag-retrieval/withLangChain"]
+pythonpath = ["common", "tool-calling/withLangChain", "tool-calling/withLangGraph", "rag-ingestion/withLangChain", "rag-retrieval/withLangChain", "observability/withLangChain", "observability/withLangGraph"]
 testpaths = ["tests"]

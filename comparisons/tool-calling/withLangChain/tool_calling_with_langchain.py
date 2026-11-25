@@ -77,6 +77,9 @@ class LangChainToolChat:
             model=name, base_url=self._base_url, api_key=self._api_key, max_retries=0
         ), name
 
+    def _invoke(self, agent, payload):  # noqa: ANN001, ANN202 - a hook the observed variant overrides
+        return agent.invoke(payload)
+
     def answer(self, messages: list[Message], model: str | None) -> Result:
         llm, name = self._llm(model)
         agent = create_agent(
@@ -88,7 +91,7 @@ class LangChainToolChat:
         )
         started = time.monotonic()
         try:
-            state = agent.invoke({"messages": to_langchain_messages(messages)})
+            state = self._invoke(agent, {"messages": to_langchain_messages(messages)})
         except UnavailableError:
             raise
         except Exception as exc:
