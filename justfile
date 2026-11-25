@@ -210,3 +210,15 @@ ai-terms:
 # fail if the docs or docs/ai-terms.md are out of date with docs/ai-terms.yaml (CI runs the same check)
 ai-terms-check:
     uv run --project {{api}} python scripts/ai_terms.py check
+
+# comparison lab (E5): lint and test every module; no keys, no network
+comparisons-test:
+    cd comparisons && uv run ruff check . && uv run ruff format --check . && uv run pytest -q
+
+# E5.1 tool calling with LangChain (create_agent) on port 19101 (needs OPENROUTER_API_KEY and the application up)
+comparisons-tool-calling-with-langchain:
+    cd comparisons && PYTHONPATH=common:tool-calling/withLangChain uv run python tool-calling/withLangChain/main.py
+
+# E5.1 tool calling with LangGraph (a StateGraph we draw) on port 19102 (same settings)
+comparisons-tool-calling-with-langgraph:
+    cd comparisons && PYTHONPATH=common:tool-calling/withLangGraph uv run python tool-calling/withLangGraph/main.py
