@@ -37,7 +37,12 @@ class ScriptedChatModel(BaseChatModel):
         return "scripted"
 
     def bind_tools(self, tools: Sequence[Any], **kwargs: Any) -> ScriptedChatModel:
-        self.tools_bound = [getattr(t, "name", str(t)) for t in tools]
+        self.tools_bound = [
+            t["function"]["name"]
+            if isinstance(t, dict) and "function" in t
+            else getattr(t, "name", str(t))
+            for t in tools
+        ]
         return self
 
     def _generate(

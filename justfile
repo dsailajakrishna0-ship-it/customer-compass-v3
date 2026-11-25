@@ -254,3 +254,19 @@ comparisons-memory-with-langchain:
 # E5.6 conversation memory with LangGraph (the checkpointer and a thread id) on port 19161 (same settings)
 comparisons-memory-with-langgraph:
     cd comparisons && PYTHONPATH=common:memory/withLangGraph uv run python memory/withLangGraph/main.py
+
+# E5.7 the supervisor pattern on LangGraph on port 19151 (needs OPENROUTER_API_KEY and the application up)
+comparisons-multi-agent-supervisor:
+    cd comparisons && PYTHONPATH=common:multi-agent/supervisor/withLangGraph uv run python multi-agent/supervisor/withLangGraph/main.py
+
+# E5.7 the hierarchical pattern (a top supervisor over two child graphs) on port 19152 (same settings)
+comparisons-multi-agent-hierarchical:
+    cd comparisons && PYTHONPATH=common:multi-agent/hierarchical/withLangGraph uv run python multi-agent/hierarchical/withLangGraph/main.py
+
+# E5.7 the network pattern (peers name each other) on port 19153 (same settings)
+comparisons-multi-agent-network:
+    cd comparisons && PYTHONPATH=common:multi-agent/network/withLangGraph uv run python multi-agent/network/withLangGraph/main.py
+
+# E5.7 the handoff pattern (agents hand the work on by name) on port 19154 (same settings)
+comparisons-multi-agent-handoff:
+    cd comparisons && PYTHONPATH=common:multi-agent/handoff/withLangGraph uv run python multi-agent/handoff/withLangGraph/main.py
