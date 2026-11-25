@@ -18,7 +18,7 @@ The [tech-stack](../tech-stack.md#v3-tech-stack-at-a-glance) lists every tool, w
 | 5 | [Observability and 🟪evals](05-observability-and-evals.md) | Tracing (5.1); metrics beyond recall, 🟪guardrail comparison (later) | In progress (5.1) |
 | E1 | [🟪Multi-source RAG](E1-multi-source-rag.md) (a Python extension, see [python-extensions](../python-extensions.md)) | Several 🟪knowledge bases, each its own collection (E1.1); routing and comparison (later) | E1.1 to E1.3 merged |
 | E3 | [Supervisor with specialist agents](E3-supervisor.md) (a Python extension, the twin of the Java edition's E3) | The supervisor graph (E3.1); answer team (E3.2); comparison (E3.3: harness, recording pending) | E3.1 and E3.2 merged; E3.3 in review |
-| E5 | [Comparison lab, frameworks only](E5-comparison-lab.md) (a Python extension, the twin of the Java edition's J8) | The same seven topics built with 🟦LangChain and LangGraph, one folder per approach | E5.1 to E5.3 merged, E5.4 in review |
+| E5 | [Comparison lab, frameworks only](E5-comparison-lab.md) (a Python extension, the twin of the Java edition's J8) | The same seven topics built with 🟦LangChain and LangGraph, one folder per approach | E5.1 to E5.4 merged, E5.5 in review |
 | 6 | CRM modules and auth | Authentication, authorization, schema growth | Written in Stage 6 |
 | 7 | Agents and supervisor | Multi-agent routing, when an agent is worth it | Written in Stage 7 |
 | 8 | Product features | Forms, uploads, end-to-end tests | Written in Stage 8 |

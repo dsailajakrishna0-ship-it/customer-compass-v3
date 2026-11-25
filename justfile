@@ -238,3 +238,11 @@ comparisons-observe-with-langchain:
 # E5.4 observed tool calling with LangGraph (stream updates) on port 19132 (same settings)
 comparisons-observe-with-langgraph:
     cd comparisons && PYTHONPATH=common:tool-calling/withLangGraph:observability/withLangGraph uv run python observability/withLangGraph/main.py
+
+# E5.5 the agent with an approval pause as a LangGraph StateGraph on port 19141 (needs OPENROUTER_API_KEY and the application up)
+comparisons-agent-with-langgraph:
+    cd comparisons && PYTHONPATH=common:agent-graph/withLangGraph uv run python agent-graph/withLangGraph/main.py
+
+# E5.5 the agent with an approval pause as a LangChain create_agent with human-approval middleware on port 19142 (same settings)
+comparisons-agent-with-langchain:
+    cd comparisons && PYTHONPATH=common:agent-graph/withLangChain uv run python agent-graph/withLangChain/main.py
