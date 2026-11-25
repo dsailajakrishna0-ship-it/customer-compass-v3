@@ -45,6 +45,6 @@ Both approaches call the model with no lock held (a test starts a turn, makes th
 
 ## How this was run
 
-`just comparisons-test` (168 tests, no key, no network, in CI; the memory tests were run 30 times in a row without a failure). Both backends were also started once through `just` with a fake key and an unreachable model address: a conversation is created (201), a turn is a 503 `The model call failed (OpenAIConnectionError).` and **stores nothing** (the conversation reads back with no messages), delete is a 204 and a read after it is a 404, and the fake key is in no log line.
+`just comparisons-test` (212 tests with the E5.5 ones, no key, no network, in CI; the memory tests were run 30 times in a row without a failure). Both backends were also started once through `just` with a fake key and an unreachable model address: a conversation is created (201), a turn is a 503 `The model call failed (OpenAIConnectionError).` and **stores nothing** (the conversation reads back with no messages), delete is a 204 and a read after it is a 404, and the fake key is in no log line.
 
 **Not measured:** a real model's answers with real history, the cost of the rewrite per turn on a long conversation (it copies the kept messages each turn), a durable store (both are lost on a restart; the application keeps its history in Postgres), and two concurrent turns on one conversation (not tested; the contract allows them to interleave).
