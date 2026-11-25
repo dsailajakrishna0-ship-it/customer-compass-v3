@@ -34,3 +34,20 @@ def read_result(messages: list[AnyMessage], model_name: str, started: float) -> 
         latency_ms=int((time.monotonic() - started) * 1000),
     )
     return Result(message=str(last_ai.text), tools_used=tools_run(messages), usage=usage)
+
+
+def window_messages(
+    messages: list[AnyMessage], max_messages: int, max_chars: int
+) -> list[AnyMessage]:
+    """The window of the contract with LangChain's `trim_messages`: the most recent `max_messages`
+    messages, then the oldest dropped until the history is at most `max_chars` characters. A single
+    message longer than `max_chars` leaves nothing (measured)."""
+    from langchain_core.messages import trim_messages
+
+    recent = trim_messages(messages, max_tokens=max_messages, token_counter=len, strategy="last")
+    return trim_messages(
+        recent,
+        max_tokens=max_chars,
+        token_counter=lambda batch: sum(len(str(m.content)) for m in batch),
+        strategy="last",
+    )
