@@ -35,9 +35,23 @@ class EmbeddingsUnavailableError(RuntimeError):
     is safe to show to an API caller: it never contains the key or Google's reply body."""
 
 
+# The batch endpoint accepts at most 100 texts per request.
+_MAX_BATCH = 100
+
+
+def _refused(response: httpx.Response) -> EmbeddingsUnavailableError:
+    log.warning("embedding_request_failed", status=response.status_code, body=response.text[:200])
+    return EmbeddingsUnavailableError(
+        f"Google's embedding service answered {response.status_code}: "
+        "check GOOGLE_API_KEY and try again (details are in the API log)."
+    )
+
+
 async def _embed_google(texts: list[str]) -> list[list[float]]:
-    """Embeds a batch of texts, one request per text (this API has no native
-    batch-embed endpoint for embedContent), preserving input order."""
+    """Embeds texts through `batchEmbedContents`, up to 100 per request, preserving input order.
+    Each text is sent exactly as the single-text endpoint took it (same model, same content, same
+    output size), so the vectors are the ones the index already holds. The key goes in the
+    `x-goog-api-key` header, never in the URL, so it cannot end up in a proxy or access log."""
     if len(texts) == 0:
         return []
     settings = get_settings()
@@ -49,35 +63,37 @@ async def _embed_google(texts: list[str]) -> list[list[float]]:
             "if you run the API outside Docker), without a leading #, then restart the API."
         )
 
-    async with httpx.AsyncClient(timeout=30.0) as client:
-        embeddings: list[list[float]] = []
-        for text in texts:
+    embeddings: list[list[float]] = []
+    async with httpx.AsyncClient(timeout=30.0, headers={"x-goog-api-key": api_key}) as client:
+        for start in range(0, len(texts), _MAX_BATCH):
+            batch = texts[start : start + _MAX_BATCH]
             response = await client.post(
-                f"{_API_BASE}/models/{model}:embedContent",
-                params={"key": api_key},
+                f"{_API_BASE}/models/{model}:batchEmbedContents",
                 json={
-                    "model": f"models/{model}",
-                    "content": {"parts": [{"text": text}]},
-                    "outputDimensionality": EMBEDDING_DIMENSIONS,
+                    "requests": [
+                        {
+                            "model": f"models/{model}",
+                            "content": {"parts": [{"text": text}]},
+                            "outputDimensionality": EMBEDDING_DIMENSIONS,
+                        }
+                        for text in batch
+                    ]
                 },
             )
             if response.status_code != 200:
-                log.warning(
-                    "embedding_request_failed",
-                    status=response.status_code,
-                    body=response.text[:200],
-                )
+                raise _refused(response)
+            items = response.json().get("embeddings")
+            if not isinstance(items, list) or len(items) != len(batch):
                 raise EmbeddingsUnavailableError(
-                    f"Google's embedding service answered {response.status_code}: "
-                    "check GOOGLE_API_KEY and try again (details are in the API log)."
+                    "Google did not return one embedding vector for each input."
                 )
-            payload = response.json()
-            values = payload.get("embedding", {}).get("values")
-            if not isinstance(values, list):
-                raise EmbeddingsUnavailableError(
-                    "Google did not return an embedding vector for one of the inputs."
-                )
-            embeddings.append(values)
+            for item in items:
+                values = item.get("values") if isinstance(item, dict) else None
+                if not isinstance(values, list):
+                    raise EmbeddingsUnavailableError(
+                        "Google did not return an embedding vector for one of the inputs."
+                    )
+                embeddings.append(values)
     return embeddings
 
 

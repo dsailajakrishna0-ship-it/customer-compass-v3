@@ -137,13 +137,20 @@ async def ingest_knowledge_base(kb: KnowledgeBase) -> KnowledgeBaseIngestSummary
                 f"Could not find the folder of knowledge base {kb.id}: {folder}. Set its source_dir."
             )
         documents = load_documents(folder, root)
+        # Read-only phase first: embed every chunk BEFORE the collection is replaced, so a failed
+        # embedding call leaves the previous knowledge base as it was.
+        prepared = [(doc, chunk_segments(doc.segments)) for doc in documents]
+        vectors = await embed_texts(
+            [chunk.content for _doc, chunks in prepared for _segment, chunk in chunks]
+        )
         with using_collection(kb.collection, _hint(kb)):
             await recreate_collection()
-            for document_id, doc in enumerate(documents, start=1):
-                chunks = chunk_segments(doc.segments)
+            offset = 0
+            for document_id, (doc, chunks) in enumerate(prepared, start=1):
                 if not chunks:
                     continue
-                embeddings = await embed_texts([chunk.content for _segment, chunk in chunks])
+                embeddings = vectors[offset : offset + len(chunks)]
+                offset += len(chunks)
                 points = [
                     PointStruct(
                         id=str(uuid.uuid4()),
