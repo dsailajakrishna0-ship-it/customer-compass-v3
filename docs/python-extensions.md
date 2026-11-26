@@ -16,6 +16,17 @@ Several 🟪knowledge bases (the CRM documents and, for example, a farm-supply h
 | E1.2 | Three ways to decide where to search (a router, search everything and merge, an 🟪agent with a tool), on one route, `POST /chat/multi`, as one 🟦LangGraph graph. [ADR 0030](adr/0030-multi-source-strategies-as-a-graph.md) | In review |
 | E1.3 | A replayable comparison of the three on the same 24 labelled questions as the Java edition, replayable without keys (`just eval-multi`, checked in CI). [ADR 0032](adr/0032-multi-source-strategy-results.md) | In review |
 
+### The docs knowledge base (step 4)
+
+The project's own documentation as one more knowledge base, `docs` ([ADR 0045](adr/0045-docs-knowledge-base.md)): ask "how do I run the application?" and get an answer that quotes the commands and names the page. Off by default.
+
+| Route or setting | What it does |
+| --- | --- |
+| `DOCS_KNOWLEDGE_BASE=true` (and `DOCS_DIR`, `/docs` in Docker) | Adds the knowledge base `docs` (the pages at the top of `docs/` and `docs/stages/`, 28 pages, 1,020 🟪chunks) |
+| `POST /api/v1/knowledge-bases/docs/ingest` | Rebuilds it from scratch |
+| `POST /api/v1/knowledge-bases/docs/ingest?folder=stages` (or `folder=.`) | Adds or refreshes one folder only, so the 🟪embedding calls can be spread over days |
+| `POST /api/v1/chat/multi` with `"strategy": "route"` | The router picks `docs` for how-to questions; the answer quotes commands exactly and names the page |
+
 ## E3: a supervisor with specialist agents
 
 A coordinator model that decides, turn by turn, which specialist works next, with the rules in code (the twin of the Java edition's E3).

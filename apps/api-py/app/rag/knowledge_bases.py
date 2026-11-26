@@ -20,13 +20,16 @@ from pathlib import Path
 from qdrant_client.models import PointStruct
 
 from app.config import get_settings
+from app.rag import docs_reader
 from app.rag.embeddings import embed_texts
-from app.rag.ingest import _with_framework_metadata, chunk_segments, load_documents
+from app.rag.ingest import ParsedDocument, _with_framework_metadata, chunk_segments, load_documents
 from app.rag.qdrant_store import (
     DENSE,
     SPARSE,
+    collection_exists,
     collection_name,
     count_chunks,
+    delete_chunks_for_sources,
     get_client,
     recreate_collection,
     upsert_chunks,
@@ -48,6 +51,15 @@ class KnowledgeBase:
     collection: str
     built_in: bool
     source_dir: Path | None = None  # extra knowledge bases only; None: the default folder
+    reader: str = (
+        "documents"  # "documents" (front matter, PDF, Word, Excel) or "docs" (project pages)
+    )
+    folders: tuple[
+        str, ...
+    ] = ()  # reader "docs" only: the folders read, "." being source_dir itself
+    answer_hint: str | None = (
+        None  # a line added to the answer prompt when this knowledge base is used
+    )
 
 
 @dataclass
@@ -84,10 +96,45 @@ def all_knowledge_bases() -> list[KnowledgeBase]:
             collection=_collection_for(source.id),
             built_in=False,
             source_dir=source.source_dir,
+            reader=source.reader,
+            folders=tuple(source.folders or ()),
         )
         for source in settings.knowledge_bases
     ]
+    if settings.docs_knowledge_base:
+        extras.append(_docs_knowledge_base())
     return [crm, *extras]
+
+
+DOCS = "docs"
+DOCS_FOLDERS = (docs_reader.TOP_LEVEL, "stages")
+
+
+def _docs_knowledge_base() -> KnowledgeBase:
+    """The project's own documentation (step 4, ADR 0045): the guides at the top of `docs/` (how to run,
+    test and troubleshoot) and the stage guides. The superseded V2 pages and the ADRs are left out."""
+    settings = get_settings()
+    source_dir = settings.docs_dir or Path(__file__).resolve().parents[4] / "docs"
+    return KnowledgeBase(
+        id=DOCS,
+        label="Project documentation",
+        description=(
+            "How Customer Compass works and how to run it: starting the stack, ingesting documents, the "
+            "smoke test and acceptance runbook, the testing and troubleshooting guides, the API reference, "
+            "the architecture and tech stack, the stage guides, and the comparison lab (LangChain, "
+            "LangGraph, the multi-agent patterns) with its hand-test script."
+        ),
+        collection=_collection_for(DOCS),
+        built_in=False,
+        source_dir=source_dir,
+        reader="docs",
+        folders=DOCS_FOLDERS,
+        answer_hint=(
+            "This answer comes from the project's own documentation. Quote commands, file names and "
+            "settings exactly as written in the context, each command in a code block, and say which page "
+            "each one comes from."
+        ),
+    )
 
 
 def find_knowledge_base(kb_id: str) -> KnowledgeBase | None:
@@ -126,27 +173,54 @@ async def count_knowledge_base_chunks(kb: KnowledgeBase) -> int:
         return 0
 
 
-async def ingest_knowledge_base(kb: KnowledgeBase) -> KnowledgeBaseIngestSummary:
-    """Rebuilds an extra knowledge base from its folder: same parser, chunker and embeddings as the CRM
-    documents, each chunk stored with its keyword vector. Running it twice never duplicates."""
+def _numbered_documents(
+    kb: KnowledgeBase, source_dir: Path, root: Path, folder: str | None
+) -> list[tuple[int, ParsedDocument]]:
+    """The documents to ingest, each with its document number. For the project pages the number is the
+    page's position among ALL configured pages, so it does not change when one folder is ingested alone."""
+    if kb.reader == "docs":
+        every = docs_reader.all_paths(source_dir, kb.folders)
+        wanted = every if folder is None else docs_reader.folder_paths(source_dir, folder)
+        wanted_set = set(wanted)
+        return [
+            (number, docs_reader.read_page(path, root))
+            for number, path in enumerate(every, start=1)
+            if path in wanted_set
+        ]
+    if folder is not None:
+        raise ValueError(f"The knowledge base {kb.id} has no folders to choose from.")
+    if not source_dir.is_dir():
+        raise FileNotFoundError(
+            f"Could not find the folder of knowledge base {kb.id}: {source_dir}. Set its source_dir."
+        )
+    return list(enumerate(load_documents(source_dir, root), start=1))
+
+
+async def ingest_knowledge_base(
+    kb: KnowledgeBase, folder: str | None = None
+) -> KnowledgeBaseIngestSummary:
+    """Rebuilds an extra knowledge base from its folder: same chunker and embeddings as the CRM documents,
+    each chunk stored with its keyword vector. Running it twice never duplicates.
+
+    For the project pages a single `folder` can be ingested alone (to spread the embedding calls over
+    several days): that folder's pages are added or refreshed and the rest of the collection stays."""
     documents_processed = chunks_created = 0
     try:
-        folder, root = _source_dir(kb)
-        if not folder.is_dir():
-            raise FileNotFoundError(
-                f"Could not find the folder of knowledge base {kb.id}: {folder}. Set its source_dir."
-            )
-        documents = load_documents(folder, root)
-        # Read-only phase first: embed every chunk BEFORE the collection is replaced, so a failed
+        source_dir, root = _source_dir(kb)
+        numbered = _numbered_documents(kb, source_dir, root, folder)
+        # Read-only phase first: embed every chunk BEFORE the collection is touched, so a failed
         # embedding call leaves the previous knowledge base as it was.
-        prepared = [(doc, chunk_segments(doc.segments)) for doc in documents]
+        prepared = [(number, doc, chunk_segments(doc.segments)) for number, doc in numbered]
         vectors = await embed_texts(
-            [chunk.content for _doc, chunks in prepared for _segment, chunk in chunks]
+            [chunk.content for _number, _doc, chunks in prepared for _segment, chunk in chunks]
         )
         with using_collection(kb.collection, _hint(kb)):
-            await recreate_collection()
+            if folder is None or not await collection_exists():
+                await recreate_collection()
+            else:
+                await delete_chunks_for_sources([doc.source_path for _number, doc, _c in prepared])
             offset = 0
-            for document_id, (doc, chunks) in enumerate(prepared, start=1):
+            for document_id, doc, chunks in prepared:
                 if not chunks:
                     continue
                 embeddings = vectors[offset : offset + len(chunks)]

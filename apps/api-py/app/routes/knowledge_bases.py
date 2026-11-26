@@ -3,7 +3,7 @@ edition; see docs/python-extensions.md): list them, ingest an extra one, search 
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, StringConstraints
 
@@ -51,13 +51,27 @@ async def list_knowledge_bases():
 
 
 @router.post("/{kb_id}/ingest")
-async def ingest(kb: Annotated[KnowledgeBase, Depends(known_knowledge_base)]):
+async def ingest(
+    kb: Annotated[KnowledgeBase, Depends(known_knowledge_base)],
+    folder: Annotated[
+        str | None,
+        Query(
+            description="Project-page knowledge bases only: ingest just this folder (add or refresh "
+            "its pages, keep the rest) to spread the embedding calls over several days."
+        ),
+    ] = None,
+):
     if kb.built_in:
         raise HTTPException(
             status_code=400,
             detail="The CRM documents are ingested with POST /api/v1/documents/ingest.",
         )
-    summary = await ingest_knowledge_base(kb)
+    if folder is not None and folder not in kb.folders:
+        choices = ", ".join(kb.folders) or "none: this knowledge base is rebuilt as a whole"
+        raise HTTPException(
+            status_code=422, detail=f'Unknown folder "{folder}". Choose one of: {choices}.'
+        )
+    summary = await ingest_knowledge_base(kb, folder)
     return JSONResponse(
         status_code=200 if summary.status == "completed" else 502,
         content={

@@ -88,6 +88,7 @@ limits (set through the `AGENT_*` environment variables), the tool code. **The p
 | `test_embedding_models.py` | other | Retrieval and ingestion |
 | `test_embedding_requests.py` | other | Retrieval and ingestion (how the Google embedding call is made: key in a header, batches of 100; fake HTTP transport, no key) |
 | `test_ingest_order.py` | other | Retrieval and ingestion (embed everything before replacing the index, CRM documents and knowledge bases; fakes, no database) |
+| `test_docs_knowledge_base.py` | other | Retrieval and ingestion (the project's own docs as a knowledge base, a Python-only extension: the reader, one folder at a time, the answer hint; in-process Qdrant and fake embeddings) |
 | `test_migrations.py` | other | Database |
 | `test_health.py` | other | Database |
 | `test_ai_terms.py` | other | Repository rules and tooling |

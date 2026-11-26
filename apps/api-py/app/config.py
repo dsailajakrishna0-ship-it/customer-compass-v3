@@ -52,6 +52,11 @@ class KnowledgeBaseSource(BaseModel):
     description: str
     # None: sample-data/knowledge-bases/<id> next to the sample documents
     source_dir: Path | None = None
+    # How the folder is read: "documents" (front matter with title and type, plus PDF, Word and Excel) or
+    # "docs" (the project's own Markdown pages: title from the first heading, one folder level at a time)
+    reader: Literal["documents", "docs"] = "documents"
+    # reader "docs" only: the folders under source_dir to read, "." being source_dir itself
+    folders: list[str] | None = None
 
 
 # The one corpus that ships with the repo: a fictional farm-supply handbook, the same eight documents
@@ -82,6 +87,11 @@ class Settings(BaseSettings):
     # Extra knowledge bases (ADR 0029): a JSON list in KNOWLEDGE_BASES, for example
     # [{"id": "agri-supply", "label": "...", "description": "...", "source_dir": null}]
     knowledge_bases: list[KnowledgeBaseSource] = DEFAULT_KNOWLEDGE_BASES
+    # Step 4 (ADR 0045): the project's own `docs/` as one more knowledge base, off by default
+    docs_knowledge_base: bool = False
+    docs_dir: Path | None = (
+        None  # None: the docs folder of this repository (Docker: DOCS_DIR=/docs)
+    )
     vector_index_min_points: int = 10_000
     vector_hnsw_ef: int = 64
     vector_count_cache_seconds: float = 60.0

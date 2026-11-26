@@ -159,8 +159,11 @@ services:
       TRACING_CAPTURE_CONTENT: ${TRACING_CAPTURE_CONTENT:-false}  # true also sends shortened text, which can hold customer data
       LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY:-}  # from Langfuse: project settings, API keys
       LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY:-}
+      DOCS_KNOWLEDGE_BASE: ${DOCS_KNOWLEDGE_BASE:-false}  # step 4: the project's own docs/ as a knowledge base (ADR 0045)
+      DOCS_DIR: /docs
     volumes:
       - ./sample-data:/sample-data:ro
+      - ./docs:/docs:ro
     ports:
       - "8001:8001"
     healthcheck:
