@@ -129,11 +129,20 @@ async def ingest_documents() -> IngestSummary:
     try:
         documents = _load_documents()
 
+        # Read-only phase: cut every document and embed every chunk BEFORE anything is replaced, so a
+        # failed embedding call (no key, a refused request, a bad reply) leaves the previous index
+        # exactly as it was. The vectors are held in memory until the replace below.
+        prepared = [(doc, chunk_segments(doc.segments)) for doc in documents]
+        vectors = await embed_texts(
+            [chunk.content for _doc, chunks in prepared for _segment, chunk in chunks]
+        )
+
         # Re-ingesting should not duplicate rows/points: clear prior state first.
         await pool.execute("TRUNCATE documents RESTART IDENTITY CASCADE")
         await recreate_collection()
 
-        for doc in documents:
+        offset = 0
+        for doc, chunks in prepared:
             company_id = await _resolve_company_id(pool, doc.company_name)
             doc_row = await pool.fetchrow(
                 """INSERT INTO documents (source_path, title, doc_type, company_id, content)
@@ -146,11 +155,11 @@ async def ingest_documents() -> IngestSummary:
             )
             document_id = doc_row["id"]
 
-            chunks = chunk_segments(doc.segments)
             if len(chunks) == 0:
                 continue
 
-            embeddings = await embed_texts([chunk.content for _segment, chunk in chunks])
+            embeddings = vectors[offset : offset + len(chunks)]
+            offset += len(chunks)
 
             points = [
                 PointStruct(
