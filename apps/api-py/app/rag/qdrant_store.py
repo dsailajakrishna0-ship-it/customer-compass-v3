@@ -20,6 +20,7 @@ from qdrant_client.models import (
     Distance,
     FieldCondition,
     Filter,
+    MatchAny,
     MatchValue,
     Modifier,
     PointStruct,
@@ -102,6 +103,22 @@ async def recreate_collection() -> None:
         sparse_vectors_config={SPARSE: SparseVectorParams(modifier=Modifier.IDF)},
         # which embedding model made the vectors: a changed model is noticed at search time (4.3)
         metadata={"embedding_model": embedding_model_id()},
+    )
+
+
+async def collection_exists() -> bool:
+    return await get_client().collection_exists(collection_name())
+
+
+async def delete_chunks_for_sources(source_paths: list[str]) -> None:
+    """Removes every chunk that came from one of these files (a re-ingested page must not duplicate)."""
+    if not source_paths:
+        return
+    await get_client().delete(
+        collection_name=collection_name(),
+        points_selector=Filter(
+            must=[FieldCondition(key="source_path", match=MatchAny(any=source_paths))]
+        ),
     )
 
 

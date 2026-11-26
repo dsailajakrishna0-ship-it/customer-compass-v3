@@ -148,6 +148,15 @@ def _labelled(kb_chunk: KbChunk, clean_text: str) -> RetrievedChunk:
     )
 
 
+def answer_hints(found: list[KbChunk]) -> str:
+    """The one-line style hints of the knowledge bases that supplied the chunks (the project pages ask
+    for commands quoted exactly, with their page). Written by us, never taken from a document."""
+    used = {item.knowledge_base for item in found}
+    return "\n".join(
+        kb.answer_hint for kb in all_knowledge_bases() if kb.id in used and kb.answer_hint
+    )
+
+
 def _report(state: MultiState):
     return build_report(
         (_finding(state["question_finding"]), "user_input"),
@@ -242,6 +251,8 @@ async def respond(state: MultiState) -> MultiState:
     shown = [_labelled(c, f.neutralized_text) for c, f in zip(found, findings, strict=True)]
     context = wrap_untrusted_context(build_context(shown))
     prompt = f"Context:\n{context}\n\nQuestion: {question_finding.neutralized_text}"
+    if hints := answer_hints(found):
+        prompt += f"\n\nNote on how to answer: {hints}"
     result = await generate(
         GROUNDED_SYSTEM_PROMPT,
         [*state["messages"][:-1], {"role": "user", "content": prompt}],
