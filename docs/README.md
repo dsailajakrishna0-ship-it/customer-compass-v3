@@ -28,6 +28,7 @@ Start here. The repo is the V3 learning project, seeded from `customer-compass-v
 | [api-reference.md](api-reference.md) | Every HTTP endpoint, request and response shape, error shape. |
 | [agent-boundaries.md](agent-boundaries.md) | Which pattern to use for which question (SQL, RAG, tool calling, workflow, agents). |
 | [agent-models.md](agent-models.md) | Which kind of model each agent and model call needs, and a checklist for new agents. |
+| [agent-tool-calling-guide.md](agent-tool-calling-guide.md) | **Tool calling for this app's APIs, both ends.** How to add a tool to the app's own copilot, and how a separate agent can use a few of the app's APIs safely: what to do in the app, what to do in the agent, a worked example with real endpoints, a checklist and what can go wrong. |
 | [port-status.md](port-status.md) | The Java sibling repo, the planned claims project, and how far the Java edition has caught up. |
 | [fe/](fe/fe-architecture-overview.md) | Frontend layering and the chat request lifecycle. |
 
